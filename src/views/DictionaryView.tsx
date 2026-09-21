@@ -4,10 +4,11 @@ import { RegMark } from '../components/RegMark'
 import { StepGrid } from '../components/StepGrid'
 import { StepRow } from '../components/StepRow'
 import { VoicingPads } from '../components/VoicingPads'
-import { QUALITY_LIST, QualityId, qualityById } from '../music/chords'
+import { chordToneSpelling, QUALITY_LIST, QualityId, qualityById } from '../music/chords'
+import { soundingChord } from '../music/capo'
 import { LATIN_SHARP, PITCH_SHARP } from '../music/notes'
 import { parseChord } from '../music/parseChord'
-import { STRING_LABELS } from '../music/voicings'
+import { stringLabels } from '../music/voicings'
 import { useStore } from '../state/store'
 
 export function DictionaryView() {
@@ -15,7 +16,6 @@ export function DictionaryView() {
     chord,
     voicings,
     selectedVoicing,
-    tuning,
     t,
     lang,
     setChord,
@@ -23,15 +23,28 @@ export function DictionaryView() {
     addSuggestion,
     notation,
     playFrets,
+    capo,
+    soundingTuning,
   } = useStore()
   const voicing = voicings[selectedVoicing]
+  const sounding = soundingChord(chord, capo)
+  const noteNames = useMemo(() => {
+    const map: Record<number, string> = {}
+    for (const tone of chordToneSpelling(sounding.rootPc, sounding.quality, sounding.accidental === 'flat')) {
+      map[tone.pc] = tone.anglo
+    }
+    return map
+  }, [sounding.rootPc, sounding.quality, sounding.accidental])
 
   const windowStart = useMemo(() => {
-    if (!voicing) return 1
+    if (!voicing) return capo > 0 ? capo : 1
     const fretted = voicing.frets.filter((fret): fret is number => fret !== null && fret > 0)
-    if (fretted.length === 0) return 1
-    return Math.max(1, Math.min(...fretted))
-  }, [voicing])
+    if (fretted.length === 0) return capo > 0 ? capo : 1
+    const minAbsolute = Math.min(...fretted) + capo
+    const maxAbsolute = Math.max(...fretted) + capo
+    if (capo > 0) return Math.max(capo, maxAbsolute - 4)
+    return Math.max(1, minAbsolute)
+  }, [voicing, capo])
 
   return (
     <div className="grid items-start gap-4 xl:grid-cols-[minmax(280px,1fr)_minmax(420px,1.7fr)_minmax(250px,0.9fr)]">
@@ -55,11 +68,13 @@ export function DictionaryView() {
         {voicing && (
           <StepGrid
             frets={voicing.frets}
-            tuning={tuning}
-            stringLabels={STRING_LABELS}
+            tuning={soundingTuning}
+            stringLabels={stringLabels(soundingTuning)}
             accidental={chord.accidental}
             windowStart={windowStart}
             windowSize={5}
+            capo={capo}
+            noteNames={noteNames}
             onPlayString={(stringIndex) => {
               const single = voicing.frets.map((fret, index) => (index === stringIndex ? fret : null))
               playFrets(single)

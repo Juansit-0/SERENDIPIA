@@ -261,6 +261,13 @@
     background-size: 4px 4px;
   }
 
+  .cell.cell--capo,
+  .cell.cell--capo:hover {
+    background: var(--color-ink);
+    border-color: var(--color-ink);
+    cursor: not-allowed;
+  }
+
   .cropmark {
     position: absolute;
     width: 9px;

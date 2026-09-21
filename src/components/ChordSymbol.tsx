@@ -1,4 +1,6 @@
-import { bothNames, intervalName } from '../music/notes'
+import { soundingChord } from '../music/capo'
+import { chordToneSpelling } from '../music/chords'
+import { intervalName } from '../music/notes'
 import { useStore } from '../state/store'
 import { OffsetPlate } from './OffsetPlate'
 import type { TKey } from '../i18n'
@@ -15,8 +17,10 @@ export function ChordSymbol() {
     chordError,
     voicings,
     selectedVoicing,
+    capo,
   } = useStore()
   const voicing = voicings[selectedVoicing]
+  const sounding = soundingChord(chord, capo)
 
   return (
     <section className="plate flex flex-col gap-3 p-4">
@@ -44,23 +48,30 @@ export function ChordSymbol() {
         </p>
       </OffsetPlate>
       {notation === 'both' && <p className="fv-display text-[1.15rem] text-ink-soft">{chord.latin}</p>}
+      {capo > 0 && (
+        <p className="flex flex-wrap items-center gap-2">
+          <span className="chip chip--blue">
+            {t('capo.label')} {capo}
+          </span>
+          <span className="chip">
+            {t('capo.sounds')} {notation === 'latin' ? sounding.latin : sounding.anglo}
+          </span>
+        </p>
+      )}
 
       <dl className="flex flex-col gap-3 border-t border-rule pt-3">
         <div className="flex flex-col gap-1.5">
           <dt className="label-ink text-blue-ink">{t('chord.notes')}</dt>
           <dd className="flex flex-wrap gap-1.5">
-            {chord.quality.intervals.map((interval, index) => {
-              const names = bothNames((chord.rootPc + interval) % 12, chord.accidental)
-              return (
-                <span className="chip" key={`${interval}-${index}`}>
-                  <span className="font-mono text-[10px] text-blue">{intervalName(interval)}</span>
-                  <span className="fv-ui font-semibold text-ink">
-                    {notation === 'latin' ? names.latin : names.anglo}
-                  </span>
-                  {notation === 'both' && <span className="text-ink-faint">{names.latin}</span>}
+            {chordToneSpelling(sounding.rootPc, sounding.quality, sounding.accidental === 'flat').map((tone) => (
+              <span className="chip" key={`${tone.interval}-${tone.pc}`}>
+                <span className="font-mono text-[10px] text-blue-ink">{intervalName(tone.interval)}</span>
+                <span className="fv-ui font-semibold text-ink">
+                  {notation === 'latin' ? tone.latin : tone.anglo}
                 </span>
-              )
-            })}
+                {notation === 'both' && <span className="text-ink-faint">{tone.latin}</span>}
+              </span>
+            ))}
           </dd>
         </div>
         {voicing && (

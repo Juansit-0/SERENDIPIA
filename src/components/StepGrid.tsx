@@ -8,10 +8,12 @@ export interface StepGridProps {
   accidental: Accidental
   windowStart: number
   windowSize: number
+  capo?: number
   interactive?: boolean
   onToggle?: (stringIndex: number, fret: number) => void
   onPlayString?: (stringIndex: number, midi: number) => void
   showNotes?: boolean
+  noteNames?: Record<number, string>
   label?: string
 }
 
@@ -24,15 +26,19 @@ export function StepGrid({
   accidental,
   windowStart,
   windowSize,
+  capo = 0,
   interactive = false,
   onToggle,
   onPlayString,
   showNotes = false,
+  noteNames,
   label,
 }: StepGridProps) {
   const { t } = useStore()
   const fretColumns = Array.from({ length: windowSize }, (_, index) => windowStart + index)
   const rowOrder = frets.map((_, index) => index).reverse()
+  const absolute = (fret: number | null) => (fret === null ? null : fret + capo)
+  const capoVisible = capo > 0 && capo >= windowStart && capo < windowStart + windowSize
 
   return (
     <div
@@ -45,7 +51,13 @@ export function StepGrid({
       <span className="label-ink text-center">0</span>
       {fretColumns.map((fret) => (
         <span key={`head-${fret}`} className="relative flex flex-col items-center gap-1">
-          <span className={`label-ink ${MARKERS.includes(fret) ? 'text-ink' : ''}`}>{fret}</span>
+          <span
+            className={`label-ink ${MARKERS.includes(fret) ? 'text-ink' : ''} ${
+              capoVisible && fret === capo ? 'text-ink underline decoration-2 underline-offset-2' : ''
+            }`}
+          >
+            {fret}
+          </span>
           {MARKERS.includes(fret) && <span className="h-[3px] w-[3px] rounded-full bg-orange" />}
         </span>
       ))}
@@ -62,7 +74,9 @@ export function StepGrid({
         const fretValue = frets[stringIndex]
         const open = fretValue === 0
         const muted = fretValue === null
-        const openNote = pitchName((((tuning[stringIndex] % 12) + 12) % 12), accidental)
+        const openPc = (((tuning[stringIndex] % 12) + 12) % 12)
+        const openNote = noteNames?.[openPc] ?? pitchName(openPc, accidental)
+        const soundingMidiAt = (absoluteFret: number) => tuning[stringIndex] + absoluteFret - capo
         const stringLabel = stringLabels[stringIndex]
 
         return (
@@ -100,25 +114,30 @@ export function StepGrid({
             </button>
 
             {fretColumns.map((fret) => {
-              const lit = fretValue === fret
+              const lit = fretValue !== null && fretValue > 0 && absolute(fretValue) === fret
+              const isCapo = capoVisible && fret === capo
               return (
                 <button
                   key={`cell-${stringIndex}-${fret}`}
                   type="button"
-                  className={`cell h-[30px] ${lit ? 'cell--lit' : ''}`}
+                  className={`cell h-[30px] ${isCapo ? 'cell--capo' : ''} ${lit ? 'cell--lit' : ''}`}
                   aria-pressed={interactive ? lit : undefined}
+                  aria-disabled={isCapo || undefined}
+                  title={isCapo ? t('capo.label') : undefined}
                   onClick={() => {
+                    if (isCapo) return
                     if (!interactive) {
-                      if (lit) onPlayString?.(stringIndex, tuning[stringIndex] + fret)
+                      if (lit) onPlayString?.(stringIndex, soundingMidiAt(fret))
                       return
                     }
                     onToggle?.(stringIndex, lit ? 0 : fret)
                   }}
-                  aria-label={`${stringLabel} ${t('a11y.fret')} ${fret}`}
+                  aria-label={`${stringLabel} ${t('a11y.fret')} ${fret}${isCapo ? ` · ${t('capo.label')}` : ''}`}
                 >
                   {lit && showNotes && (
                     <span className="relative z-10 font-mono text-[7px] font-bold text-ink">
-                      {pitchName((((tuning[stringIndex] + fret) % 12) + 12) % 12, accidental)}
+                      {noteNames?.[((soundingMidiAt(fret) % 12) + 12) % 12] ??
+                        pitchName(((soundingMidiAt(fret) % 12) + 12) % 12, accidental)}
                     </span>
                   )}
                 </button>

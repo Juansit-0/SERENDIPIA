@@ -14,6 +14,7 @@ import { QualityId, qualityById } from '../music/chords'
 import { ParsedChord, parseChord } from '../music/parseChord'
 import { Suggestion, nextChordSuggestions, PROGRESSIONS, resolveProgression } from '../music/progressions'
 import { Mode } from '../music/scales'
+import { clampCapo, withCapo } from '../music/capo'
 import { STANDARD_TUNING, TUNINGS, Voicing, voicingsFor } from '../music/voicings'
 
 export type Notation = 'anglo' | 'latin' | 'both'
@@ -38,6 +39,9 @@ interface StoreValue {
   tuningId: string
   setTuningId: (id: string) => void
   tuning: number[]
+  soundingTuning: number[]
+  capo: number
+  setCapo: (capo: number) => void
   tempo: number
   setTempo: (tempo: number) => void
   volume: number
@@ -78,6 +82,7 @@ interface StoreValue {
   addSuggestion: (suggestion: Suggestion) => void
   detectorFrets: (number | null)[]
   setDetectorFrets: (frets: (number | null)[]) => void
+  toggleDetectorString: (stringIndex: number, fret: number) => void
 }
 
 const StoreContext = createContext<StoreValue | null>(null)
@@ -95,6 +100,7 @@ interface PersistedSettings {
   loop: boolean
   beatsPerChord: number
   timbre: TimbreId
+  capo: number
 }
 
 const DEFAULTS: PersistedSettings = {
@@ -108,6 +114,7 @@ const DEFAULTS: PersistedSettings = {
   loop: true,
   beatsPerChord: 4,
   timbre: 'nylon',
+  capo: 0,
 }
 
 function loadSettings(): PersistedSettings {
@@ -136,6 +143,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [loop, setLoop] = useState(initial.current.loop)
   const [beatsPerChord, setBeatsPerChord] = useState(initial.current.beatsPerChord)
   const [timbre, setTimbreState] = useState<TimbreId>(initial.current.timbre)
+  const [capo, setCapoState] = useState(initial.current.capo)
   const [keyRootPc, setKeyRootPc] = useState(initial.current.keyRootPc)
   const [keyMode, setKeyMode] = useState<Mode>(initial.current.keyMode)
   const [chordInput, setChordInputState] = useState('Am7')
@@ -188,13 +196,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       loop,
       beatsPerChord,
       timbre,
+      capo,
     }
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
     } catch {
       return
     }
-  }, [lang, notation, tuningId, tempo, volume, keyRootPc, keyMode, loop, beatsPerChord, timbre])
+  }, [lang, notation, tuningId, tempo, volume, keyRootPc, keyMode, loop, beatsPerChord, timbre, capo])
 
   useEffect(() => {
     audioEngine.setVolume(volume)
@@ -205,10 +214,17 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [tuningId],
   )
 
-  const voicings = useMemo(
-    () => voicingsFor(chord.rootPc, chord.quality, tuning, { bassPc: chord.bassPc, limit: 9 }),
-    [chord, tuning],
-  )
+  const soundingTuning = useMemo(() => withCapo(tuning, capo), [tuning, capo])
+
+  const setCapo = useCallback((next: number) => {
+    setCapoState(clampCapo(next))
+  }, [])
+
+  const voicings = useMemo(() => {
+    const shapes = voicingsFor(chord.rootPc, chord.quality, tuning, { bassPc: chord.bassPc, limit: 9 })
+    if (capo === 0) return shapes
+    return shapes.map((voicing) => ({ ...voicing, midi: voicing.midi.map((midi) => midi + capo) }))
+  }, [chord, tuning, capo])
 
   useEffect(() => {
     setSelectedVoicing(0)
@@ -237,10 +253,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const target = voicings[index ?? selectedVoicing]
       if (!target) return
       void enableAudio().then(() => {
-        audioEngine.playFrets(target.frets, tuning, pattern)
+        audioEngine.playFrets(target.frets, soundingTuning, pattern)
       })
     },
-    [voicings, selectedVoicing, tuning, enableAudio],
+    [voicings, selectedVoicing, soundingTuning, enableAudio],
   )
 
   const selectVoicing = useCallback(
@@ -254,10 +270,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const playFrets = useCallback(
     (frets: (number | null)[], pattern: PlayPattern = 'strum-down') => {
       void enableAudio().then(() => {
-        audioEngine.playFrets(frets, tuning, pattern)
+        audioEngine.playFrets(frets, soundingTuning, pattern)
       })
     },
-    [enableAudio, tuning],
+    [enableAudio, soundingTuning],
   )
 
   const setChordInput = useCallback((value: string) => {
@@ -331,7 +347,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         tempo,
         loop,
         beatsPerChord,
-        tuning,
+        tuning: soundingTuning,
         getFrets: getFretsForStep,
         onStep: (index) => setActiveStep(index),
         onEnd: () => {
@@ -341,7 +357,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       })
       setPlaying(true)
     })
-  }, [playing, progression.length, enableAudio, tempo, loop, beatsPerChord, tuning, getFretsForStep])
+  }, [playing, progression.length, enableAudio, tempo, loop, beatsPerChord, soundingTuning, getFretsForStep])
 
   useEffect(() => {
     if (!playing) return
@@ -358,6 +374,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
     audioEngine.updateProgression({ stepCount: progression.length, getFrets: getFretsForStep })
   }, [progression, playing, getFretsForStep])
+
+  const toggleDetectorString = useCallback((stringIndex: number, fret: number) => {
+    setDetectorFrets((previous) => {
+      const next = [...previous]
+      next[stringIndex] = fret < 0 ? null : Math.max(0, fret - capo)
+      return next
+    })
+  }, [capo])
 
   const addSuggestion = useCallback(
     (suggestion: Suggestion) => {
@@ -387,6 +411,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     tuningId,
     setTuningId,
     tuning,
+    soundingTuning,
+    capo,
+    setCapo,
     tempo,
     setTempo,
     volume,
@@ -427,6 +454,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     addSuggestion,
     detectorFrets,
     setDetectorFrets,
+    toggleDetectorString,
   }
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>

@@ -5,22 +5,43 @@ import { StepGrid } from '../components/StepGrid'
 import { detectChord } from '../music/detectChord'
 import { LATIN_SHARP, PITCH_SHARP, chordAccidental } from '../music/notes'
 import { parseChord } from '../music/parseChord'
-import { STRING_LABELS } from '../music/voicings'
+import { shapeChord } from '../music/capo'
+import { chordToneSpelling } from '../music/chords'
+import { stringLabels } from '../music/voicings'
 import { useStore } from '../state/store'
 
 const OPEN: (number | null)[] = [0, 0, 0, 0, 0, 0]
 
 export function DetectorView() {
-  const { tuning, t, lang, notation, setChord, setView, playFrets, detectorFrets, setDetectorFrets } = useStore()
+  const {
+    soundingTuning,
+    capo,
+    t,
+    lang,
+    notation,
+    setChord,
+    setView,
+    playFrets,
+    detectorFrets,
+    setDetectorFrets,
+    toggleDetectorString,
+  } = useStore()
   const frets = detectorFrets
 
-  const detection = useMemo(() => detectChord(frets, tuning), [frets, tuning])
+  const detection = useMemo(() => detectChord(frets, soundingTuning), [frets, soundingTuning])
   const best = detection.candidates[0]
+  const shape = best ? shapeChord(parseChord(best.anglo) ?? parseChord('C')!, capo) : null
+  const noteNames = useMemo(() => {
+    if (!best) return undefined
+    const map: Record<number, string> = {}
+    for (const tone of chordToneSpelling(best.rootPc, best.quality, chordAccidental(best.rootPc) === 'flat')) {
+      map[tone.pc] = tone.anglo
+    }
+    return map
+  }, [best])
 
   const toggle = (stringIndex: number, fret: number) => {
-    const next = [...frets]
-    next[stringIndex] = fret < 0 ? null : fret
-    setDetectorFrets(next)
+    toggleDetectorString(stringIndex, fret)
   }
 
   return (
@@ -42,14 +63,16 @@ export function DetectorView() {
           <div className="min-w-[560px]">
             <StepGrid
               frets={frets}
-              tuning={tuning}
-              stringLabels={STRING_LABELS}
+              tuning={soundingTuning}
+              stringLabels={stringLabels(soundingTuning)}
               accidental={best ? chordAccidental(best.rootPc) : 'sharp'}
               windowStart={1}
               windowSize={12}
+              capo={capo}
               interactive
               onToggle={toggle}
               showNotes
+              noteNames={noteNames}
             />
           </div>
         </div>
@@ -83,6 +106,11 @@ export function DetectorView() {
                   ? t('detector.rootPosition')
                   : `${t('detector.inversion')}: ${best.inversion}`}
               </span>
+              {capo > 0 && shape && (
+                <span className="chip chip--blue">
+                  {t('capo.shape')}: {notation === 'latin' ? shape.latin : shape.anglo}
+                </span>
+              )}
               {detection.notes.map((note, index) => (
                 <span className="chip" key={`${note.midi}-${index}`}>
                   {notation === 'latin' ? note.latin : note.anglo}
@@ -98,7 +126,7 @@ export function DetectorView() {
                 type="button"
                 className="stamp"
                 onClick={() => {
-                  const parsed = parseChord(best.anglo)
+                  const parsed = shape ?? parseChord(best.anglo)
                   if (parsed) {
                     setChord(parsed)
                     setView('dictionary')
@@ -120,7 +148,7 @@ export function DetectorView() {
                       className="stamp flex-col items-start gap-0 px-2 py-1"
                       onClick={() => {
                         const parsed = parseChord(candidate.anglo)
-                        if (parsed) setChord(parsed)
+                        if (parsed) setChord(shapeChord(parsed, capo))
                       }}
                     >
                       <span className="text-[0.8125rem] font-bold normal-case">{candidate.anglo}</span>

@@ -1,3 +1,5 @@
+import { spellNote, tonicLetterIndex } from './notes'
+
 export type QualityId =
   | 'maj'
   | 'min'
@@ -104,6 +106,45 @@ export function chordTones(rootPc: number, quality: Quality): number[] {
 
 export function essentialTones(rootPc: number, quality: Quality): number[] {
   return quality.essential.map((interval) => (((rootPc + interval) % 12) + 12) % 12)
+}
+
+const DEGREE_BY_INTERVAL: Record<number, number> = {
+  0: 0,
+  1: 1,
+  2: 1,
+  3: 2,
+  4: 2,
+  5: 3,
+  6: 3,
+  7: 4,
+  8: 4,
+  9: 5,
+  10: 6,
+  11: 6,
+  13: 1,
+  14: 1,
+  15: 1,
+  17: 3,
+  18: 3,
+  21: 5,
+}
+
+export interface ChordTone {
+  interval: number
+  pc: number
+  anglo: string
+  latin: string
+}
+
+export function chordToneSpelling(rootPc: number, quality: Quality, preferFlat: boolean): ChordTone[] {
+  const tonicLetter = tonicLetterIndex(rootPc, preferFlat)
+  return quality.intervals.map((interval) => {
+    const degree = DEGREE_BY_INTERVAL[interval] ?? 0
+    const letter = (tonicLetter + degree) % 7
+    const pc = (((rootPc + interval) % 12) + 12) % 12
+    const spelled = spellNote(letter, pc)
+    return { interval, pc, anglo: spelled.anglo, latin: spelled.latin }
+  })
 }
 
 export function isTriadLike(quality: Quality): boolean {

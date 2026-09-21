@@ -96,7 +96,7 @@ export interface SpelledNote {
   latin: string
 }
 
-function tonicLetterIndex(rootPc: number, preferFlat: boolean): number {
+export function tonicLetterIndex(rootPc: number, preferFlat: boolean): number {
   for (let index = 0; index < LETTER_PCS.length; index += 1) {
     const natural = LETTER_PCS[index]
     const diff = preferFlat ? mod12(natural - rootPc) : mod12(rootPc - natural)

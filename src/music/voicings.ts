@@ -1,7 +1,18 @@
 import { Quality, chordTones, essentialTones } from './chords'
+import { pitchName } from './notes'
 
 export const STANDARD_TUNING = [40, 45, 50, 55, 59, 64]
-export const STRING_LABELS = ['E', 'A', 'D', 'G', 'B', 'e']
+
+export function stringLabels(tuning: number[]): string[] {
+  return tuning.map((midi) => {
+    const pc = ((midi % 12) + 12) % 12
+    const accidental = FLAT_STRING_ROOTS.has(pc) ? 'flat' : 'sharp'
+    const name = pitchName(pc, accidental)
+    return midi >= 60 ? name.toLowerCase() : name
+  })
+}
+
+const FLAT_STRING_ROOTS = new Set([1, 3, 6, 8, 10])
 
 export interface Tuning {
   id: string

@@ -1,4 +1,5 @@
 import { TIMBRES, type TimbreId } from '../audio/engine'
+import { MAX_CAPO } from '../music/capo'
 import { LATIN_SHARP, PITCH_SHARP } from '../music/notes'
 import { useStore, type Notation, type ViewId } from '../state/store'
 import { RegMark } from './RegMark'
@@ -24,6 +25,8 @@ export function TransportStrip() {
     setLoop,
     timbre,
     setTimbre,
+    capo,
+    setCapo,
     volume,
     setVolume,
     playing,
@@ -130,6 +133,31 @@ export function TransportStrip() {
               </option>
             ))}
           </select>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="label-ink">{t('transport.capo')}</span>
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              className="stamp px-2 py-0.5"
+              onClick={() => setCapo(capo - 1)}
+              disabled={capo === 0}
+              aria-label={t('a11y.capoDown')}
+            >
+              −
+            </button>
+            <span className="ink-block font-mono text-[0.9375rem] font-semibold tabular-nums">{capo}</span>
+            <button
+              type="button"
+              className="stamp px-2 py-0.5"
+              onClick={() => setCapo(capo + 1)}
+              disabled={capo >= MAX_CAPO}
+              aria-label={t('a11y.capoUp')}
+            >
+              +
+            </button>
+          </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">

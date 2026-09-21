@@ -7,10 +7,33 @@ const PORT = 9333
 const OUT = path.resolve(import.meta.dirname, '../.impeccable/review')
 
 const TARGETS = [
-  { name: 'desktop.png', url: 'http://localhost:5173/', width: 1440, height: 1250, dsf: 1 },
-  { name: 'mobile.png', url: 'http://localhost:5173/', width: 390, height: 1400, dsf: 2 },
-  { name: 'detector.png', url: 'http://localhost:5173/#detector', width: 1440, height: 1000, dsf: 1 },
-  { name: 'theory.png', url: 'http://localhost:5173/#theory', width: 1440, height: 1300, dsf: 1 },
+  { name: 'desktop.png', url: 'http://localhost:5173/', width: 1440, height: 1250, dsf: 1, settings: { capo: 0 } },
+  { name: 'mobile.png', url: 'http://localhost:5173/', width: 390, height: 1400, dsf: 2, settings: { capo: 0 } },
+  { name: 'detector.png', url: 'http://localhost:5173/#detector', width: 1440, height: 1000, dsf: 1, settings: { capo: 0 } },
+  { name: 'theory.png', url: 'http://localhost:5173/#theory', width: 1440, height: 1300, dsf: 1, settings: { capo: 0 } },
+  { name: 'capo-desktop.png', url: 'http://localhost:5173/', width: 1440, height: 1250, dsf: 1, settings: { capo: 3 } },
+  {
+    name: 'capo-detector.png',
+    url: 'http://localhost:5173/#detector',
+    width: 1440,
+    height: 1000,
+    dsf: 1,
+    settings: { capo: 3 },
+    action: `(() => {
+      const found = []
+      const click = (label) => {
+        const target = [...document.querySelectorAll('button')].find((button) =>
+          (button.getAttribute('aria-label') || '').includes(label),
+        )
+        found.push(label + '=' + (target ? (target.getAttribute('aria-label') || '').slice(0, 24) : 'MISS'))
+        target?.click()
+      }
+      click('F traste 5')
+      setTimeout(() => click('D traste 4'), 350)
+      return found.join(' | ')
+    })()`,
+  },
+  { name: 'capo-mobile.png', url: 'http://localhost:5173/', width: 390, height: 1400, dsf: 2, settings: { capo: 3 } },
 ]
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
@@ -88,7 +111,23 @@ for (const target of TARGETS) {
   await send('Page.navigate', { url: 'about:blank' }, session)
   await sleep(250)
   await send('Page.navigate', { url: target.url }, session)
+  await sleep(900)
+  if (target.settings) {
+    const expression = `(() => {
+      const key = 'serendipia.settings.v2'
+      const current = JSON.parse(localStorage.getItem(key) || '{}')
+      localStorage.setItem(key, JSON.stringify({ ...current, ...${JSON.stringify(target.settings)} }))
+      return 'ok'
+    })()`
+    await send('Runtime.evaluate', { expression }, session)
+    await send('Page.reload', {}, session)
+  }
   await sleep(2600)
+  if (target.action) {
+    const acted = await send('Runtime.evaluate', { expression: target.action, returnByValue: true }, session)
+    console.log(`  action -> ${acted.result?.result?.value}`)
+    await sleep(900)
+  }
   const shot = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true }, session)
   await writeFile(path.join(OUT, target.name), Buffer.from(shot.result.data, 'base64'))
   const metrics = await send(

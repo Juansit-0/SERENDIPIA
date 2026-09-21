@@ -30,7 +30,7 @@ Desktop browser at home, guitar in hand, speakers on. Sessions are exploratory p
 
 Confirmed MVP: (1) chord dictionary — pick or type a chord, see multiple voicings as diagrams, hear them; (2) detector — enter a fretboard position, get chord name, inversions, and alternatives; (3) theory and recommendations — diatonic chords per key, preset progressions transposable and playable in loop, next-chord suggestions with reasons. The drag-and-drop progression editor is Phase 2. UI is bilingual ES/EN. Anglo chord notation is primary with Latin notation visible alongside. Audio uses self-hosted guitar samples (nylon, steel, clean electric, jazz) extracted from MusyngKite soundfonts, trimmed to 12 notes per timbre plus fret noise, with a synthesized fallback when samples cannot load; the audio works offline from the repository's own assets. No backend; preferences persist in localStorage. Music-theory logic is pure TypeScript covered by Vitest.
 
-Explicitly undecided: deploy target, capo support, alternate-tunings UI, metronome, export/share.
+Capo support ships (0-7): the typed chord is the SHAPE (cifra), the fretboard shows absolute frets with the capo drawn as an ink band, and the app labels what the shape sounds as (`suena X`); the detector reports the sounding chord and the shape that produces it. Alternate-tunings UI, metronome, and export/share remain undecided.
 
 ## Brand Commitments
 

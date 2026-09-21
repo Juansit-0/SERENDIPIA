@@ -90,6 +90,8 @@ export const es = {
   'capo.label': 'CAPO',
   'capo.sounds': 'suena',
   'capo.shape': 'forma',
+  'key.suggested': 'Tonalidad probable',
+  'key.use': 'Usar',
   'voicing.marked': 'Marcada',
   'voicing.auto': 'Auto',
   'voicing.autoHint': 'la más fácil',

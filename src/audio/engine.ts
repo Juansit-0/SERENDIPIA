@@ -1,7 +1,7 @@
 import * as Tone from 'tone'
 import { midiToFreq } from '../music/notes'
-import manifest from '../assets/samples/manifest.json'
 import { beatsToNotation } from './timing'
+import { SAMPLE_FILES } from '../assets/samples/generated'
 
 export type PlayPattern = 'strum-down' | 'strum-up' | 'arpeggio' | 'block'
 export type TimbreId = 'nylon' | 'steel' | 'electric' | 'jazz'
@@ -24,27 +24,6 @@ export interface ProgressionOptions {
   onEnd?: () => void
 }
 
-const SAMPLE_URLS = import.meta.glob('../assets/samples/**/*.mp3', {
-  eager: true,
-  query: '?url',
-  import: 'default',
-}) as Record<string, string>
-
-function urlsForFolder(folder: string): Record<string, string> {
-  const prefix = `samples/${folder}/`
-  const entries: Record<string, string> = {}
-  for (const [path, url] of Object.entries(SAMPLE_URLS)) {
-    const index = path.indexOf(prefix)
-    if (index === -1) continue
-    entries[path.slice(index + prefix.length).replace('.mp3', '')] = url
-  }
-  return entries
-}
-
-type TimbreManifest = Record<string, { samples: Record<string, { file: string; source: string }> }>
-
-const MANIFEST = manifest as TimbreManifest
-
 class AudioEngine {
   private started = false
   private input: Tone.Gain | null = null
@@ -59,6 +38,7 @@ class AudioEngine {
   private cursor = 0
   private options: ProgressionOptions | null = null
   private loadingTimbre: TimbreId | null = null
+  private loadedTimbres = new Set<TimbreId>()
   private failed = false
   onLoadingChange: ((timbre: TimbreId | null) => void) | null = null
   onFallback: ((failed: boolean) => void) | null = null
@@ -77,6 +57,29 @@ class AudioEngine {
 
   get usingFallback(): boolean {
     return this.failed
+  }
+
+  async measure(): Promise<number> {
+    if (!this.master) return 0
+    const analyser = new Tone.Analyser('waveform', 2048)
+    this.master.connect(analyser)
+    await new Promise((resolve) => setTimeout(resolve, 350))
+    const values = analyser.getValue() as Float32Array
+    analyser.dispose()
+    const sum = values.reduce((total, value) => total + value * value, 0)
+    return Math.sqrt(sum / values.length)
+  }
+
+  debug(): Record<string, unknown> {
+    return {
+      started: this.started,
+      timbre: this.timbre,
+      context: Tone.getContext().state,
+      samplers: this.samplers.size,
+      sampleFiles: Object.keys(SAMPLE_FILES[this.timbre] ?? {}).length,
+      loaded: this.loadedTimbres.has(this.timbre),
+      fallbackVoices: this.fallbackVoices.length,
+    }
   }
 
   async start(): Promise<void> {
@@ -119,13 +122,7 @@ class AudioEngine {
     this.loadingTimbre = id
     this.onLoadingChange?.(id)
     try {
-      const files = urlsForFolder(id)
-      const samples = MANIFEST[id]?.samples ?? {}
-      const urls: Record<string, string> = {}
-      for (const [note, info] of Object.entries(samples)) {
-        const key = info.file.replace('.mp3', '')
-        if (files[key]) urls[note] = files[key]
-      }
+      const urls = SAMPLE_FILES[id] ?? {}
       if (Object.keys(urls).length === 0) throw new Error(`no samples for ${id}`)
 
       const left = new Tone.Sampler({ urls, attack: 0.002, release: 1.2 }).connect(
@@ -135,6 +132,10 @@ class AudioEngine {
         new Tone.Panner(0.28).connect(this.input),
       )
       await Tone.loaded()
+      const loaded = [left, right].every(
+        (sampler) => (sampler as unknown as { loaded?: boolean }).loaded !== false,
+      )
+      if (loaded) this.loadedTimbres.add(id)
       this.samplers.set(id, { left, right })
       this.loadingTimbre = null
       this.onLoadingChange?.(null)
@@ -152,13 +153,7 @@ class AudioEngine {
   private async loadFretNoise(): Promise<void> {
     if (!this.input || this.fretNoise) return
     try {
-      const files = urlsForFolder('fret-noise')
-      const samples = MANIFEST['fret-noise']?.samples ?? {}
-      const urls: Record<string, string> = {}
-      for (const [note, info] of Object.entries(samples)) {
-        const key = info.file.replace('.mp3', '')
-        if (files[key]) urls[note] = files[key]
-      }
+      const urls = SAMPLE_FILES['fret-noise'] ?? {}
       if (Object.keys(urls).length === 0) return
       const sampler = new Tone.Sampler({ urls, attack: 0.001, release: 0.2 })
       sampler.volume.value = -22
@@ -337,3 +332,7 @@ class AudioEngine {
 }
 
 export const audioEngine = new AudioEngine()
+
+if (import.meta.env.DEV) {
+  ;(window as unknown as { __serendipia?: unknown }).__serendipia = { audioEngine }
+}

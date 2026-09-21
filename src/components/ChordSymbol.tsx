@@ -1,7 +1,9 @@
 import { soundingChord } from '../music/capo'
 import { chordToneSpelling } from '../music/chords'
+import { keyCandidates, sameKey } from '../music/keyDetection'
 import { voicingLabel } from '../music/stepVoicing'
 import { intervalName } from '../music/notes'
+import { useMemo } from 'react'
 import { useStore } from '../state/store'
 import { OffsetPlate } from './OffsetPlate'
 import type { TKey } from '../i18n'
@@ -19,9 +21,19 @@ export function ChordSymbol() {
     voicings,
     selectedVoicing,
     capo,
+    keyRootPc,
+    keyMode,
+    setKeyRootPc,
+    setKeyMode,
   } = useStore()
   const voicing = voicings[selectedVoicing]
   const sounding = soundingChord(chord, capo)
+  const keySuggestions = useMemo(
+    () => keyCandidates({ rootPc: chord.rootPc, qualityId: chord.quality.id }, 2),
+    [chord.rootPc, chord.quality.id],
+  )
+  const currentKey = { rootPc: keyRootPc, mode: keyMode }
+  const shownKeys = keySuggestions.filter((candidate) => !sameKey(candidate, currentKey))
 
   return (
     <section className="plate flex flex-col gap-3 p-4">
@@ -39,6 +51,34 @@ export function ChordSymbol() {
         autoFocus
       />
       {chordError && <p className="font-mono text-[11px] text-red">{t('chord.invalid')}</p>}
+
+      {shownKeys.length > 0 && (
+        <p className="flex flex-wrap items-center gap-2">
+          <span className="label-ink text-blue-ink">{t('key.suggested')}</span>
+          {shownKeys.map((candidate) => (
+            <button
+              key={`${candidate.keyAnglo}${candidate.mode}`}
+              type="button"
+              className="chip chip--blue hover:bg-turquoise hover:text-ink"
+              onClick={() => {
+                setKeyRootPc(candidate.rootPc)
+                setKeyMode(candidate.mode)
+              }}
+              title={`${t('key.use')}: ${candidate.roman}`}
+            >
+              {candidate.harmonicFunction && (
+                <span
+                  className={`ink-rule--${candidate.harmonicFunction} h-2 w-2 rounded-full`}
+                  aria-hidden="true"
+                />
+              )}
+              {notation === 'latin' ? candidate.keyLatin : candidate.keyAnglo}{' '}
+              {candidate.mode === 'major' ? t('theory.mode.major') : t('theory.mode.minor')} · {candidate.roman} —{' '}
+              {t('key.use')}
+            </button>
+          ))}
+        </p>
+      )}
 
       <OffsetPlate offset={5}>
         <p

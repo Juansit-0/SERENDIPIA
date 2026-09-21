@@ -92,6 +92,8 @@ export const en: Dictionary = {
   'capo.label': 'CAPO',
   'capo.sounds': 'sounds as',
   'capo.shape': 'shape',
+  'key.suggested': 'Likely key',
+  'key.use': 'Use',
   'voicing.marked': 'Marked',
   'voicing.auto': 'Auto',
   'voicing.autoHint': 'easiest',

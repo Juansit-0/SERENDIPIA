@@ -1,5 +1,6 @@
 import { soundingChord } from '../music/capo'
 import { chordToneSpelling } from '../music/chords'
+import { voicingLabel } from '../music/stepVoicing'
 import { intervalName } from '../music/notes'
 import { useStore } from '../state/store'
 import { OffsetPlate } from './OffsetPlate'
@@ -97,6 +98,10 @@ export function ChordSymbol() {
               qualityId: chord.quality.id,
               anglo: chord.anglo,
               latin: chord.latin,
+              bassPc: chord.bassPc,
+              frets: voicing?.frets ?? null,
+              voicingLabel: voicing ? voicingLabel(voicing.frets) : undefined,
+              voicingSource: voicing?.source === 'marked' ? 'marked' : voicing ? 'proof' : 'auto',
             })
           }
         >

@@ -34,6 +34,63 @@ const TARGETS = [
     })()`,
   },
   { name: 'capo-mobile.png', url: 'http://localhost:5173/', width: 390, height: 1400, dsf: 2, settings: { capo: 3 } },
+  {
+    name: 'voicing-marked.png',
+    url: 'http://localhost:5173/#detector',
+    width: 1440,
+    height: 1250,
+    dsf: 1,
+    settings: { capo: 3 },
+    action: `(() => {
+      const click = (label) => {
+        const target = [...document.querySelectorAll('button')].find((button) =>
+          ((button.getAttribute('aria-label') || '') + ' ' + (button.textContent || '')).includes(label),
+        )
+        target?.click()
+        return Boolean(target)
+      }
+      const first = click('F traste 5')
+      window.setTimeout(() => {
+        click('D traste 4')
+        window.setTimeout(() => click('Ver en el diccionario'), 450)
+      }, 350)
+      return 'marked=' + first
+    })()`,
+  },
+  {
+    name: 'voicing-picker.png',
+    url: 'http://localhost:5173/#detector',
+    width: 1440,
+    height: 1250,
+    dsf: 1,
+    settings: { capo: 3 },
+    postActionDelay: 2400,
+    action: `(() => {
+      const byLabel = (label) => {
+        const target = [...document.querySelectorAll('button')].find((button) =>
+          ((button.getAttribute('aria-label') || '') + ' ' + (button.textContent || '')).includes(label),
+        )
+        target?.click()
+        return Boolean(target)
+      }
+      const byTitle = (text, last = false) => {
+        const matches = [...document.querySelectorAll('button')].filter((button) =>
+          (button.getAttribute('title') || '').includes(text),
+        )
+        const target = last ? matches[matches.length - 1] : matches[0]
+        target?.click()
+        return Boolean(target)
+      }
+      const first = byLabel('F traste 5')
+      window.setTimeout(() => {
+        byLabel('D traste 4')
+        window.setTimeout(() => byLabel('Ver en el diccionario'), 450)
+        window.setTimeout(() => byLabel('Añadir al patrón'), 900)
+        window.setTimeout(() => byTitle('Elegir posición', true), 1400)
+      }, 350)
+      return 'marked=' + first
+    })()`,
+  },
 ]
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
@@ -126,7 +183,7 @@ for (const target of TARGETS) {
   if (target.action) {
     const acted = await send('Runtime.evaluate', { expression: target.action, returnByValue: true }, session)
     console.log(`  action -> ${acted.result?.result?.value}`)
-    await sleep(900)
+    await sleep(target.postActionDelay ?? 900)
   }
   const shot = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true }, session)
   await writeFile(path.join(OUT, target.name), Buffer.from(shot.result.data, 'base64'))

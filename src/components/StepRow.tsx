@@ -1,9 +1,10 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { chordTones, qualityById } from '../music/chords'
 import { chordAccidental, pitchName } from '../music/notes'
 import { diatonicChords, type HarmonicFunction } from '../music/scales'
 import { useStore } from '../state/store'
 import { OffsetPlate } from './OffsetPlate'
+import { StepVoicingPicker } from './StepVoicingPicker'
 
 const SLOTS = 16
 
@@ -28,6 +29,7 @@ export function StepRow() {
     t,
   } = useStore()
 
+  const [pickerStepId, setPickerStepId] = useState<string | null>(null)
   const diatonic = useMemo(() => diatonicChords(keyRootPc, keyMode), [keyRootPc, keyMode])
 
   const pcsOf = (rootPc: number, qualityId: Parameters<typeof qualityById>[0]) =>
@@ -78,9 +80,16 @@ export function StepRow() {
                 className={`sheet flex min-h-[68px] w-full snap-start flex-col justify-between p-1.5 text-left ${
                   active ? 'wipe-in border-ink' : ''
                 }`}
-                onClick={() => removeFromProgression(index)}
+                data-step-index={index}
+                onClick={(event) => {
+                  if (event.altKey) {
+                    removeFromProgression(index)
+                    return
+                  }
+                  setPickerStepId(step.id)
+                }}
                 disabled={playing}
-                title={playing ? t('transport.stop') : `${t('progression.remove')}: ${step.anglo}`}
+                title={playing ? t('transport.stop') : `${t('voicing.pick')}: ${step.anglo}`}
               >
                 <span className={`h-[3px] w-full ${fn ? FUNCTION_INK[fn] : 'bg-rule-strong'}`} aria-hidden="true" />
                 <span className="font-mono text-[8px] text-ink-faint">{index + 1}</span>
@@ -90,6 +99,18 @@ export function StepRow() {
                 {notation === 'both' && (
                   <span className="truncate font-mono text-[8px] text-ink-soft">{step.latin}</span>
                 )}
+                <span className="flex items-center gap-1">
+                  <span
+                    className={`truncate px-1 font-mono text-[8px] ${
+                      step.frets
+                        ? 'bg-turquoise font-semibold text-ink mix-blend-multiply'
+                        : 'text-ink-faint'
+                    }`}
+                    title={step.frets ? t('voicing.step') : t('voicing.auto')}
+                  >
+                    {step.voicingLabel ?? t('voicing.auto')}
+                  </span>
+                </span>
                 <span
                   className="truncate bg-turquoise px-1 font-mono text-[9px] font-semibold text-ink mix-blend-multiply"
                   title={t('a11y.sharedNotes')}
@@ -133,6 +154,23 @@ export function StepRow() {
       </div>
 
       {progression.length === 0 && <p className="readout text-[11px] text-ink-faint">{t('progression.empty')}</p>}
+
+      {pickerStepId !== null &&
+        (() => {
+          const pickerIndex = progression.findIndex((item) => item.id === pickerStepId)
+          if (pickerIndex === -1) return null
+          return (
+            <StepVoicingPicker
+              step={progression[pickerIndex]}
+              index={pickerIndex}
+              onClose={() => {
+                const anchor = document.querySelector<HTMLButtonElement>(`[data-step-index="${pickerIndex}"]`)
+                setPickerStepId(null)
+                anchor?.focus()
+              }}
+            />
+          )
+        })()}
     </section>
   )
 }

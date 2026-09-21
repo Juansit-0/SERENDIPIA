@@ -35,6 +35,8 @@ export interface Barre {
   to: number
 }
 
+export type VoicingSource = 'common' | 'generated' | 'marked'
+
 export interface Voicing {
   frets: (number | null)[]
   midi: number[]
@@ -46,7 +48,7 @@ export interface Voicing {
   open: number
   difficulty: Difficulty
   score: number
-  source: 'common' | 'generated'
+  source: VoicingSource
   signature: string
 }
 
@@ -178,7 +180,7 @@ function difficultyOf(barre: Barre | null, span: number, muted: number, distinct
 function buildVoicing(
   frets: (number | null)[],
   tuning: number[],
-  source: 'common' | 'generated',
+  source: VoicingSource,
   rootPc: number,
   quality: Quality,
   bassPc: number | null,
@@ -236,6 +238,16 @@ function buildVoicing(
     source,
     signature: signatureOf(frets),
   }
+}
+
+export function voicingFromFrets(
+  frets: (number | null)[],
+  tuning: number[],
+  rootPc: number,
+  quality: Quality,
+  source: VoicingSource = 'marked',
+): Voicing | null {
+  return buildVoicing(frets, tuning, source, rootPc, quality, null, new Set(chordTones(rootPc, quality)))
 }
 
 export function voicingsFor(

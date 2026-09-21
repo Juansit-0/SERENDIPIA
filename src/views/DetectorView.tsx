@@ -7,6 +7,7 @@ import { LATIN_SHARP, PITCH_SHARP, chordAccidental } from '../music/notes'
 import { parseChord } from '../music/parseChord'
 import { shapeChord } from '../music/capo'
 import { chordToneSpelling } from '../music/chords'
+import { isPlayableFrets, voicingLabel } from '../music/stepVoicing'
 import { stringLabels } from '../music/voicings'
 import { useStore } from '../state/store'
 
@@ -25,6 +26,7 @@ export function DetectorView() {
     detectorFrets,
     setDetectorFrets,
     toggleDetectorString,
+    setMarkedVoicing,
   } = useStore()
   const frets = detectorFrets
 
@@ -127,10 +129,18 @@ export function DetectorView() {
                 className="stamp"
                 onClick={() => {
                   const parsed = shape ?? parseChord(best.anglo)
-                  if (parsed) {
-                    setChord(parsed)
-                    setView('dictionary')
+                  if (!parsed) return
+                  setChord(parsed)
+                  if (shape && isPlayableFrets(frets)) {
+                    setMarkedVoicing({
+                      rootPc: shape.rootPc,
+                      qualityId: shape.quality.id,
+                      frets,
+                      label: voicingLabel(frets),
+                      capo,
+                    })
                   }
+                  setView('dictionary')
                 }}
               >
                 {t('detector.toDictionary')}

@@ -10,12 +10,13 @@ import {
 } from 'react'
 import { audioEngine, type PlayPattern, type TimbreId } from '../audio/engine'
 import { translate, type Lang, type TKey } from '../i18n'
-import { QualityId, qualityById } from '../music/chords'
+import { QualityId } from '../music/chords'
 import { ParsedChord, parseChord } from '../music/parseChord'
 import { Suggestion, nextChordSuggestions, PROGRESSIONS, resolveProgression } from '../music/progressions'
 import { Mode } from '../music/scales'
 import { clampCapo, withCapo } from '../music/capo'
-import { STANDARD_TUNING, TUNINGS, Voicing, voicingsFor } from '../music/voicings'
+import { resolveStepFrets, type StepVoicingRef, type StepVoicingSource } from '../music/stepVoicing'
+import { STANDARD_TUNING, TUNINGS, Voicing, voicingFromFrets, voicingsFor } from '../music/voicings'
 
 export type Notation = 'anglo' | 'latin' | 'both'
 export type ViewId = 'dictionary' | 'detector' | 'theory'
@@ -26,6 +27,18 @@ export interface ProgressionStep {
   qualityId: QualityId
   anglo: string
   latin: string
+  bassPc?: number | null
+  frets?: (number | null)[] | null
+  voicingLabel?: string
+  voicingSource?: StepVoicingSource
+}
+
+export interface MarkedVoicing {
+  rootPc: number
+  qualityId: QualityId
+  frets: (number | null)[]
+  label: string
+  capo: number
 }
 
 interface StoreValue {
@@ -69,7 +82,10 @@ interface StoreValue {
   progression: ProgressionStep[]
   loadProgression: (steps: Array<Omit<ProgressionStep, 'id'>>) => void
   addToProgression: (step: Omit<ProgressionStep, 'id'>) => void
+  setStepVoicing: (index: number, voicing: StepVoicingRef | null) => void
   removeFromProgression: (index: number) => void
+  markedVoicing: MarkedVoicing | null
+  setMarkedVoicing: (voicing: MarkedVoicing | null) => void
   clearProgression: () => void
   playing: boolean
   activeStep: number
@@ -162,6 +178,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [playing, setPlaying] = useState(false)
   const [activeStep, setActiveStep] = useState(-1)
   const [detectorFrets, setDetectorFrets] = useState<(number | null)[]>([0, 0, 0, 0, 0, 0])
+  const [markedVoicing, setMarkedVoicingState] = useState<MarkedVoicing | null>(null)
   const [audioReady, setAudioReady] = useState(false)
   const [audioLoading, setAudioLoading] = useState<TimbreId | null>(null)
   const [audioFallback, setAudioFallback] = useState(false)
@@ -222,9 +239,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const voicings = useMemo(() => {
     const shapes = voicingsFor(chord.rootPc, chord.quality, tuning, { bassPc: chord.bassPc, limit: 9 })
-    if (capo === 0) return shapes
-    return shapes.map((voicing) => ({ ...voicing, midi: voicing.midi.map((midi) => midi + capo) }))
-  }, [chord, tuning, capo])
+    const shift = (voicing: Voicing): Voicing =>
+      capo === 0 ? voicing : { ...voicing, midi: voicing.midi.map((midi) => midi + capo) }
+    if (!markedVoicing || markedVoicing.rootPc !== chord.rootPc || markedVoicing.qualityId !== chord.quality.id) {
+      return shapes.map(shift)
+    }
+    const marked = voicingFromFrets(markedVoicing.frets, tuning, chord.rootPc, chord.quality, 'marked')
+    if (!marked) return shapes.map(shift)
+    return [shift(marked), ...shapes.filter((voicing) => voicing.signature !== marked.signature).map(shift)]
+  }, [chord, tuning, capo, markedVoicing])
 
   useEffect(() => {
     setSelectedVoicing(0)
@@ -287,6 +310,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
+  const setMarkedVoicing = useCallback((voicing: MarkedVoicing | null) => {
+    setMarkedVoicingState(voicing)
+  }, [])
+
   const setChord = useCallback((next: ParsedChord) => {
     setChordState(next)
     setChordInputState(next.anglo)
@@ -312,6 +339,21 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     )
   }, [])
 
+  const setStepVoicing = useCallback((index: number, voicing: StepVoicingRef | null) => {
+    setProgression((current) =>
+      current.map((step, position) =>
+        position === index
+          ? {
+              ...step,
+              frets: voicing?.frets ?? null,
+              voicingLabel: voicing?.label,
+              voicingSource: voicing?.source,
+            }
+          : step,
+      ),
+    )
+  }, [])
+
   const removeFromProgression = useCallback((index: number) => {
     setProgression((current) => current.filter((_, position) => position !== index))
   }, [])
@@ -327,8 +369,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     (index: number): (number | null)[] | null => {
       const step = progression[index]
       if (!step) return null
-      const options = voicingsFor(step.rootPc, qualityById(step.qualityId), tuning, { limit: 1 })
-      return options[0]?.frets ?? null
+      return resolveStepFrets(step, tuning)
     },
     [progression, tuning],
   )
@@ -390,6 +431,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         qualityId: suggestion.qualityId,
         anglo: suggestion.anglo,
         latin: suggestion.latin,
+        voicingSource: 'auto',
       })
     },
     [addToProgression],
@@ -441,7 +483,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     progression,
     loadProgression,
     addToProgression,
+    setStepVoicing,
     removeFromProgression,
+    markedVoicing,
+    setMarkedVoicing,
     clearProgression,
     playing,
     activeStep,

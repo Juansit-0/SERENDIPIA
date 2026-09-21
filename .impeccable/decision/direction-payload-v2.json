@@ -1,0 +1,165 @@
+{
+  "title": "Elige el mundo visual",
+  "question": "Mundo nuevo: la tirada asignó Riso Studio; ningún challenger ganó ambos ejes. Bloquea una carta, o re-tira.",
+  "options": [
+    {
+      "id": "assigned",
+      "label": "Riso Studio",
+      "kicker": "THE ROLL",
+      "lineage": "taller risográfico de música: afiches de concierto, fanzines, carátulas de 7\", tintas planas saturadas, sobreimpresión, grano, marcas de registro",
+      "thesis": "SERENDIPIA como taller de impresión musical: cada acorde es un afiche, el mástil una placa impresa, los voicings pruebas apiladas y la progresión una tira de hojas encadenadas; la sobreimpresión marca las notas que comparten acordes vecinos.",
+      "palette": ["#F4F1EA", "#1A1A1A", "#0078BF", "#FF6C2F", "#FFE800", "#40E0D0"],
+      "materials": ["papel sin recubrir", "tinta riso plana", "sobreimpresión", "grano de impresión", "marcas de registro"],
+      "viewport": "Un afiche del acorde actual a gran escala: el nombre monumental en tinta negra sobre papel, la placa del mástil impresa al centro con puntos de tinta y marcas de registro que alinean la cuadrícula, la pila de pruebas de voicings a la derecha ordenada por facilidad, la tira de progresión abajo como hojas encadenadas que avanzan al sonar, y una leyenda de tintas que asigna un color a cada función (tónica, subdominante, dominante).",
+      "risk": "La tinta sobre papel claro rompe con el dark anterior; el grano y la sobreimpresión deben cargar el material o se ve como un póster plano, y el color saturado cansa si no hay zonas de descanso.",
+      "raised": [
+        {
+          "from": "challenger-alphabet-storm",
+          "raise": "El nombre del acorde es el objeto mayor y se re-tipografia en vivo al cambiar raíz, cualidad o notación: el toggle ES/EN es una recomposición real, no un cambio de etiqueta."
+        },
+        {
+          "from": "challenger-variable-font",
+          "raise": "Jerarquía solo por contraste de escala — nombre enorme contra lecturas mono diminutas — con un readout vivo de notas, intervalos y MIDI del voicing actual."
+        },
+        {
+          "from": "challenger-orizuru",
+          "raise": "Una sola hoja continua: la placa del mástil conserva las marcas de cada posición visitada, y cada voicing es un estado discreto y recuperable."
+        }
+      ],
+      "wireframe": {
+        "cols": 12,
+        "rows": 10,
+        "regions": [
+          {"label": "barra de tinta", "x": 0, "y": 0, "w": 12, "h": 1},
+          {"label": "nombre del acorde", "x": 0, "y": 1, "w": 5, "h": 3, "accent": true},
+          {"label": "placa del mástil", "x": 5, "y": 1, "w": 4, "h": 4, "accent": true},
+          {"label": "pila de pruebas", "x": 9, "y": 1, "w": 3, "h": 6},
+          {"label": "readout de datos", "x": 0, "y": 4, "w": 5, "h": 2},
+          {"label": "tira de progresión", "x": 0, "y": 7, "w": 12, "h": 2, "accent": true},
+          {"label": "marcas de registro", "x": 0, "y": 9, "w": 12, "h": 1}
+        ]
+      }
+    },
+    {
+      "id": "model-pick",
+      "label": "Split-Flap Board",
+      "kicker": "IMPECCABLE’S PICK",
+      "lineage": "tablilla de aeropuerto: módulos que voltean letras, eje metálico, tipografía condensada",
+      "thesis": "Cada acorde se voltea en módulos físicos; la progresión es el tablero completo que se recompone en vivo.",
+      "palette": ["#15171A", "#E8E4DA", "#40E0D0", "#C24B3A"],
+      "materials": ["módulos de plástico", "eje metálico", "tipografía condensada", "sonido de volteo"],
+      "viewport": "Un tablero de módulos a toda pantalla: el acorde actual enorme en módulos que voltean, el mástil debajo en módulos pequeños, la progresión como fila de tablillas que se recomponen.",
+      "risk": "Es un mundo muy familiar y el volteo puede volverse espectáculo si cada cambio dispara cientos de animaciones; sin disciplina tipográfica se lee como novelty.",
+      "wireframe": {
+        "cols": 12,
+        "rows": 10,
+        "regions": [
+          {"label": "cabecera del tablero", "x": 0, "y": 0, "w": 12, "h": 1},
+          {"label": "módulos del acorde", "x": 0, "y": 1, "w": 12, "h": 3, "accent": true},
+          {"label": "mástil en módulos", "x": 0, "y": 4, "w": 8, "h": 3, "accent": true},
+          {"label": "panel de datos", "x": 8, "y": 4, "w": 4, "h": 3},
+          {"label": "fila de progresión", "x": 0, "y": 7, "w": 12, "h": 2}
+        ]
+      }
+    },
+    {
+      "id": "challenger-lexicon",
+      "label": "Lexicon Page",
+      "verdict": "competitive",
+      "lineage": "página de léxico del siglo XIX: medida fija, margen de uña, láminas cromolitografiadas",
+      "thesis": "El diccionario como léxico impreso: palabras guía que nombran el rango visible, índice de pulgar por raíz, y todo el color encerrado en láminas bordeadas.",
+      "palette": ["#F2EAD8", "#151515", "#C6362E", "#2E7D5B", "#1F4E9C", "#D4A017"],
+      "materials": ["tinta de grabado", "papel sin recubrir", "lámina en siete tintas", "filete"],
+      "viewport": "Doble página: columna de texto con palabras guía arriba (el primer y el último acorde visibles) y una lámina a color con el diagrama del acorde actual.",
+      "case": "Sostiene la claridad de diccionario y la jerarquía del impreso; pierde identificación fuera del mundo del libro.",
+      "risk": "Puede sentirse academicista y lento para una herramienta de práctica.",
+      "wireframe": {
+        "cols": 12,
+        "rows": 10,
+        "regions": [
+          {"label": "palabras guía", "x": 0, "y": 0, "w": 12, "h": 1, "accent": true},
+          {"label": "columna de entradas", "x": 0, "y": 1, "w": 7, "h": 8},
+          {"label": "margen de uña", "x": 7, "y": 1, "w": 1, "h": 8},
+          {"label": "lámina del acorde", "x": 8, "y": 1, "w": 4, "h": 8, "accent": true}
+        ]
+      },
+      "board": "https://impeccable.style/worlds/cards/rw-lexicon-shoulder-and-plate.webp",
+      "hero": "https://impeccable.style/worlds/cards/rw-lexicon-shoulder-and-plate-hero.webp"
+    },
+    {
+      "id": "challenger-scope",
+      "label": "Signal Bench Scope",
+      "verdict": "competitive",
+      "lineage": "osciloscopio CRT en banco de señales: fósforo verde, graticule grabado, perillas detentadas",
+      "thesis": "El sonido se ve: la traza del acorde vive sobre la graticule y el mástil es una rejilla medida de diez divisiones.",
+      "palette": ["#0A0F0C", "#39FF88", "#1F4D33", "#D8B24A", "#8A9490"],
+      "materials": ["vidrio", "fósforo", "graticule grabado", "perillas detentadas"],
+      "viewport": "Una pantalla: la traza del acorde barriendo la graticule, el nombre en siete segmentos, las posiciones como trazas superpuestas y las perillas de tiempo y escala al borde.",
+      "case": "Sostiene identificación de gear pro-audio y hace visible el sonido; pierde claridad para el diccionario y las posiciones, que no son señales.",
+      "risk": "Verde fósforo sobre negro es un look muy transitado; sin medición real se ve como disfraz.",
+      "wireframe": {
+        "cols": 12,
+        "rows": 10,
+        "regions": [
+          {"label": "graticule", "x": 1, "y": 1, "w": 10, "h": 6, "accent": true},
+          {"label": "traza del acorde", "x": 2, "y": 3, "w": 8, "h": 2},
+          {"label": "lecturas de siete segmentos", "x": 1, "y": 7, "w": 10, "h": 1},
+          {"label": "perillas", "x": 1, "y": 8, "w": 10, "h": 1}
+        ]
+      },
+      "board": "https://impeccable.style/worlds/cards/scientific-notation-oscilloscope-signal-bench.webp",
+      "hero": "https://impeccable.style/worlds/cards/scientific-notation-oscilloscope-signal-bench-hero.webp"
+    },
+    {
+      "id": "declined-alphabet-storm",
+      "label": "Alphabet Storm",
+      "verdict": "declined",
+      "lineage": "tormenta de letras surrealista",
+      "thesis": "Las letras se condensan en palabras, rompen en clima y rehacen el paisaje según la gramática.",
+      "palette": ["#F7F7F4", "#141414", "#C9CCD1"],
+      "materials": ["tinta negra", "papel blanco", "partículas procedurales"],
+      "case": "Fusiona mal: el clima surrealista no es el mundo de un guitarrista y el mecanismo se ahogaría en metáfora. Ya presentada antes; sigue declinada.",
+      "kept": "Tipografía monumental que transforma: el nombre del acorde como objeto mayor que se recompone.",
+      "hero": "https://impeccable.style/worlds/cards/dream-surreal-impossible-worlds-alphabet-storm-hero.webp"
+    },
+    {
+      "id": "declined-variable-font",
+      "label": "Variable Font Specimen",
+      "verdict": "declined",
+      "lineage": "especimen tipográfico interactivo con ejes variables",
+      "thesis": "Un slider de eje deforma toda una rejilla de glifos en vivo.",
+      "palette": ["#FBFBF9", "#111111", "#E8452C"],
+      "materials": ["papel casi blanco", "tinta negra", "sliders de eje"],
+      "case": "Fusiona mal: un especimen celebra la tipografía, no la música; la claridad se hundiría en una demo de fuente. Ya presentada antes; sigue declinada.",
+      "kept": "Jerarquía por contraste de escala con un readout mono vivo.",
+      "hero": "https://impeccable.style/worlds/cards/variable-font-specimen-hero.webp"
+    }
+  ],
+  "reroll": {
+    "registers": ["safer", "bolder"]
+  },
+  "buildPath": {
+    "value": "code",
+    "toggle": false
+  },
+  "canon": true,
+  "canonCard": {
+    "label": "El estándar de la categoría",
+    "thesis": "Lo que esta categoría envía, ejecutado impecablemente: buscador, rejilla de acordes, fila de formas, botón de play.",
+    "palette": ["#ffffff", "#111827", "#2563eb"],
+    "materials": ["rejilla limpia", "sans de sistema", "acento azul"],
+    "viewport": "Campo de búsqueda arriba, las formas del acorde como fila limpia de diagramas, un reproductor debajo.",
+    "risk": "Indistinguible de la competencia por diseño.",
+    "wireframe": {
+      "cols": 12,
+      "rows": 10,
+      "regions": [
+        {"label": "buscador", "x": 0, "y": 0, "w": 12, "h": 1},
+        {"label": "fila de formas", "x": 0, "y": 1, "w": 12, "h": 5, "accent": true},
+        {"label": "reproductor", "x": 0, "y": 6, "w": 12, "h": 1},
+        {"label": "relacionados", "x": 0, "y": 7, "w": 12, "h": 2}
+      ]
+    }
+  },
+  "steer": true
+}

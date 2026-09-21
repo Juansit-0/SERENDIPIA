@@ -1,0 +1,197 @@
+{
+  "title": "Elige el mundo visual",
+  "question": "Ronda 2: la tirada asignó Key Plate; ningún challenger ganó ambos ejes. Escoge una, o re-tira.",
+  "options": [
+    {
+      "id": "assigned",
+      "label": "Key Plate",
+      "kicker": "THE ROLL",
+      "lineage": "wall chart del círculo de quintas, traducido a una placa de esmalte oscuro",
+      "thesis": "SERENDIPIA como una placa grabada: la rueda de quintas es selector y mapa, el acorde vive en el centro y sus voicings se graban alrededor.",
+      "palette": ["#101418", "#e9e3d5", "#c4633a", "#c9a227"],
+      "materials": ["esmalte oscuro", "grabado a línea fina", "tinta crema", "latón"],
+      "viewport": "Una placa de esmalte oscuro llena el viewport: la rueda grabada a la izquierda (tonalidades en el anillo exterior, menores relativos dentro, diatónicos de la tonalidad actual como segmentos con numeral romano), el símbolo del acorde monumental al centro, los voicings como placas grabadas alrededor, una columna mono de datos a la derecha, y la progresión como un arco de cuentas sobre el borde inferior.",
+      "risk": "Una interfaz circular puede volverse rompecabezas: la rueda nunca debe esconder la consulta directa, y la traducción oscura de un póster de papel no puede volverse un HUD de neón.",
+      "raised": [
+        {
+          "from": "challenger-sneaker-wall",
+          "raise": "Etiquetas de extremo estructuradas: cada voicing lleva su rótulo mono (nombre, posición, corrida de digitación) en vez de un caption suelto."
+        },
+        {
+          "from": "challenger-gravity-garden",
+          "raise": "Las anotaciones se anclan al objeto que describen, y un solo eje de referencia (cejuela/trastes) permanece nivelado mientras todo lo demás puede inclinarse."
+        },
+        {
+          "from": "challenger-eboy-pixorama",
+          "raise": "El zoom del mástil avanza en trastes enteros, nunca escalado fraccionario: las celdas se mantienen nítidas en cualquier densidad."
+        }
+      ],
+      "wireframe": {
+        "cols": 12,
+        "rows": 10,
+        "regions": [
+          {"label": "barra de transporte", "x": 0, "y": 0, "w": 12, "h": 1},
+          {"label": "rueda grabada", "x": 0, "y": 1, "w": 6, "h": 7, "accent": true},
+          {"label": "símbolo del acorde", "x": 6, "y": 1, "w": 3, "h": 2, "accent": true},
+          {"label": "placas de voicings", "x": 6, "y": 3, "w": 6, "h": 4},
+          {"label": "columna mono de datos", "x": 9, "y": 1, "w": 3, "h": 2},
+          {"label": "arco de progresión", "x": 0, "y": 8, "w": 12, "h": 2, "accent": true}
+        ]
+      }
+    },
+    {
+      "id": "model-pick",
+      "label": "Pedalboard",
+      "kicker": "IMPECCABLE’S PICK",
+      "lineage": "pedalboard: cadena de cajas metálicas, LEDs, footswitches",
+      "thesis": "La app como un pedalboard: cada acorde es un pedal con su LED, la progresión es el orden de la cadena, y pisar es tocar.",
+      "palette": ["#1c1a17", "#d8d2c4", "#d9483b", "#4fae8f"],
+      "materials": ["tolex", "acero cepillado", "serigrafía", "LED"],
+      "viewport": "Un pedalboard de borde a borde: la cadena de acordes como pedales con perillas, el LED del pedal activo encendido, los voicings como perillas alternas por pedal, y una tira de transporte con tempo y loop en el borde superior.",
+      "risk": "El pedalboard es tan querido que puede volverse disfraz: sin jerarquía clara, la cadena se come la consulta de acordes.",
+      "wireframe": {
+        "cols": 12,
+        "rows": 10,
+        "regions": [
+          {"label": "tira de transporte", "x": 0, "y": 0, "w": 12, "h": 1},
+          {"label": "pedal activo", "x": 0, "y": 1, "w": 5, "h": 5, "accent": true},
+          {"label": "perillas de voicing", "x": 5, "y": 1, "w": 7, "h": 5},
+          {"label": "cadena de pedales", "x": 0, "y": 6, "w": 12, "h": 3, "accent": true}
+        ]
+      }
+    },
+    {
+      "id": "challenger-yeye",
+      "label": "Yé-yé Pop Sleeve",
+      "verdict": "competitive",
+      "lineage": "carátula de pop francés yé-yé: fondo plano saturado, retrato recortado, logotipo redondeado",
+      "thesis": "Cada acorde como un sencillo: cuatro voicings rankeados como cuatro pistas sobre un fondo plano saturado.",
+      "palette": ["#e8642c", "#2fa3a0", "#f6f1e6", "#1b1a18"],
+      "materials": ["tinta plana", "papel offset", "retrato cálido"],
+      "viewport": "Un fondo tangerina plano a toda pantalla, el símbolo del acorde como logotipo redondeado arriba, y los cuatro voicings listados como pistas numeradas en una esquina, con la activa en blanco.",
+      "case": "Sostiene identificación por la cultura del disco; pierde claridad para un catálogo abierto: cuatro pistas no son doce tonalidades.",
+      "risk": "Un fondo saturado a pantalla completa cansa si cada cambio de acorde no lo justifica.",
+      "wireframe": {
+        "cols": 12,
+        "rows": 10,
+        "regions": [
+          {"label": "logotipo del acorde", "x": 0, "y": 0, "w": 12, "h": 2, "accent": true},
+          {"label": "retrato/placa", "x": 2, "y": 2, "w": 6, "h": 6},
+          {"label": "pistas de voicings", "x": 8, "y": 5, "w": 4, "h": 4}
+        ]
+      },
+      "board": "https://impeccable.style/worlds/cards/posters-covers-sleeves-yeye-pop-sleeve.webp",
+      "hero": "https://impeccable.style/worlds/cards/posters-covers-sleeves-yeye-pop-sleeve-hero.webp"
+    },
+    {
+      "id": "challenger-depot-blind",
+      "label": "Depot Destination Blind",
+      "verdict": "competitive",
+      "lineage": "cortina de destinos de depósito: cursos de lona teñida, leyendas amarillo cromo, sesgo a 12°",
+      "thesis": "Una superficie de monitoreo como cortina de destinos: los cursos de tela apilan estados y un fallo detiene la fila a medio paso.",
+      "palette": ["#1f3a2d", "#e0b52a", "#efe9dc", "#101010"],
+      "materials": ["lona teñida", "hilo", "ojales", "luz posterior"],
+      "viewport": "Cursos de lona verde botella apilados bajo una ventana fija; la leyenda activa en amarillo cromo; la cinta de ojales al borde como índice de la progresión.",
+      "case": "Sostiene claridad de operación — estados como marcas, no colores — pero pierde identificación: una cortina de depósito no es el mundo de un guitarrista.",
+      "risk": "La disciplina textil puede leerse fría; la calidez debe venir del contenido, no del adorno.",
+      "wireframe": {
+        "cols": 12,
+        "rows": 10,
+        "regions": [
+          {"label": "ventana fija", "x": 0, "y": 1, "w": 12, "h": 2, "accent": true},
+          {"label": "cursos de lona", "x": 0, "y": 3, "w": 10, "h": 6},
+          {"label": "cinta de ojales", "x": 10, "y": 3, "w": 2, "h": 6}
+        ]
+      },
+      "board": "https://impeccable.style/worlds/cards/operate-c-depot-blind-courses.webp",
+      "hero": "https://impeccable.style/worlds/cards/operate-c-depot-blind-courses-hero.webp"
+    },
+    {
+      "id": "challenger-cutting-bench",
+      "label": "Cutting Bench Select Rail",
+      "verdict": "competitive",
+      "lineage": "banco de edición de cine: riel perforado, fotogramas punzonados, bandera de cinta naranja",
+      "thesis": "La progresión como tira de película: fotogramas punzonados en un riel, la bandera marcando dónde te detuviste, y los descartes colgando en el canasto.",
+      "palette": ["#0d0d0d", "#e8641f", "#f2efe8"],
+      "materials": ["grano de película", "cinta engomada", "pines", "ventanas punzonadas"],
+      "viewport": "Un riel perforado cruza la hoja a una altura fija; cada acorde es un fotograma punzonado entre dos pines; la bandera naranja doblada marca el punto actual, y los voicings alternos cuelgan en el canasto inferior.",
+      "case": "Sostiene claridad de edición — marcar, fijar, descartar, retomar — pero pierde identificación: el banco de edición no es un instrumento de práctica.",
+      "risk": "El negro pleno con naranja de bandera flirtea con el cliché neón-sobre-negro si el grano y las ventanas punzonadas no cargan el material.",
+      "wireframe": {
+        "cols": 12,
+        "rows": 10,
+        "regions": [
+          {"label": "bandera de posición", "x": 7, "y": 2, "w": 2, "h": 2, "accent": true},
+          {"label": "riel perforado", "x": 0, "y": 3, "w": 12, "h": 1},
+          {"label": "fotogramas", "x": 0, "y": 4, "w": 12, "h": 3, "accent": true},
+          {"label": "canasto de descartes", "x": 0, "y": 7, "w": 12, "h": 2}
+        ]
+      },
+      "board": "https://impeccable.style/worlds/cards/operate-a-cutting-bench-select-rail.webp",
+      "hero": "https://impeccable.style/worlds/cards/operate-a-cutting-bench-select-rail-hero.webp"
+    },
+    {
+      "id": "declined-sneaker",
+      "label": "Sneaker Archive Wall",
+      "verdict": "declined",
+      "lineage": "muro de cajas de sneakers apiladas, silueta a una línea, colorway",
+      "thesis": "Un muro de cajas indexado por etiquetas de extremo; la caja elegida se desliza medio afuera y la tapa se abre.",
+      "palette": ["#c25a2a", "#141414", "#f4f2ee"],
+      "materials": ["cartón naranja quemado", "línea negra", "papel seda"],
+      "case": "Fusiona mal: la cultura sneaker no es el mundo de un guitarrista; el mecanismo quedaría disfrazado.",
+      "kept": "Etiquetas de extremo estructuradas: nombre, variante y corrida mono como rótulo de cada objeto.",
+      "hero": "https://impeccable.style/worlds/cards/textiles-weave-drape-fashion-sneaker-box-stacks-hero.webp"
+    },
+    {
+      "id": "declined-gravity-rain",
+      "label": "Gravity Rain Garden",
+      "verdict": "declined",
+      "lineage": "jardín de lluvia con gravedad por color de nube",
+      "thesis": "Las gotas caen hacia flores, muros y lunas según el color de cada nube.",
+      "palette": ["#3d4a44", "#5b7fbf", "#b4453c", "#111111"],
+      "materials": ["campo vectorial", "acuarela digital", "noche"],
+      "case": "Fusiona mal: la física surrealista no explica acordes; la claridad se ahogaría en el sistema de gravedades.",
+      "kept": "Anotaciones ancladas a su objeto, con un único eje de referencia nivelado.",
+      "hero": "https://impeccable.style/worlds/cards/dream-surreal-impossible-worlds-gravity-rain-garden-hero.webp"
+    },
+    {
+      "id": "declined-pixorama",
+      "label": "Pixorama Metropolis",
+      "verdict": "declined",
+      "lineage": "metrópolis isométrica de píxeles, RGB saturado, rejilla dura",
+      "thesis": "Bloques isométricos saturados construyen una ciudad zoomeable sobre una sola rejilla de píxel duro.",
+      "palette": ["#e23b3b", "#2f6fd0", "#f2c53d", "#101010"],
+      "materials": ["píxel duro", "sin antialias", "dither"],
+      "case": "Fusiona mal: la ciudad pixelada no es un instrumento de acordes; el hallazgo de detalles premia explorar, no practicar.",
+      "kept": "Zoom en pasos enteros: celdas nítidas a cualquier densidad, nunca escalado borroso.",
+      "hero": "https://impeccable.style/worlds/cards/eboy-pixorama-metropolis-hero.webp"
+    }
+  ],
+  "reroll": {
+    "registers": ["safer", "bolder"]
+  },
+  "buildPath": {
+    "value": "code",
+    "toggle": false
+  },
+  "canon": true,
+  "canonCard": {
+    "label": "El estándar de la categoría",
+    "thesis": "Lo que esta categoría envía, ejecutado impecablemente: buscador, rejilla de acordes, fila de formas, botón de play.",
+    "palette": ["#ffffff", "#111827", "#2563eb"],
+    "materials": ["rejilla limpia", "sans de sistema", "acento azul"],
+    "viewport": "Campo de búsqueda arriba, las formas del acorde como fila limpia de diagramas, un reproductor debajo.",
+    "risk": "Indistinguible de la competencia por diseño.",
+    "wireframe": {
+      "cols": 12,
+      "rows": 10,
+      "regions": [
+        {"label": "buscador", "x": 0, "y": 0, "w": 12, "h": 1},
+        {"label": "fila de formas", "x": 0, "y": 1, "w": 12, "h": 5, "accent": true},
+        {"label": "reproductor", "x": 0, "y": 6, "w": 12, "h": 1},
+        {"label": "relacionados", "x": 0, "y": 7, "w": 12, "h": 2}
+      ]
+    }
+  },
+  "steer": true
+}

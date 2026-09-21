@@ -1,0 +1,231 @@
+{
+  "nylon": {
+    "soundfont": "acoustic_guitar_nylon",
+    "samples": {
+      "E2": {
+        "file": "E2.mp3",
+        "source": "E2"
+      },
+      "A2": {
+        "file": "A2.mp3",
+        "source": "A2"
+      },
+      "D3": {
+        "file": "D3.mp3",
+        "source": "D3"
+      },
+      "G3": {
+        "file": "G3.mp3",
+        "source": "G3"
+      },
+      "B3": {
+        "file": "B3.mp3",
+        "source": "B3"
+      },
+      "E4": {
+        "file": "E4.mp3",
+        "source": "E4"
+      },
+      "E3": {
+        "file": "E3.mp3",
+        "source": "E3"
+      },
+      "A3": {
+        "file": "A3.mp3",
+        "source": "A3"
+      },
+      "D4": {
+        "file": "D4.mp3",
+        "source": "D4"
+      },
+      "G4": {
+        "file": "G4.mp3",
+        "source": "G4"
+      },
+      "B4": {
+        "file": "B4.mp3",
+        "source": "B4"
+      },
+      "E5": {
+        "file": "E5.mp3",
+        "source": "E5"
+      }
+    }
+  },
+  "steel": {
+    "soundfont": "acoustic_guitar_steel",
+    "samples": {
+      "E2": {
+        "file": "E2.mp3",
+        "source": "E2"
+      },
+      "A2": {
+        "file": "A2.mp3",
+        "source": "A2"
+      },
+      "D3": {
+        "file": "D3.mp3",
+        "source": "D3"
+      },
+      "G3": {
+        "file": "G3.mp3",
+        "source": "G3"
+      },
+      "B3": {
+        "file": "B3.mp3",
+        "source": "B3"
+      },
+      "E4": {
+        "file": "E4.mp3",
+        "source": "E4"
+      },
+      "E3": {
+        "file": "E3.mp3",
+        "source": "E3"
+      },
+      "A3": {
+        "file": "A3.mp3",
+        "source": "A3"
+      },
+      "D4": {
+        "file": "D4.mp3",
+        "source": "D4"
+      },
+      "G4": {
+        "file": "G4.mp3",
+        "source": "G4"
+      },
+      "B4": {
+        "file": "B4.mp3",
+        "source": "B4"
+      },
+      "E5": {
+        "file": "E5.mp3",
+        "source": "E5"
+      }
+    }
+  },
+  "electric": {
+    "soundfont": "electric_guitar_clean",
+    "samples": {
+      "E2": {
+        "file": "E2.mp3",
+        "source": "E2"
+      },
+      "A2": {
+        "file": "A2.mp3",
+        "source": "A2"
+      },
+      "D3": {
+        "file": "D3.mp3",
+        "source": "D3"
+      },
+      "G3": {
+        "file": "G3.mp3",
+        "source": "G3"
+      },
+      "B3": {
+        "file": "B3.mp3",
+        "source": "B3"
+      },
+      "E4": {
+        "file": "E4.mp3",
+        "source": "E4"
+      },
+      "E3": {
+        "file": "E3.mp3",
+        "source": "E3"
+      },
+      "A3": {
+        "file": "A3.mp3",
+        "source": "A3"
+      },
+      "D4": {
+        "file": "D4.mp3",
+        "source": "D4"
+      },
+      "G4": {
+        "file": "G4.mp3",
+        "source": "G4"
+      },
+      "B4": {
+        "file": "B4.mp3",
+        "source": "B4"
+      },
+      "E5": {
+        "file": "E5.mp3",
+        "source": "E5"
+      }
+    }
+  },
+  "jazz": {
+    "soundfont": "electric_guitar_jazz",
+    "samples": {
+      "E2": {
+        "file": "E2.mp3",
+        "source": "E2"
+      },
+      "A2": {
+        "file": "A2.mp3",
+        "source": "A2"
+      },
+      "D3": {
+        "file": "D3.mp3",
+        "source": "D3"
+      },
+      "G3": {
+        "file": "G3.mp3",
+        "source": "G3"
+      },
+      "B3": {
+        "file": "B3.mp3",
+        "source": "B3"
+      },
+      "E4": {
+        "file": "E4.mp3",
+        "source": "E4"
+      },
+      "E3": {
+        "file": "E3.mp3",
+        "source": "E3"
+      },
+      "A3": {
+        "file": "A3.mp3",
+        "source": "A3"
+      },
+      "D4": {
+        "file": "D4.mp3",
+        "source": "D4"
+      },
+      "G4": {
+        "file": "G4.mp3",
+        "source": "G4"
+      },
+      "B4": {
+        "file": "B4.mp3",
+        "source": "B4"
+      },
+      "E5": {
+        "file": "E5.mp3",
+        "source": "E5"
+      }
+    }
+  },
+  "fret-noise": {
+    "soundfont": "guitar_fret_noise",
+    "samples": {
+      "E3": {
+        "file": "E3.mp3",
+        "source": "E3"
+      },
+      "B3": {
+        "file": "B3.mp3",
+        "source": "B3"
+      },
+      "E4": {
+        "file": "E4.mp3",
+        "source": "E4"
+      }
+    }
+  }
+}

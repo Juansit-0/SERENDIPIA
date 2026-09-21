@@ -1,0 +1,184 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-20T22:58:54Z",
+  "title": "Design System: SERENDIPIA",
+  "extensions": {
+    "colorMeta": {
+      "paper": { "role": "neutral", "displayName": "Print Paper", "canonical": "#f4f1ea", "tonalRamp": ["#352c18", "#5d4e2a", "#856f3c", "#ad914e", "#c1aa75", "#d3c39d", "#e5dbc5", "#f7f4ed"] },
+      "paper-deep": { "role": "neutral", "displayName": "Deep Paper", "canonical": "#eae4d6", "tonalRamp": ["#352c17", "#5e4e29", "#86703b", "#af914d", "#c2aa74", "#d4c39c", "#e5dcc5", "#f7f4ed"] },
+      "paper-shade": { "role": "neutral", "displayName": "Shadow Paper", "canonical": "#e0d8c6", "tonalRamp": ["#342c18", "#5c4d2b", "#836e3e", "#ab8f50", "#bfa977", "#d2c29e", "#e4dbc6", "#f7f4ee"] },
+      "ink": { "role": "neutral", "displayName": "Press Ink", "canonical": "#1a1a1a", "tonalRamp": ["#272525", "#454242", "#625f5f", "#807b7b", "#9d9999", "#b9b7b7", "#d6d4d4", "#f3f2f2"] },
+      "ink-soft": { "role": "neutral", "displayName": "Soft Ink", "canonical": "#4c4a44", "tonalRamp": ["#292823", "#49463e", "#686459", "#888374", "#a39f93", "#bebbb2", "#d8d7d2", "#f3f3f1"] },
+      "ink-faint": { "role": "neutral", "displayName": "Faint Ink", "canonical": "#6f6b60", "tonalRamp": ["#2a2823", "#4a463d", "#6a6557", "#8a8372", "#a49f91", "#bfbbb1", "#d9d7d1", "#f3f3f1"] },
+      "rule": { "role": "neutral", "displayName": "Hairline Rule", "canonical": "#cbc2ae", "tonalRamp": ["#312a1c", "#564a31", "#7b6a46", "#a08b5c", "#b6a580", "#cbbfa5", "#e0d9ca", "#f6f4ef"] },
+      "rule-strong": { "role": "neutral", "displayName": "Strong Rule", "canonical": "#a79c84", "tonalRamp": ["#2e291e", "#524935", "#75684c", "#988863", "#b0a386", "#c7bea9", "#ded8cc", "#f5f3f0"] },
+      "blue": { "role": "primary", "displayName": "Riso Blue", "canonical": "#0078bf", "tonalRamp": ["#00304d", "#005587", "#0079c1", "#009efb", "#37b5ff", "#71caff", "#abe0ff", "#e5f6ff"] },
+      "blue-ink": { "role": "primary", "displayName": "Riso Blue Ink", "canonical": "#005f96", "tonalRamp": ["#00304d", "#005587", "#007ac1", "#009ffb", "#37b6ff", "#71cbff", "#abe0ff", "#e5f6ff"] },
+      "orange": { "role": "secondary", "displayName": "Riso Orange", "canonical": "#ff6c2f", "tonalRamp": ["#4d1600", "#872800", "#c13900", "#fb4a00", "#ff7137", "#ff9b71", "#ffc4ab", "#ffede5"] },
+      "yellow": { "role": "tertiary", "displayName": "Riso Yellow", "canonical": "#ffe800", "tonalRamp": ["#4d4600", "#877b00", "#c1b000", "#fbe500", "#ffed37", "#fff271", "#fff7ab", "#fffde5"] },
+      "turquoise": { "role": "accent", "displayName": "Turquoise Accent Ink", "canonical": "#40e0d0", "tonalRamp": ["#09443e", "#0f786d", "#16ac9d", "#1cdfcc", "#4de9d9", "#81efe4", "#b5f6ef", "#e8fcfa"] },
+      "red": { "role": "signal", "displayName": "Signal Red", "canonical": "#d8452f", "tonalRamp": ["#42110a", "#751f12", "#a82c19", "#da3921", "#e56451", "#ec9184", "#f4beb6", "#fcebe9"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Chord Display", "purpose": "The monumental chord symbol, screen-printed paper-on-ink inside a halftone block." },
+      "headline": { "displayName": "Detected Chord", "purpose": "The detector result name on its ink block." },
+      "wordmark": { "displayName": "Wordmark", "purpose": "SERENDIPIA in the transport strip." },
+      "subtitle": { "displayName": "Latin Reading", "purpose": "The Latin notation line under the chord in both-mode." },
+      "title": { "displayName": "Chord Name (UI)", "purpose": "Chord names in chips, suggestion slips, degree cards and step sheets." },
+      "body": { "displayName": "Body", "purpose": "Default UI text and prose." },
+      "field": { "displayName": "Field Value", "purpose": "The chord input value." },
+      "control": { "displayName": "Stamp Label", "purpose": "Every ink-stamp control label." },
+      "label": { "displayName": "Silkscreen Label", "purpose": "Section and field headings, printed in blue ink." },
+      "readout": { "displayName": "Readout", "purpose": "Machine-read values: position, span, counts, hints, empty states." },
+      "chip": { "displayName": "Chip Data", "purpose": "Chip and metadata strings: quality, bass, inversion, alternatives." },
+      "micro": { "displayName": "Micro Annotation", "purpose": "Step indices, proof fret strings, roman numerals, difficulty tags." }
+    },
+    "shadows": [
+      { "name": "sheet-rest", "value": "0 1px 2px rgba(26, 26, 26, 0.1), 0 5px 12px rgba(26, 26, 26, 0.07)", "purpose": "Every .sheet at rest: proof sheets, suggestion slips, step sheets, degree cards." },
+      { "name": "sheet-lift", "value": "0 2px 4px rgba(26, 26, 26, 0.12), 0 12px 22px rgba(26, 26, 26, 0.12)", "purpose": "Sheet hover, paired with translateY(-2px) and a straighten to 0deg." },
+      { "name": "stamp-press", "value": "inset 0 2px 0 rgba(26, 26, 26, 0.28)", "purpose": "An ink stamp while active." }
+    ],
+    "motion": [
+      { "name": "ease-print", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Default easing for every state transition." },
+      { "name": "wipe", "value": "wipe 0.5s var(--ease-print)", "purpose": "Active-step reveal: clip-path inset(0 100% 0 0) to inset(0 0 0 0)." },
+      { "name": "sheet-transition", "value": "0.18s var(--ease-print)", "purpose": "Sheet transform, shadow and border-color response." },
+      { "name": "stamp-transition", "value": "0.15s var(--ease-print)", "purpose": "Stamp background, color and shadow response." },
+      { "name": "cell-transition", "value": "0.14s var(--ease-print)", "purpose": "Grid cell background and border-color response." },
+      { "name": "lift", "value": "lift 0.35s var(--ease-print)", "purpose": "Declared in the theme; no shipped component applies it." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px", "purpose": "Transport strip becomes a wrapping row; strip grid drops its 760px floor; page padding grows; diatonic grid becomes 4 columns; swipe hint hides." },
+      { "name": "xl", "value": "1280px", "purpose": "Dictionary, detector and theory views take their multi-column grid; below this every view is a single column." }
+    ]
+  },
+  "components": [
+    {
+      "name": "Ink Stamp",
+      "kind": "button",
+      "refersTo": "stamp",
+      "description": "Rubber-stamp control used for every button in the app.",
+      "html": "<button class=\"ds-stamp\" type=\"button\">Diccionario</button>\n<button class=\"ds-stamp ds-stamp--live\" type=\"button\">Correr</button>\n<button class=\"ds-stamp\" type=\"button\" disabled>Correr</button>",
+      "css": ".ds-stamp { display: inline-flex; align-items: center; justify-content: center; gap: 0.375rem; min-height: 32px; padding: 0.3rem 0.7rem; border: 1.5px solid var(--color-ink, #1a1a1a); border-radius: 2px; background: transparent; color: var(--color-ink, #1a1a1a); font-family: var(--font-display, 'Archivo Variable', system-ui, sans-serif); font-variation-settings: 'wdth' 96, 'wght' 600; font-size: 0.6875rem; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: background 0.15s var(--ease-print, cubic-bezier(0.16, 1, 0.3, 1)), color 0.15s var(--ease-print, cubic-bezier(0.16, 1, 0.3, 1)), box-shadow 0.15s var(--ease-print, cubic-bezier(0.16, 1, 0.3, 1)); } .ds-stamp:hover { background: rgba(26, 26, 26, 0.08); } .ds-stamp:active { box-shadow: inset 0 2px 0 rgba(26, 26, 26, 0.28); } .ds-stamp:focus-visible { outline: 2px solid var(--color-blue, #0078bf); outline-offset: 2px; } .ds-stamp[aria-pressed='true'] { background: var(--color-ink, #1a1a1a); color: var(--color-paper, #f4f1ea); } .ds-stamp--live { background: var(--color-turquoise, #40e0d0); color: var(--color-ink, #1a1a1a); } .ds-stamp:disabled { opacity: 0.35; cursor: not-allowed; box-shadow: none; }"
+    },
+    {
+      "name": "Pressed Ink Stamp (tab)",
+      "kind": "nav",
+      "refersTo": "stamp-pressed",
+      "description": "Active tab state: ink fill, paper text, no underline or indicator.",
+      "html": "<nav class=\"ds-nav\"><button class=\"ds-stamp\" aria-pressed=\"true\" type=\"button\">Diccionario</button><button class=\"ds-stamp\" aria-pressed=\"false\" type=\"button\">Detector</button><button class=\"ds-stamp\" aria-pressed=\"false\" type=\"button\">Teor&iacute;a</button></nav>",
+      "css": ".ds-nav { display: flex; flex-wrap: wrap; gap: 6px; } .ds-nav .ds-stamp { display: inline-flex; align-items: center; justify-content: center; min-height: 32px; padding: 0.3rem 0.7rem; border: 1.5px solid var(--color-ink, #1a1a1a); border-radius: 2px; background: transparent; color: var(--color-ink, #1a1a1a); font-family: var(--font-display, 'Archivo Variable', system-ui, sans-serif); font-variation-settings: 'wdth' 96, 'wght' 600; font-size: 0.6875rem; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: background 0.15s var(--ease-print, cubic-bezier(0.16, 1, 0.3, 1)), color 0.15s var(--ease-print, cubic-bezier(0.16, 1, 0.3, 1)); } .ds-nav .ds-stamp:hover { background: rgba(26, 26, 26, 0.08); } .ds-nav .ds-stamp[aria-pressed='true'] { background: var(--color-ink, #1a1a1a); color: var(--color-paper, #f4f1ea); } .ds-nav .ds-stamp:focus-visible { outline: 2px solid var(--color-blue, #0078bf); outline-offset: 2px; }"
+    },
+    {
+      "name": "Paper Plate with Registration Marks",
+      "kind": "card",
+      "refersTo": "plate",
+      "description": "The working surface: paper face, 1px ink border, 3px radius, registration corners.",
+      "html": "<section class=\"ds-plate\"><svg class=\"ds-reg ds-reg--tl\" viewBox=\"0 0 11 11\" aria-hidden=\"true\"><circle cx=\"5.5\" cy=\"5.5\" r=\"4.1\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"0.8\"/><path d=\"M5.5 0v3.2M5.5 7.8V11M0 5.5h3.2M7.8 5.5H11\" stroke=\"currentColor\" stroke-width=\"0.8\"/></svg><svg class=\"ds-reg ds-reg--tr\" viewBox=\"0 0 11 11\" aria-hidden=\"true\"><circle cx=\"5.5\" cy=\"5.5\" r=\"4.1\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"0.8\"/><path d=\"M5.5 0v3.2M5.5 7.8V11M0 5.5h3.2M7.8 5.5H11\" stroke=\"currentColor\" stroke-width=\"0.8\"/></svg><svg class=\"ds-reg ds-reg--bl\" viewBox=\"0 0 11 11\" aria-hidden=\"true\"><circle cx=\"5.5\" cy=\"5.5\" r=\"4.1\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"0.8\"/><path d=\"M5.5 0v3.2M5.5 7.8V11M0 5.5h3.2M7.8 5.5H11\" stroke=\"currentColor\" stroke-width=\"0.8\"/></svg><svg class=\"ds-reg ds-reg--br\" viewBox=\"0 0 11 11\" aria-hidden=\"true\"><circle cx=\"5.5\" cy=\"5.5\" r=\"4.1\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"0.8\"/><path d=\"M5.5 0v3.2M5.5 7.8V11M0 5.5h3.2M7.8 5.5H11\" stroke=\"currentColor\" stroke-width=\"0.8\"/></svg><h2 class=\"ds-label\">Posiciones</h2><p class=\"ds-readout\">x 0 2 0 1 0</p></section>",
+      "css": ".ds-plate { position: relative; background: var(--color-paper, #f4f1ea); border: 1px solid var(--color-ink, #1a1a1a); border-radius: 3px; padding: 16px; color: var(--color-ink, #1a1a1a); font-family: var(--font-display, 'Archivo Variable', system-ui, sans-serif); } .ds-reg { position: absolute; width: 11px; height: 11px; pointer-events: none; opacity: 0.85; color: var(--color-ink-soft, #4c4a44); } .ds-reg--tl { left: 6px; top: 6px; } .ds-reg--tr { right: 6px; top: 6px; } .ds-reg--bl { bottom: 6px; left: 6px; } .ds-reg--br { bottom: 6px; right: 6px; } .ds-label { margin: 0 0 0.5rem; font-variation-settings: 'wdth' 92, 'wght' 600; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--color-blue-ink, #005f96); } .ds-readout { margin: 0; font-family: var(--font-mono, 'Martian Mono Variable', monospace); font-size: 12px; font-weight: 500; letter-spacing: 0.02em; font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Paper Sheet",
+      "kind": "card",
+      "refersTo": "sheet",
+      "description": "Resting sheet that lifts 2px and straightens on hover; used for suggestion slips, degree cards and step sheets.",
+      "html": "<button class=\"ds-sheet\" type=\"button\" style=\"width: 220px;\"><span class=\"ds-sheet__name\">Am7</span><span class=\"ds-sheet__reason\">A&ntilde;ade la tercera de la t&oacute;nica; tensi&oacute;n suave.</span></button>",
+      "css": ".ds-sheet { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 8px 12px; text-align: left; background: var(--color-paper, #f4f1ea); border: 1px solid var(--color-rule-strong, #a79c84); border-radius: 2px; box-shadow: 0 1px 2px rgba(26, 26, 26, 0.1), 0 5px 12px rgba(26, 26, 26, 0.07); color: var(--color-ink, #1a1a1a); font-family: var(--font-display, 'Archivo Variable', system-ui, sans-serif); cursor: pointer; transition: transform 0.18s var(--ease-print, cubic-bezier(0.16, 1, 0.3, 1)), box-shadow 0.18s var(--ease-print, cubic-bezier(0.16, 1, 0.3, 1)), border-color 0.18s var(--ease-print, cubic-bezier(0.16, 1, 0.3, 1)); } .ds-sheet:hover { transform: translateY(-2px); box-shadow: 0 2px 4px rgba(26, 26, 26, 0.12), 0 12px 22px rgba(26, 26, 26, 0.12); border-color: var(--color-ink, #1a1a1a); } .ds-sheet:focus-visible { outline: 2px solid var(--color-blue, #0078bf); outline-offset: 2px; } .ds-sheet__name { font-variation-settings: 'wdth' 100, 'wght' 520; font-size: 1rem; } .ds-sheet__reason { font-size: 10px; line-height: 1.35; color: var(--color-ink-soft, #4c4a44); }"
+    },
+    {
+      "name": "Proof Sheet with Offset Plate",
+      "kind": "custom",
+      "refersTo": "proof-sheet",
+      "description": "Selected voicing proof: 84px sheet over a solid turquoise plate offset 4px (misregistration device), label band overprinted in multiply.",
+      "html": "<button class=\"ds-offset ds-offset--selected\" type=\"button\" aria-pressed=\"true\"><span class=\"ds-proof\"><svg viewBox=\"0 0 40 46\" class=\"ds-proof__mini\" aria-hidden=\"true\"><line x1=\"4\" y1=\"10\" x2=\"4\" y2=\"44\" stroke=\"#a79c84\" stroke-width=\"0.7\"/><line x1=\"10.4\" y1=\"10\" x2=\"10.4\" y2=\"44\" stroke=\"#a79c84\" stroke-width=\"0.7\"/><line x1=\"16.8\" y1=\"10\" x2=\"16.8\" y2=\"44\" stroke=\"#a79c84\" stroke-width=\"0.7\"/><line x1=\"23.2\" y1=\"10\" x2=\"23.2\" y2=\"44\" stroke=\"#a79c84\" stroke-width=\"0.7\"/><line x1=\"29.6\" y1=\"10\" x2=\"29.6\" y2=\"44\" stroke=\"#a79c84\" stroke-width=\"0.7\"/><line x1=\"36\" y1=\"10\" x2=\"36\" y2=\"44\" stroke=\"#a79c84\" stroke-width=\"0.7\"/><line x1=\"4\" y1=\"10\" x2=\"36\" y2=\"10\" stroke=\"#a79c84\" stroke-width=\"0.7\"/><line x1=\"4\" y1=\"17\" x2=\"36\" y2=\"17\" stroke=\"#a79c84\" stroke-width=\"0.7\"/><line x1=\"4\" y1=\"24\" x2=\"36\" y2=\"24\" stroke=\"#a79c84\" stroke-width=\"0.7\"/><line x1=\"4\" y1=\"31\" x2=\"36\" y2=\"31\" stroke=\"#a79c84\" stroke-width=\"0.7\"/><line x1=\"4\" y1=\"38\" x2=\"36\" y2=\"38\" stroke=\"#a79c84\" stroke-width=\"0.7\"/><circle cx=\"10.4\" cy=\"27.5\" r=\"2.2\" fill=\"#40e0d0\" stroke=\"#1a1a1a\" stroke-width=\"0.6\"/><circle cx=\"23.2\" cy=\"24.5\" r=\"2.2\" fill=\"#40e0d0\" stroke=\"#1a1a1a\" stroke-width=\"0.6\"/><circle cx=\"29.6\" cy=\"20.5\" r=\"2.2\" fill=\"#40e0d0\" stroke=\"#1a1a1a\" stroke-width=\"0.6\"/><circle cx=\"16.8\" cy=\"34\" r=\"2.2\" fill=\"#40e0d0\" stroke=\"#1a1a1a\" stroke-width=\"0.6\"/><circle cx=\"4\" cy=\"31\" r=\"2.2\" fill=\"#40e0d0\" stroke=\"#1a1a1a\" stroke-width=\"0.6\"/></svg><span class=\"ds-proof__band ds-proof__band--selected\">Com&uacute;n</span><span class=\"ds-proof__meta\">F&aacute;cil</span><span class=\"ds-proof__frets\">x 0 2 0 1 0</span></span></button>",
+      "css": ".ds-offset { position: relative; display: block; padding: 0; border: 0; background: none; cursor: pointer; } .ds-offset::before { content: ''; position: absolute; inset: 0; left: 4px; top: 4px; background: var(--color-turquoise, #40e0d0); } .ds-offset--selected { transform: rotate(0deg); } .ds-proof { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; width: 84px; padding: 8px; background: var(--color-paper, #f4f1ea); border: 1px solid var(--color-ink, #1a1a1a); border-radius: 2px; box-shadow: 0 1px 2px rgba(26, 26, 26, 0.1), 0 5px 12px rgba(26, 26, 26, 0.07); font-family: var(--font-display, 'Archivo Variable', system-ui, sans-serif); } .ds-proof__mini { width: 40px; height: 46px; } .ds-proof__band { width: 100%; text-align: center; font-variation-settings: 'wdth' 92, 'wght' 600; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--color-ink-soft, #4c4a44); } .ds-proof__band--selected { background: var(--color-turquoise, #40e0d0); color: var(--color-ink, #1a1a1a); mix-blend-mode: multiply; } .ds-proof__meta { font-family: var(--font-mono, 'Martian Mono Variable', monospace); font-size: 8px; color: var(--color-ink-faint, #6f6b60); } .ds-proof__frets { font-family: var(--font-mono, 'Martian Mono Variable', monospace); font-size: 8px; letter-spacing: -0.02em; color: var(--color-ink-soft, #4c4a44); } .ds-offset:focus-visible .ds-proof { outline: 2px solid var(--color-blue, #0078bf); outline-offset: 2px; }"
+    },
+    {
+      "name": "Chord Field",
+      "kind": "input",
+      "refersTo": "field",
+      "description": "Underlined chord input with blue focus underline and red error underline.",
+      "html": "<label class=\"ds-label\" for=\"ds-chord\">Acorde</label><input id=\"ds-chord\" class=\"ds-field\" value=\"Am7\" spellcheck=\"false\" autocomplete=\"off\" placeholder=\"Escribe un acorde: Am7, F#dim, Do m7…\"><p class=\"ds-field__error\">No reconozco ese acorde</p><input class=\"ds-field ds-field--error\" value=\"Am7(\" aria-invalid=\"true\">",
+      "css": ".ds-label { display: block; margin-bottom: 6px; font-family: var(--font-display, 'Archivo Variable', system-ui, sans-serif); font-variation-settings: 'wdth' 92, 'wght' 600; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--color-blue-ink, #005f96); } .ds-field { display: block; width: 100%; box-sizing: border-box; background: transparent; border: 0; border-bottom: 2px solid var(--color-ink, #1a1a1a); border-radius: 0; padding: 0.35rem 0.15rem; color: var(--color-ink, #1a1a1a); font-family: var(--font-display, 'Archivo Variable', system-ui, sans-serif); font-variation-settings: 'wdth' 100, 'wght' 600; font-size: 1.25rem; letter-spacing: 0.01em; } .ds-field::placeholder { color: var(--color-ink-faint, #6f6b60); } .ds-field:focus { outline: none; border-bottom-color: var(--color-blue, #0078bf); } .ds-field--error { border-bottom-color: var(--color-red, #d8452f); } .ds-field__error { margin: 6px 0 12px; font-family: var(--font-mono, 'Martian Mono Variable', monospace); font-size: 11px; color: var(--color-red, #d8452f); }"
+    },
+    {
+      "name": "Data Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Mono metadata chip; ink variant marks the detected quality.",
+      "html": "<span class=\"ds-chip\">Bajo: E / Mi</span>\n<span class=\"ds-chip ds-chip--ink\">Menor once</span>\n<span class=\"ds-chip ds-chip--blue\">Imprimiendo…</span>",
+      "css": ".ds-chip { display: inline-flex; align-items: baseline; gap: 0.3rem; border: 1px solid var(--color-rule-strong, #a79c84); border-radius: 2px; padding: 0.1rem 0.4rem; background: var(--color-paper, #f4f1ea); font-family: var(--font-mono, 'Martian Mono Variable', monospace); font-size: 0.6875rem; font-variant-numeric: tabular-nums; color: var(--color-ink-soft, #4c4a44); } .ds-chip--ink { background: var(--color-ink, #1a1a1a); border-color: var(--color-ink, #1a1a1a); color: var(--color-paper, #f4f1ea); } .ds-chip--blue { border-color: var(--color-blue-ink, #005f96); color: var(--color-blue-ink, #005f96); }"
+    },
+    {
+      "name": "Fret Grid Cell",
+      "kind": "custom",
+      "refersTo": "cell",
+      "description": "30px grid cell with hairline rule; lit state prints a 15px turquoise dot in multiply that turns orange on hover.",
+      "html": "<div class=\"ds-cells\"><button class=\"ds-cell\" type=\"button\">&middot;</button><button class=\"ds-cell ds-cell--open\" type=\"button\">&#9675;</button><button class=\"ds-cell ds-cell--muted\" type=\"button\">&times;</button><button class=\"ds-cell ds-cell--lit\" type=\"button\" aria-pressed=\"true\"></button></div>",
+      "css": ".ds-cells { display: flex; gap: 3px; } .ds-cell { position: relative; width: 30px; min-height: 30px; display: grid; place-items: center; background: transparent; border: 1px solid var(--color-rule, #cbc2ae); border-radius: 1px; color: var(--color-ink-faint, #6f6b60); font-family: var(--font-mono, 'Martian Mono Variable', monospace); font-size: 11px; cursor: pointer; transition: background 0.14s var(--ease-print, cubic-bezier(0.16, 1, 0.3, 1)), border-color 0.14s var(--ease-print, cubic-bezier(0.16, 1, 0.3, 1)); } .ds-cell:hover { border-color: var(--color-ink-soft, #4c4a44); background: rgba(26, 26, 26, 0.05); } .ds-cell:focus-visible { outline: 2px solid var(--color-blue, #0078bf); outline-offset: 2px; } .ds-cell--open { border-color: var(--color-ink, #1a1a1a); color: var(--color-ink, #1a1a1a); } .ds-cell--muted { color: var(--color-red, #d8452f); } .ds-cell--lit { border-color: var(--color-ink, #1a1a1a); } .ds-cell--lit::before { content: ''; position: absolute; left: 50%; top: 50%; width: 15px; height: 15px; transform: translate(-50%, -50%); background: var(--color-turquoise, #40e0d0); border-radius: 999px; mix-blend-mode: multiply; } .ds-cell--lit:hover::before { background: var(--color-orange, #ff6c2f); }"
+    },
+    {
+      "name": "Progression Step Sheet",
+      "kind": "custom",
+      "refersTo": "step-sheet",
+      "description": "Strip step with function ink rule, overprinted shared-note band; the active step re-enters under an ink wipe inside an offset plate.",
+      "html": "<div class=\"ds-offset ds-offset--step\"><button class=\"ds-step ds-step--active\" type=\"button\" title=\"Quitar: Am7\"><span class=\"ds-step__rule ds-step__rule--tonic\"></span><span class=\"ds-step__index\">3</span><span class=\"ds-step__name\">Am7</span><span class=\"ds-step__latin\">La m7</span><span class=\"ds-step__shared\" title=\"Notas compartidas con el acorde siguiente\">C E G</span></button></div>",
+      "css": ".ds-offset--step { position: relative; display: inline-block; } .ds-offset--step::before { content: ''; position: absolute; inset: 0; left: 4px; top: 4px; background: var(--color-turquoise, #40e0d0); } .ds-step { position: relative; display: flex; flex-direction: column; justify-content: space-between; gap: 2px; min-height: 68px; width: 100%; padding: 6px; text-align: left; background: var(--color-paper, #f4f1ea); border: 1px solid var(--color-ink, #1a1a1a); border-radius: 2px; box-shadow: 0 1px 2px rgba(26, 26, 26, 0.1), 0 5px 12px rgba(26, 26, 26, 0.07); color: var(--color-ink, #1a1a1a); font-family: var(--font-display, 'Archivo Variable', system-ui, sans-serif); cursor: pointer; animation: ds-wipe 0.5s var(--ease-print, cubic-bezier(0.16, 1, 0.3, 1)); } .ds-step:hover { border-color: var(--color-ink, #1a1a1a); } .ds-step:focus-visible { outline: 2px solid var(--color-blue, #0078bf); outline-offset: 2px; } .ds-step__rule { height: 3px; width: 100%; } .ds-step__rule--tonic { background: var(--color-turquoise, #40e0d0); } .ds-step__rule--subdominant { background: var(--color-blue, #0078bf); } .ds-step__rule--dominant { background: var(--color-orange, #ff6c2f); } .ds-step__index { font-family: var(--font-mono, 'Martian Mono Variable', monospace); font-size: 8px; color: var(--color-ink-faint, #6f6b60); } .ds-step__name { font-variation-settings: 'wdth' 100, 'wght' 520; font-size: clamp(9px, 0.72vw, 13px); line-height: 1.15; } .ds-step__latin { font-family: var(--font-mono, 'Martian Mono Variable', monospace); font-size: 8px; color: var(--color-ink-soft, #4c4a44); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .ds-step__shared { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; background: var(--color-turquoise, #40e0d0); padding: 0 4px; font-family: var(--font-mono, 'Martian Mono Variable', monospace); font-size: 9px; font-weight: 600; color: var(--color-ink, #1a1a1a); mix-blend-mode: multiply; } @keyframes ds-wipe { 0% { clip-path: inset(0 100% 0 0); } 100% { clip-path: inset(0 0 0 0); } }"
+    },
+    {
+      "name": "Tempo Ink Block",
+      "kind": "custom",
+      "refersTo": "tempo-block",
+      "description": "Yellow riso ink block holding the tempo digits, flanked by compact stamps.",
+      "html": "<div class=\"ds-tempo\"><button class=\"ds-stamp ds-stamp--compact\" type=\"button\" aria-label=\"Bajar tempo\">&minus;</button><span class=\"ds-tempo__digits\">92</span><button class=\"ds-stamp ds-stamp--compact\" type=\"button\" aria-label=\"Subir tempo\">+</button></div>",
+      "css": ".ds-tempo { display: flex; align-items: center; gap: 4px; font-family: var(--font-display, 'Archivo Variable', system-ui, sans-serif); } .ds-stamp--compact { display: inline-flex; align-items: center; justify-content: center; min-height: 32px; padding: 0.3rem 0.7rem; border: 1.5px solid var(--color-ink, #1a1a1a); border-radius: 2px; background: transparent; color: var(--color-ink, #1a1a1a); font-variation-settings: 'wdth' 96, 'wght' 600; font-size: 0.6875rem; letter-spacing: 0.1em; cursor: pointer; } .ds-stamp--compact:hover { background: rgba(26, 26, 26, 0.08); } .ds-tempo__digits { background: var(--color-yellow, #ffe800); border: 1px solid var(--color-ink, #1a1a1a); border-radius: 2px; padding: 0.1rem 0.5rem; font-family: var(--font-mono, 'Martian Mono Variable', monospace); font-size: 1.05rem; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--color-ink, #1a1a1a); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Riso Print Shop",
+    "overview": "SERENDIPIA is a print shop that happens to be a chord lab. The page is one paper sheet; every working surface is a bordered plate carrying registration marks at its corners; every control is a rubber stamp pressed in ink; every chord is set as a poster screen on an ink block with a misregistered turquoise plate slipped beneath it. The progression is a strip of chained paper sheets that advances under an ink wipe while the notes two neighbouring chords share overprint in turquoise. Nothing floats, nothing glows, nothing is glass.\n\nThe material logic is flat and physical throughout: riso spot inks on paper, soft neutral paper shadows, 1px ink rules, dashed cut lines, corner crop marks, a halftone screen over the ink-block chord names, and a fixed print grain over the whole page. The world's own palette (paper, ink, riso blue, orange, yellow) does the work; turquoise #40E0D0 rides only as an accent ink and is always printed as material — a plate, a dot, a band, a selection — through mix-blend-mode: multiply. Type is one variable grotesque for words (Archivo) and one variable mono rationed to measurements (Martian Mono). Motion exists for two jobs only: state transitions and the 0.5s wipe that reveals the step being played.",
+    "keyCharacteristics": [
+      "Paper #F4F1EA ground; plates with 1px ink borders, 3px radius and registration marks.",
+      "Flat spot inks: blue #0078BF, orange #FF6C2F, yellow #FFE800, turquoise accent #40E0D0, red #D8452F signals.",
+      "Soft neutral paper shadows only; depth is paper, never glow (ink at 10-12% alpha).",
+      "The misregistration device: a solid colored plate offset 4-5px behind selected objects and the monumental chord name.",
+      "Ink-stamp controls with aria-pressed ink fill, pressed inset, and a turquoise live state.",
+      "Print texture: fixed grain overlay, halftone dot screens on ink blocks, dashed cut lines, 9px crop marks, 11px registration marks.",
+      "One viewport, max 1560px; views fold to a single column below 1280px; the 16-slot strip and 12-fret detector grid scroll internally."
+    ],
+    "rules": [
+      { "name": "The Ink-Is-Material Rule", "body": "Chromatic ink is a material before it is a color: it appears as plates, bands, dots, rules and fills. Turquoise and orange never letter a word; the only non-material turquoise in the build is the 13px legend glyph. Blue letters labels, red letters errors — nothing else sets colored type below display size.", "section": "colors" },
+      { "name": "The Multiply-Overprint Rule", "body": "Every turquoise state mark that sits on paper prints with mix-blend-mode: multiply (lit cell dot, selected proof label, shared-note band). It is never translucent, never glowing; where inks meet, they darken like overprint.", "section": "colors" },
+      { "name": "The Paper-Only Rule", "body": "No dark mode, no colored shadow, no gradient, no glow. Chromatic inks are opaque matte fills; depth comes from paper shadows and ink rules.", "section": "colors" },
+      { "name": "The Rationed-Mono Rule", "body": "Martian Mono appears only where something is measured, counted or marked: fret strings, step indices, roman numerals, chip data, difficulty tags, tempo digits, readouts. Prose, labels and chord names are Archivo.", "section": "typography" },
+      { "name": "The Width-Axis Rule", "body": "The display voice is Archivo's width and weight axes: chord name wdth 104/wght 800, wordmark and Latin reading wdth 92/wght 800, UI chord names wdth 100/wght 520. Nothing wider or heavier than wdth 104/wght 800.", "section": "typography" },
+      { "name": "The Silkscreen-Label Rule", "body": "Structural headings are 10px uppercase, 0.16em tracking, wdth 92/wght 600, lettered in blue ink. Sentences are never uppercased or letterspaced.", "section": "typography" },
+      { "name": "The Fold-At-XL Rule", "body": "Every view is a single column until 1280px. Panels reflow and reorder; they do not shrink into unreadable grids.", "section": "layout" },
+      { "name": "The Internal-Scroll Rule", "body": "Wide print surfaces scroll inside their plate, never the page: the 16-slot strip has a 760px minimum width below sm inside an overflow-x-auto with snap-x snap-mandatory and start snapping on each sheet, dropping the floor from sm up; the 12-fret detector grid has a 560px minimum inside its own scroller.", "section": "layout" },
+      { "name": "The Paper-Shadows Rule", "body": "Only paper casts shadow, and only in neutral ink tones. Sheets use the rest shadow; hover swaps to the lift shadow and straightens the sheet to 0deg; stamps never lift — they press in.", "section": "elevation" },
+      { "name": "The Misregistration Rule", "body": "Selection and highlight are printed as a second pass: a solid turquoise plate sits 4px behind a selected proof sheet or the active step, and 5px behind the monumental chord name and the detected chord name. The device is only ever turquoise in the shipped build (the component also declares orange and blue tones).", "section": "elevation" },
+      { "name": "The Square-Corner Rule", "body": "3px is the largest radius a working surface may take. Plates are 3px, stamps and sheets 2px, cells 1px. Circles exist only as print marks, dots and controls.", "section": "shapes" },
+      { "name": "The Rule-Plus-Gap Rule", "body": "Separation is a 1px rule plus a 3-8px gap. Fill contrast never replaces a border.", "section": "shapes" }
+    ],
+    "dos": [
+      "Do print turquoise as material: offset plate behind selection, multiply dot in lit cells, multiply band for shared notes and selected proof labels, live stamp fill, selection background. Never let it letter a word.",
+      "Do set every label with the silkscreen style — 10px uppercase, 0.16em tracking, wdth 92/wght 600 — and print it in blue ink.",
+      "Do keep Martian Mono for measurement only: fret strings, indices, roman numerals, chips, difficulty tags, tempo and readouts, always with tabular numerals.",
+      "Do keep the misregistration offsets — 4px behind a selected proof or active step, 5px behind the monumental chord name and detected chord name.",
+      "Do stack proof sheets at 84px wide with the 0-4-8px resting stagger and the 40x46 mini plate; hover lifts a sheet 2px and straightens it.",
+      "Do keep the sheet shadow, lift shadow and stamp press exactly as the theme declares them, in neutral ink tones.",
+      "Do keep the print texture: grain overlay, halftone screens on ink blocks, registration marks at plate corners, crop marks and dashed cut lines around the proof field.",
+      "Do keep the function ink rules on step sheets and degree cards — turquoise tonic, blue subdominant, orange dominant — and the turquoise overprint band for shared notes.",
+      "Do keep the 16-slot strip (dashed ghosts, paper-deep/40 empties, snap scrolling below the fold) and the 12-fret detector grid with internal scroll."
+    ],
+    "donts": [
+      "Don't add a third typeface, a serif, or a second sans; Archivo and Martian Mono are the whole press.",
+      "Don't use chromatic ink as small-size text; turquoise and orange are material, and red is reserved for errors and muted strings.",
+      "Don't exceed 3px of radius on plates or 2px on stamps and sheets, and never introduce pills.",
+      "Don't replace borders and gaps with fill contrast, gradients, glows, glass or colored shadows.",
+      "Don't reintroduce a dark theme: color-scheme: light and the paper ground are committed.",
+      "Don't drop the grain, halftone, registration or crop marks — they are the print identity, not decoration.",
+      "Don't put Martian Mono into sentences or chord names.",
+      "Don't animate beyond state transitions and the active-step wipe."
+    ]
+  }
+}

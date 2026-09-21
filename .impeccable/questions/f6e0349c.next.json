@@ -1,0 +1,204 @@
+{
+  "title": "Elige el mundo visual",
+  "question": "La tirada asignó una dirección; al fusionar los challengers, Pattern Machine ganó ambos ejes y lidera. Escoge una, o re-tira.",
+  "options": [
+    {
+      "id": "assigned",
+      "label": "Pattern Machine",
+      "kicker": "THE ROLL",
+      "lineage": "máquina de ritmos de inicios de los 80: fila de 16 pasos, chase light, panel serigrafiado",
+      "thesis": "SERENDIPIA como instrumento de práctica: el símbolo del acorde a escala monumental sobre un panel de pasos donde las progresiones son patrones que se programan y se corren.",
+      "palette": ["#17191c", "#e9e6df", "#d94f3d", "#e0913c", "#e3c04a", "#ffb454"],
+      "materials": ["panel de carbón cepillado", "serigrafía", "teclas de inyección", "luz LED de persecución"],
+      "viewport": "Un solo panel de instrumento: tira de transporte arriba (run, tempo segmentado, loop), el símbolo del acorde monumental a la izquierda, la rejilla mástil/pasos encendida al centro, fila de pads de voicings debajo, y la tira de progresión abajo con teclas fantasma para los acordes sugeridos.",
+      "risk": "Las teclas de caramelo pueden leerse como juguete retro si la tipografía y la disciplina de rejilla fallan; la fila de 16 pasos debe escalar, nunca envolverse, en anchos de escritorio estrechos.",
+      "raised": [
+        {
+          "from": "challenger-alphabet-storm",
+          "raise": "El símbolo del acorde es el objeto más grande del panel y se transforma en vivo al cambiar raíz, cualidad o notación: el toggle ES/EN es una transformación real, no un cambio de etiqueta."
+        },
+        {
+          "from": "challenger-tensegrity",
+          "raise": "Anotación de ingeniería serigrafiada: etiquetas mono con líneas guía fijan los datos medidos (alcance de trastes, dedos, intervalos) a la rejilla, sin tooltips flotantes."
+        },
+        {
+          "from": "challenger-variable-font-specimen",
+          "raise": "Jerarquía solo por contraste de escala — símbolo gigante contra lecturas mono diminutas — con un readout vivo de notas y MIDI del voicing actual."
+        },
+        {
+          "from": "assigned-grounded-timeline",
+          "raise": "Disciplina de transporte: run/stop, lectura de tempo, corchete de loop e indicador de posición de persecución, traducidos al vocabulario del panel."
+        }
+      ],
+      "wireframe": {
+        "cols": 12,
+        "rows": 10,
+        "regions": [
+          {"label": "tira de transporte", "x": 0, "y": 0, "w": 12, "h": 1},
+          {"label": "símbolo del acorde", "x": 0, "y": 1, "w": 4, "h": 3, "accent": true},
+          {"label": "rejilla mástil/pasos", "x": 4, "y": 1, "w": 5, "h": 4, "accent": true},
+          {"label": "sugerencias fantasma", "x": 9, "y": 1, "w": 3, "h": 6},
+          {"label": "pads de voicings", "x": 0, "y": 4, "w": 4, "h": 3},
+          {"label": "readout de datos", "x": 4, "y": 5, "w": 5, "h": 2},
+          {"label": "tira de progresión", "x": 0, "y": 7, "w": 12, "h": 2, "accent": true}
+        ]
+      },
+      "board": "https://impeccable.style/worlds/cards/signals-instruments-drum-machine-step-row.webp",
+      "hero": "https://impeccable.style/worlds/cards/signals-instruments-drum-machine-step-row-hero.webp"
+    },
+    {
+      "id": "model-pick",
+      "label": "Cifra Grid",
+      "kicker": "IMPECCABLE’S PICK",
+      "lineage": "el diagrama de acordes (cifra), el gráfico nativo del dominio",
+      "thesis": "La app entera como una sola rejilla de acorde: cuerdas en columnas, trastes en filas, los puntos como única forma rellena; todo lo demás, líneas finas y serigrafía.",
+      "palette": ["#10151b", "#e7ebf0", "#35c2a5", "#f2b13d"],
+      "materials": ["reglas de línea fina", "puntos de tinta", "papel de rejilla"],
+      "viewport": "Un diagrama de acorde sobredimensionado ocupa el primer viewport con el símbolo del acorde como etiqueta mono pequeña encima; cejuela, trastes y puntos son la única geometría de la página.",
+      "risk": "Es el terreno propio de la categoría: casi todas las apps de acordes aterrizan aquí; el oficio tendría que cargarla.",
+      "wireframe": {
+        "cols": 12,
+        "rows": 10,
+        "regions": [
+          {"label": "símbolo del acorde", "x": 0, "y": 0, "w": 12, "h": 1},
+          {"label": "diagrama protagonista", "x": 3, "y": 1, "w": 6, "h": 6, "accent": true},
+          {"label": "miniaturas de voicings", "x": 9, "y": 1, "w": 3, "h": 6},
+          {"label": "readout de notas", "x": 0, "y": 7, "w": 12, "h": 1},
+          {"label": "selectores raíz/cualidad", "x": 0, "y": 8, "w": 12, "h": 2}
+        ]
+      }
+    },
+    {
+      "id": "challenger-transit",
+      "label": "Midnight Transit Diagram",
+      "verdict": "competitive",
+      "lineage": "mural de esmalte azul medianoche del diagrama de metro",
+      "thesis": "La teoría como red: las tonalidades son líneas, los acordes estaciones, las progresiones rutas, las modulaciones intercambios.",
+      "palette": ["#141a3a", "#f4f1e8", "#c8392f", "#3b6fd4", "#e0a63c", "#3f8f5f"],
+      "materials": ["esmalte", "tics de porcelana", "disciplina de líneas a 45°/90°"],
+      "viewport": "Un diagrama azul medianoche a todo lo ancho donde la tonalidad actual es una línea encendida entre estaciones de porcelana, y las sugerencias de siguiente acorde son las ramas adelante.",
+      "case": "Fusiona limpio para teoría y recomendaciones; pierde por poco en el diccionario y el detector, que no son un viaje.",
+      "risk": "La disciplina del diagrama debe ser estricta o se lee como decoración.",
+      "wireframe": {
+        "cols": 12,
+        "rows": 10,
+        "regions": [
+          {"label": "leyenda de líneas", "x": 0, "y": 0, "w": 12, "h": 1},
+          {"label": "mapa de tonalidad", "x": 0, "y": 1, "w": 8, "h": 6, "accent": true},
+          {"label": "panel de intercambio", "x": 8, "y": 1, "w": 4, "h": 6},
+          {"label": "tira de ruta", "x": 0, "y": 7, "w": 12, "h": 2}
+        ]
+      },
+      "board": "https://impeccable.style/worlds/cards/wayfinding-cartography-signage-midnight-transit-diagram.webp",
+      "hero": "https://impeccable.style/worlds/cards/wayfinding-cartography-signage-midnight-transit-diagram-hero.webp"
+    },
+    {
+      "id": "challenger-leather",
+      "label": "Tooled Leather Studio",
+      "verdict": "competitive",
+      "lineage": "estantería de lectura en cuero cosido: cabeceras de silla repujadas, lino, nogal",
+      "thesis": "Acordes como objetos físicos queridos: cada voicing es una cosa que se manipula, cada sección un estante al que se llega.",
+      "palette": ["#241a13", "#c9a06a", "#efe6d8", "#8a5a34"],
+      "materials": ["cuero repujado", "costura crema", "nogal", "lino"],
+      "viewport": "Un cuarto de práctica en nogal oscuro: el acorde actual se levanta en el estante con sombra real, los voicings alternos son lomos al lado, la progresión es una costura que se llena.",
+      "case": "Sostiene identificación — la cultura de la guitarra ama madera y cuero — pero pierde en velocidad y contra el dark-pro; traducido a oscuro conservaría el oficio.",
+      "risk": "El esqueumorfismo cuesta velocidad si manipular reemplaza escribir.",
+      "wireframe": {
+        "cols": 12,
+        "rows": 10,
+        "regions": [
+          {"label": "cabecera repujada", "x": 0, "y": 0, "w": 12, "h": 1},
+          {"label": "objeto acorde levantado", "x": 0, "y": 1, "w": 6, "h": 5, "accent": true},
+          {"label": "lomos de voicings", "x": 6, "y": 1, "w": 6, "h": 5},
+          {"label": "costura de progresión", "x": 0, "y": 6, "w": 12, "h": 2}
+        ]
+      },
+      "board": "https://impeccable.style/worlds/cards/digital-design-canon-skeuomorph-leather-studio.webp",
+      "hero": "https://impeccable.style/worlds/cards/digital-design-canon-skeuomorph-leather-studio-hero.webp"
+    },
+    {
+      "id": "declined-alphabet-storm",
+      "label": "Alphabet Storm",
+      "verdict": "declined",
+      "lineage": "tormenta de letras surrealista",
+      "thesis": "Las letras se condensan en palabras, rompen en clima y rehacen el paisaje según la gramática.",
+      "palette": ["#f7f7f4", "#141414", "#c9ccd1"],
+      "materials": ["tinta negra", "papel blanco", "partículas procedurales"],
+      "case": "Fusiona mal: el clima surrealista no es el mundo de un guitarrista y el mecanismo se ahogaría en metáfora.",
+      "kept": "Tipografía monumental que se transforma: el símbolo del acorde como objeto mayor, mutando con raíz/cualidad/notación.",
+      "hero": "https://impeccable.style/worlds/cards/dream-surreal-impossible-worlds-alphabet-storm-hero.webp"
+    },
+    {
+      "id": "declined-tensegrity",
+      "label": "Tensegrity Column",
+      "verdict": "declined",
+      "lineage": "columna tensegrity que respira, varillas de carbono y cordón rojo",
+      "thesis": "Una red de tensión y compresión que se traza hasta su contrafuerza.",
+      "palette": ["#d9d6d0", "#141414", "#c0392b"],
+      "materials": ["varillas de carbono", "cordón rojo", "concreto pálido"],
+      "case": "Fusiona mal: los diagramas de fuerzas explican estructura, no acordes; identificación baja para una herramienta de práctica.",
+      "kept": "Anotación de ingeniería: etiquetas mono con líneas guía que fijan valores medidos a los nodos.",
+      "hero": "https://impeccable.style/worlds/cards/kinetic-sculpture-automata-tensegrity-breathing-column-hero.webp"
+    },
+    {
+      "id": "declined-variable-font",
+      "label": "Variable Font Specimen",
+      "verdict": "declined",
+      "lineage": "especimen tipográfico interactivo con ejes variables",
+      "thesis": "Un slider de eje deforma toda una rejilla de glifos en vivo.",
+      "palette": ["#fbfbf9", "#111111", "#e8452c"],
+      "materials": ["papel casi blanco", "tinta negra", "sliders de eje"],
+      "case": "Fusiona mal: un especimen celebra la tipografía, no la música; la claridad se hundiría en una demo de fuente.",
+      "kept": "Jerarquía por contraste de escala con un readout mono vivo.",
+      "hero": "https://impeccable.style/worlds/cards/variable-font-specimen-hero.webp"
+    },
+    {
+      "id": "assigned-grounded-timeline",
+      "label": "Arrangement Timeline",
+      "verdict": "declined",
+      "lineage": "vista de arreglo de DAW: clips, playhead, corchete de loop",
+      "thesis": "SERENDIPIA como sesión: los acordes son clips, las progresiones una línea de tiempo, la reproducción un playhead.",
+      "palette": ["#1a1c1f", "#e6e8ea", "#4fb3a5", "#e0a63c", "#d96b6b"],
+      "materials": ["rejilla de línea fina", "bloques de clip", "brillo de playhead"],
+      "case": "Pierde ambos ejes contra el panel: identificación de software de productor y una línea de tiempo pesada de mouse contra el objetivo keyboard-first; su disciplina de transporte sobrevive como raise en la ganadora.",
+      "kept": "Disciplina de transporte: run/stop, lectura de tempo, corchete de loop e indicador de posición.",
+      "wireframe": {
+        "cols": 12,
+        "rows": 10,
+        "regions": [
+          {"label": "barra de transporte", "x": 0, "y": 0, "w": 12, "h": 1},
+          {"label": "riel navegador", "x": 0, "y": 1, "w": 3, "h": 7},
+          {"label": "clips de arreglo", "x": 3, "y": 1, "w": 9, "h": 7, "accent": true},
+          {"label": "corchete de loop", "x": 3, "y": 8, "w": 9, "h": 1}
+        ]
+      }
+    }
+  ],
+  "reroll": {
+    "registers": ["safer", "bolder"]
+  },
+  "buildPath": {
+    "value": "code",
+    "toggle": false
+  },
+  "canon": true,
+  "canonCard": {
+    "label": "El estándar de la categoría",
+    "thesis": "Lo que esta categoría envía, ejecutado impecablemente: buscador, rejilla de acordes, fila de formas, botón de play.",
+    "palette": ["#ffffff", "#111827", "#2563eb"],
+    "materials": ["rejilla limpia", "sans de sistema", "acento azul"],
+    "viewport": "Campo de búsqueda arriba, las formas del acorde como fila limpia de diagramas, un reproductor debajo.",
+    "risk": "Indistinguible de la competencia por diseño.",
+    "wireframe": {
+      "cols": 12,
+      "rows": 10,
+      "regions": [
+        {"label": "buscador", "x": 0, "y": 0, "w": 12, "h": 1},
+        {"label": "fila de formas", "x": 0, "y": 1, "w": 12, "h": 5, "accent": true},
+        {"label": "reproductor", "x": 0, "y": 6, "w": 12, "h": 1},
+        {"label": "relacionados", "x": 0, "y": 7, "w": 12, "h": 2}
+      ]
+    }
+  },
+  "steer": true
+}

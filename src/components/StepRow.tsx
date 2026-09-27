@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type DragEvent, type KeyboardEvent } from 'react'
 import { chordTones, qualityById } from '../music/chords'
 import { chordAccidental, pitchName } from '../music/notes'
 import { diatonicChords, type HarmonicFunction } from '../music/scales'
@@ -20,6 +20,7 @@ export function StepRow() {
     playing,
     activeStep,
     removeFromProgression,
+    moveStep,
     clearProgression,
     suggestions,
     addSuggestion,
@@ -30,7 +31,46 @@ export function StepRow() {
   } = useStore()
 
   const [pickerStepId, setPickerStepId] = useState<string | null>(null)
+  const [dragIndex, setDragIndex] = useState<number | null>(null)
+  const [dropIndex, setDropIndex] = useState<number | null>(null)
+  const [announcement, setAnnouncement] = useState('')
   const diatonic = useMemo(() => diatonicChords(keyRootPc, keyMode), [keyRootPc, keyMode])
+
+  const resetDrag = () => {
+    setDragIndex(null)
+    setDropIndex(null)
+  }
+
+  const handleDragOver = (event: DragEvent<HTMLElement>, index: number) => {
+    if (dragIndex === null) return
+    event.preventDefault()
+    event.dataTransfer.dropEffect = 'move'
+    const rect = event.currentTarget.getBoundingClientRect()
+    const before = event.clientX < rect.left + rect.width / 2
+    setDropIndex(Math.min(before ? index : index + 1, progression.length))
+  }
+
+  const handleDrop = (event: DragEvent<HTMLElement>) => {
+    event.preventDefault()
+    const from = dragIndex
+    const raw = dropIndex ?? progression.length
+    resetDrag()
+    if (from === null) return
+    const target = Math.max(0, Math.min(raw > from ? raw - 1 : raw, progression.length - 1))
+    if (target === from) return
+    moveStep(from, target)
+    setAnnouncement(`${t('a11y.stepMoved')} ${target + 1}`)
+  }
+
+  const handleMoveKey = (event: KeyboardEvent<HTMLElement>, index: number) => {
+    if (playing || !(event.ctrlKey || event.metaKey)) return
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return
+    event.preventDefault()
+    const target = event.key === 'ArrowLeft' ? index - 1 : index + 1
+    if (target < 0 || target >= progression.length) return
+    moveStep(index, target)
+    setAnnouncement(`${t('a11y.stepMoved')} ${target + 1}`)
+  }
 
   const pcsOf = (rootPc: number, qualityId: Parameters<typeof qualityById>[0]) =>
     chordTones(rootPc, qualityById(qualityId))
@@ -44,6 +84,9 @@ export function StepRow() {
         <div className="flex items-baseline gap-3">
           <h2 className="label-ink text-blue-ink">{t('progression.title')}</h2>
           <span className="label-ink sm:hidden">{t('progression.swipe')}</span>
+          {progression.length > 1 && (
+            <span className="readout hidden text-[10px] text-ink-faint lg:inline">{t('progression.reorderHint')}</span>
+          )}
         </div>
         <div className="flex items-center gap-3">
           {progression.length > 0 && (
@@ -74,13 +117,23 @@ export function StepRow() {
             const fn = diatonic.find((degree) => degree.rootPc === step.rootPc)?.harmonicFunction
             const sharedLabel = shared.map((pc) => pitchName(pc, chordAccidental(step.rootPc))).join(' ')
 
+            const dragging = dragIndex === index
+
             const sheet = (
               <button
                 type="button"
                 className={`sheet flex min-h-[68px] w-full snap-start flex-col justify-between p-1.5 text-left ${
                   active ? 'wipe-in border-ink' : ''
-                }`}
+                } ${dragging ? 'border-dashed opacity-40' : ''}`}
                 data-step-index={index}
+                draggable={!playing}
+                onDragStart={(event) => {
+                  setDragIndex(index)
+                  event.dataTransfer.effectAllowed = 'move'
+                  event.dataTransfer.setData('text/plain', String(index))
+                }}
+                onDragEnd={resetDrag}
+                onKeyDown={(event) => handleMoveKey(event, index)}
                 onClick={(event) => {
                   if (event.altKey) {
                     removeFromProgression(index)
@@ -120,19 +173,38 @@ export function StepRow() {
               </button>
             )
 
-            return active ? (
-              <OffsetPlate key={step.id}>{sheet}</OffsetPlate>
-            ) : (
-              <div key={step.id}>{sheet}</div>
+            return (
+              <div
+                key={step.id}
+                className="relative"
+                onDragOver={(event) => handleDragOver(event, index)}
+                onDrop={handleDrop}
+              >
+                {dragIndex !== null && dropIndex === index && (
+                  <span
+                    className="pointer-events-none absolute inset-y-0 -left-[4px] z-10 w-[3px] bg-ink"
+                    aria-hidden="true"
+                  />
+                )}
+                {dragIndex !== null && dropIndex === progression.length && index === progression.length - 1 && (
+                  <span
+                    className="pointer-events-none absolute inset-y-0 -right-[4px] z-10 w-[3px] bg-ink"
+                    aria-hidden="true"
+                  />
+                )}
+                {active ? <OffsetPlate>{sheet}</OffsetPlate> : sheet}
+              </div>
             )
           })}
 
-          {ghosts.map((suggestion) => (
+          {ghosts.map((suggestion, ghostIndex) => (
             <button
               key={`ghost-${suggestion.anglo}`}
               type="button"
               className="cutline flex min-h-[68px] snap-start flex-col justify-between p-1.5 text-left text-ink-faint hover:border-blue-ink hover:text-blue-ink"
               onClick={() => addSuggestion(suggestion)}
+              onDragOver={(event) => handleDragOver(event, progression.length + ghostIndex)}
+              onDrop={handleDrop}
               title={`${t('suggestions.title')}: ${suggestion.reasonEs}`}
             >
               <span className="font-mono text-[8px]">+</span>
@@ -148,12 +220,18 @@ export function StepRow() {
               key={`empty-${index}`}
               className="min-h-[68px] border border-rule bg-paper-deep/40"
               aria-hidden="true"
+              onDragOver={(event) => handleDragOver(event, progression.length + ghosts.length + index)}
+              onDrop={handleDrop}
             />
           ))}
         </div>
       </div>
 
       {progression.length === 0 && <p className="readout text-[11px] text-ink-faint">{t('progression.empty')}</p>}
+
+      <p className="sr-only" role="status" aria-live="polite">
+        {announcement}
+      </p>
 
       {pickerStepId !== null &&
         (() => {

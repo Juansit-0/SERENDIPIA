@@ -12,7 +12,13 @@ import { audioEngine, type PlayPattern, type TimbreId } from '../audio/engine'
 import { translate, type Lang, type TKey } from '../i18n'
 import { QualityId } from '../music/chords'
 import { ParsedChord, parseChord } from '../music/parseChord'
-import { Suggestion, nextChordSuggestions, PROGRESSIONS, resolveProgression } from '../music/progressions'
+import {
+  moveStep as reorderSteps,
+  nextChordSuggestions,
+  PROGRESSIONS,
+  resolveProgression,
+  Suggestion,
+} from '../music/progressions'
 import { Mode } from '../music/scales'
 import { clampCapo, withCapo } from '../music/capo'
 import { resolveStepFrets, type StepVoicingRef, type StepVoicingSource } from '../music/stepVoicing'
@@ -82,6 +88,7 @@ interface StoreValue {
   progression: ProgressionStep[]
   loadProgression: (steps: Array<Omit<ProgressionStep, 'id'>>) => void
   addToProgression: (step: Omit<ProgressionStep, 'id'>) => void
+  moveStep: (from: number, to: number) => void
   setStepVoicing: (index: number, voicing: StepVoicingRef | null) => void
   removeFromProgression: (index: number) => void
   markedVoicing: MarkedVoicing | null
@@ -339,6 +346,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     )
   }, [])
 
+  const moveStep = useCallback((from: number, to: number) => {
+    setProgression((current) => reorderSteps(current, from, to))
+  }, [])
+
   const setStepVoicing = useCallback((index: number, voicing: StepVoicingRef | null) => {
     setProgression((current) =>
       current.map((step, position) =>
@@ -483,6 +494,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     progression,
     loadProgression,
     addToProgression,
+    moveStep,
     setStepVoicing,
     removeFromProgression,
     markedVoicing,

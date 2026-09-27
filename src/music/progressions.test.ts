@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { PROGRESSIONS, nextChordSuggestions, resolveProgression } from './progressions'
+import { PROGRESSIONS, moveStep, nextChordSuggestions, resolveProgression } from './progressions'
 
 const byId = (id: string) => PROGRESSIONS.find((progression) => progression.id === id)!
 
@@ -38,5 +38,25 @@ describe('progressions', () => {
     const labels = nextChordSuggestions(0, 0, 'major').map((suggestion) => suggestion.anglo)
     expect(labels.some((label) => label === 'F' || label === 'G')).toBe(true)
     expect(labels).toContain('G7')
+  })
+
+  it('moves a step forward', () => {
+    expect(moveStep(['A', 'B', 'C', 'D'], 0, 2)).toEqual(['B', 'C', 'A', 'D'])
+  })
+
+  it('moves a step backward', () => {
+    expect(moveStep(['A', 'B', 'C', 'D'], 3, 1)).toEqual(['A', 'D', 'B', 'C'])
+  })
+
+  it('returns the same list when the position does not change', () => {
+    const steps = ['A', 'B', 'C']
+    expect(moveStep(steps, 1, 1)).toBe(steps)
+  })
+
+  it('ignores out-of-range moves', () => {
+    const steps = ['A', 'B', 'C']
+    expect(moveStep(steps, -1, 1)).toBe(steps)
+    expect(moveStep(steps, 0, 3)).toBe(steps)
+    expect(moveStep(steps, 0, -1)).toBe(steps)
   })
 })

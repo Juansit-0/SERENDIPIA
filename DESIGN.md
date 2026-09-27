@@ -296,13 +296,13 @@ Flat riso spot inks on paper: two papers, three inks in the black-brown family, 
 
 The app is one paper sheet: `.grain` wraps a centered column of max-width 1560px with 12px padding (20px horizontal, 16px vertical from `sm` up) and 16px gaps between the transport strip and the view. Every view ends with the progression plate spanning all columns.
 
-- **Transport strip** (plate across the top): below 640px it stacks vertically as a flex column; from `sm` up it becomes a wrapping row with 20px column gaps. Left group = wordmark + tab stamps; middle = run, tempo block with −/+, beats, loop; right group (pushed with auto margin, full-width until `sm`) = timbre select, key select + major/minor, notation stamps, volume slider, ES/EN, audio chips.
+- **Transport strip** (plate across the top): below 640px it stacks vertically as a flex column; from `sm` up it becomes a wrapping row with 20px column gaps. Left group = wordmark + tab stamps; middle = run, tempo block with −/+, beats, loop, click with its 4-dot beat readout; right group (pushed with auto margin, full-width until `sm`) = timbre select, key select + major/minor, notation stamps, volume slider, ES/EN, audio chips.
 - **Dictionary**: one column until 1280px, then `minmax(280px,1fr) minmax(420px,1.7fr) minmax(250px,0.9fr)` — symbol plate / board + proofs plate / root + suggestions column — plus the full-width strip after it.
 - **Detector**: one column until 1280px, then `minmax(420px,1.6fr) minmax(280px,1fr)` — interactive grid plate / result plate — then the strip.
 - **Theory**: one column until 1280px, then `minmax(320px,1.1fr) minmax(320px,1fr)` — diatonic plate (with progression templates below it) / suggestions plate, then the strip.
 - **Fret grid**: `24px` string-label column + `34px` open-string column + N equal fret columns, 3px gaps, 30px cells; window 5 frets in the dictionary, 12 in the detector.
 - **Root grids**: six equal columns, 6px gaps. **Diatonic degrees**: 2 columns below `sm`, 4 above, 8px gaps.
-- **Progression strip**: 16 equal slots with 6px gaps; 68px sheets; a "Swipe →" hint shows below `sm`.
+- **Progression strip**: 16 equal slots with 6px gaps; 68px sheets; a "Swipe →" hint shows below `sm`, an "Arrastra para reordenar · Ctrl+←/→" readout from `lg` up.
 
 ### Named Rules
 **The Fold-At-XL Rule.** Every view is a single column until 1280px. Panels reflow and reorder; they do not shrink into unreadable grids.
@@ -341,10 +341,10 @@ Structure is drawn with borders and gaps, never with fill contrast alone: 1px in
 - **Shape:** 2px radius, 1.5px ink border, transparent face, 32px min-height, 5px/11px padding, 11px uppercase label at 0.1em (wdth 96/wght 600).
 - **Sizes:** inline variants collapse padding to 2px/6px for tempo ±, beats, notation, mode and language; the Run stamp holds an 86px minimum width; the timbre and key selects wear the stamp face with `appearance: none` and a pointer cursor.
 - **Hover:** 8% ink wash over the paper. **Active:** inset 2px ink press shadow.
-- **Pressed state (`aria-pressed="true"`):** ink fill with paper text — tabs, notation, loop, beats-per-chord, major/minor, sevenths, root keys.
+- **Pressed state (`aria-pressed="true"`):** ink fill with paper text — tabs, notation, loop, click, beats-per-chord, major/minor, sevenths, root keys.
 - **Live:** turquoise fill with ink text (`stamp--live`) — the Run stamp while playing and the "Activar sonido" prompt.
 - **Ink:** permanently ink-filled (`stamp--ink`) — Escuchar and the detector's play action; hover darkens to pure black.
-- **Disabled:** opacity 0.35, no shadow, `not-allowed` — the Run stamp when the progression is empty.
+- **Disabled:** opacity 0.35, no shadow, `not-allowed` — the Run stamp when the progression is empty and the click is off.
 - **Focus:** global 2px blue outline, 2px offset.
 
 ### Chips
@@ -367,13 +367,13 @@ Structure is drawn with borders and gaps, never with fill contrast alone: 1px in
 Three tab stamps (Diccionario / Detector / Teoría) in a 6px-gap row after the wordmark. The active tab is the pressed-ink state — ink fill, paper text. No underline, no indicator animation. The current view is mirrored to the URL hash.
 
 ### Tempo Block
-A yellow ink block with 2px radius, 2px/8px padding, holding 1.05rem semibold mono tempo digits with tabular numerals, flanked by two compact stamps (− / +) bound to 40–208 BPM.
+A yellow ink block with 2px radius, 2px/8px padding, holding 1.05rem semibold mono tempo digits with tabular numerals, flanked by two compact stamps (− / +) bound to 40–208 BPM. Next to Loop, a click stamp (`aria-pressed`) arms a synthesized metronome: a square-wave blip at C5 with a C6 accent on the first beat of each 4/4 bar; while running, four 6px dots print the bar (ink for the accent, ink-soft for the other beats, rule at rest).
 
 ### Step Grid (signature)
 A `24px + 34px + N` column grid at 3px gaps inside the board plate, built from 1px-rule `.cell` buttons 30px tall, rows reversed so the highest string sits on top, under a head row of fret numerals and a 2px ink rule. Marker frets print a 3px orange dot above the numeral. Each cell holds one mono glyph: ○ ink for open, × red for muted, · ink-faint for free; open cells take an ink border. A pressed note prints a 15px turquoise dot with multiply centered in the cell and takes an ink border; hovering that lit cell swaps the dot to orange. The dictionary grid is a 5-fret window with per-string playback; the detector grid is a 12-fret interactive window that also prints 7px note names inside lit cells and under open strings, and scrolls inside the plate below 560px.
 
 ### Progression Strip (signature)
-A 16-slot grid of paper sheets at 6px gaps, 68px tall. A filled sheet carries a 3px function ink rule at its top (turquoise tonic, blue subdominant, orange dominant, rule-strong for non-diatonic), a mono step index, the chord name at clamp(9px, 0.72vw, 13px), the Latin line in mono 8px when notation is "both", and a bottom band printing the notes shared with the next chord — turquoise, multiply, mono 9px, em-dash when there is no overlap. Filled sheets remove their chord on click and disable while playing; the strip header holds a Clear stamp (only when non-empty) and an n/16 readout. Ghost slots are dashed cut lines with a "+" index, a faint chord name, a roman numeral and a tooltip reason; hover turns border and text blue. Remaining slots are empty paper-deep/40 wells. The active step is wrapped in an offset plate, takes an ink border, and re-enters via the wipe.
+A 16-slot grid of paper sheets at 6px gaps, 68px tall. A filled sheet carries a 3px function ink rule at its top (turquoise tonic, blue subdominant, orange dominant, rule-strong for non-diatonic), a mono step index, the chord name at clamp(9px, 0.72vw, 13px), the Latin line in mono 8px when notation is "both", and a bottom band printing the notes shared with the next chord — turquoise, multiply, mono 9px, em-dash when there is no overlap. Filled sheets remove their chord on click and disable while playing; the strip header holds a Clear stamp (only when non-empty) and an n/16 readout. Sheets reorder by drag: the dragged sheet prints as a cutline at 40% opacity, a 3px ink rule marks the insertion point between slots (folding empty slots and ghosts into "move to end"), and dropping rewrites the strip order. The keyboard equivalent is Ctrl/⌘+←/→ on a focused sheet, announced through a polite live region. Ghost slots are dashed cut lines with a "+" index, a faint chord name, a roman numeral and a tooltip reason; hover turns border and text blue. Remaining slots are empty paper-deep/40 wells. The active step is wrapped in an offset plate, takes an ink border, and re-enters via the wipe.
 
 ### Registration and Print Marks
 - **Registration marks:** 11×11 SVG circle-and-cross at 0.8 stroke in ink-soft at 85% opacity, inset 6px at the four corners of the transport strip, the dictionary board plate and the detector grid plate.
@@ -393,9 +393,10 @@ A 16-slot grid of paper sheets at 6px gaps, 68px tall. A filled sheet carries a 
 ### Implemented States
 - **Hover:** stamps take an 8% ink wash; sheets lift 2px, straighten to 0° and take the lift shadow plus an ink border; grid cells take an ink-soft border and a 5% ink wash; a hovered lit cell swaps its turquoise dot to orange; dashed ghost steps turn blue in border and text.
 - **Pressed:** stamps drop into an inset 2px ink shadow while held; grid cells and sheets take no press styling.
-- **Pressed state (`aria-pressed="true"`):** ink fill with paper text on tabs, notation, loop, beats, major/minor, sevenths and root keys; proof sheets take an ink border with a multiply turquoise label band; interactive grid cells report their lit state.
+- **Pressed state (`aria-pressed="true"`):** ink fill with paper text on tabs, notation, loop, click, beats, major/minor, sevenths and root keys; proof sheets take an ink border with a multiply turquoise label band; interactive grid cells report their lit state.
 - **Live turquoise:** the Run stamp while playing and the "Activar sonido" prompt fill turquoise with ink text.
-- **Disabled:** stamps at opacity 0.35 with no shadow and a not-allowed cursor (Run with an empty progression); step sheets disable while playing with a stop tooltip.
+- **Dragging:** the dragged step sheet prints as a 1px dashed rule-strong cutline at 40% opacity; a 3px ink vertical rule marks the insertion point in the 6px gap before the target slot, or after the last filled sheet for "move to end"; no lift shadow, no rotation.
+- **Disabled:** stamps at opacity 0.35 with no shadow and a not-allowed cursor (Run with an empty progression and click off); step sheets disable and stop dragging while playing with a stop tooltip.
 - **Empty:** readout lines print in ink-faint — no voicings in range, no suggestions yet, empty progression hint, and the detector's "Ningún acorde reconocible" at 1.05rem in ink-soft; empty strip slots print as paper-deep/40 wells with a rule border.
 - **Error:** the chord field underline turns red with an 11px mono red message; no other field errors exist.
 - **Loading / fallback:** the blue loading chip and the neutral fallback chip in the transport; the enable prompt is a live stamp until audio starts.

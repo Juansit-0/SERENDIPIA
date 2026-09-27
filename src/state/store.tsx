@@ -67,6 +67,8 @@ interface StoreValue {
   setVolume: (volume: number) => void
   loop: boolean
   setLoop: (loop: boolean) => void
+  metronome: boolean
+  setMetronome: (metronome: boolean) => void
   beatsPerChord: number
   setBeatsPerChord: (beats: number) => void
   timbre: TimbreId
@@ -96,6 +98,7 @@ interface StoreValue {
   clearProgression: () => void
   playing: boolean
   activeStep: number
+  activeBeat: number
   togglePlay: () => void
   audioReady: boolean
   audioLoading: TimbreId | null
@@ -121,6 +124,7 @@ interface PersistedSettings {
   keyRootPc: number
   keyMode: Mode
   loop: boolean
+  metronome: boolean
   beatsPerChord: number
   timbre: TimbreId
   capo: number
@@ -135,6 +139,7 @@ const DEFAULTS: PersistedSettings = {
   keyRootPc: 0,
   keyMode: 'major',
   loop: true,
+  metronome: false,
   beatsPerChord: 4,
   timbre: 'nylon',
   capo: 0,
@@ -164,6 +169,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [tempo, setTempo] = useState(initial.current.tempo)
   const [volume, setVolume] = useState(initial.current.volume)
   const [loop, setLoop] = useState(initial.current.loop)
+  const [metronome, setMetronome] = useState(initial.current.metronome)
   const [beatsPerChord, setBeatsPerChord] = useState(initial.current.beatsPerChord)
   const [timbre, setTimbreState] = useState<TimbreId>(initial.current.timbre)
   const [capo, setCapoState] = useState(initial.current.capo)
@@ -184,6 +190,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   )
   const [playing, setPlaying] = useState(false)
   const [activeStep, setActiveStep] = useState(-1)
+  const [activeBeat, setActiveBeat] = useState(-1)
   const [detectorFrets, setDetectorFrets] = useState<(number | null)[]>([0, 0, 0, 0, 0, 0])
   const [markedVoicing, setMarkedVoicingState] = useState<MarkedVoicing | null>(null)
   const [audioReady, setAudioReady] = useState(false)
@@ -218,6 +225,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       keyRootPc,
       keyMode,
       loop,
+      metronome,
       beatsPerChord,
       timbre,
       capo,
@@ -227,7 +235,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     } catch {
       return
     }
-  }, [lang, notation, tuningId, tempo, volume, keyRootPc, keyMode, loop, beatsPerChord, timbre, capo])
+  }, [lang, notation, tuningId, tempo, volume, keyRootPc, keyMode, loop, metronome, beatsPerChord, timbre, capo])
 
   useEffect(() => {
     audioEngine.setVolume(volume)
@@ -374,6 +382,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     audioEngine.stopProgression()
     setPlaying(false)
     setActiveStep(-1)
+    setActiveBeat(-1)
   }, [])
 
   const getFretsForStep = useCallback(
@@ -390,9 +399,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       audioEngine.stopProgression()
       setPlaying(false)
       setActiveStep(-1)
+      setActiveBeat(-1)
       return
     }
-    if (progression.length === 0) return
+    if (progression.length === 0 && !metronome) return
     void enableAudio().then(() => {
       audioEngine.playProgression({
         stepCount: progression.length,
@@ -400,32 +410,59 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         loop,
         beatsPerChord,
         tuning: soundingTuning,
+        metronome,
         getFrets: getFretsForStep,
         onStep: (index) => setActiveStep(index),
+        onBeat: (beat) => setActiveBeat(beat),
         onEnd: () => {
           setPlaying(false)
           setActiveStep(-1)
+          setActiveBeat(-1)
         },
       })
       setPlaying(true)
     })
-  }, [playing, progression.length, enableAudio, tempo, loop, beatsPerChord, soundingTuning, getFretsForStep])
+  }, [
+    playing,
+    progression.length,
+    metronome,
+    enableAudio,
+    tempo,
+    loop,
+    beatsPerChord,
+    soundingTuning,
+    getFretsForStep,
+  ])
 
   useEffect(() => {
     if (!playing) return
-    audioEngine.updateProgression({ tempo, loop, beatsPerChord })
-  }, [tempo, loop, beatsPerChord, playing])
+    audioEngine.updateProgression({ tempo, loop, beatsPerChord, metronome })
+  }, [tempo, loop, beatsPerChord, metronome, playing])
 
   useEffect(() => {
     if (!playing) return
     if (progression.length === 0) {
+      if (metronome) {
+        audioEngine.updateProgression({ stepCount: 0, getFrets: getFretsForStep })
+        return
+      }
       audioEngine.stopProgression()
       setPlaying(false)
       setActiveStep(-1)
+      setActiveBeat(-1)
       return
     }
     audioEngine.updateProgression({ stepCount: progression.length, getFrets: getFretsForStep })
-  }, [progression, playing, getFretsForStep])
+  }, [progression, playing, metronome, getFretsForStep])
+
+  useEffect(() => {
+    if (playing && progression.length === 0 && !metronome) {
+      audioEngine.stopProgression()
+      setPlaying(false)
+      setActiveStep(-1)
+      setActiveBeat(-1)
+    }
+  }, [metronome, playing, progression.length])
 
   const toggleDetectorString = useCallback((stringIndex: number, fret: number) => {
     setDetectorFrets((previous) => {
@@ -473,6 +510,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setVolume,
     loop,
     setLoop,
+    metronome,
+    setMetronome,
     beatsPerChord,
     setBeatsPerChord,
     timbre,
@@ -502,6 +541,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     clearProgression,
     playing,
     activeStep,
+    activeBeat,
     togglePlay,
     audioReady,
     audioLoading,

@@ -12,6 +12,7 @@ export const en: Dictionary = {
   'transport.timbre': 'Timbre',
   'transport.capo': 'Capo',
   'transport.loop': 'Loop',
+  'transport.metronome': 'Click',
   'transport.key': 'Key',
   'transport.notation': 'Notation',
   'transport.lang': 'Language',

@@ -2,14 +2,14 @@
 
 Sistema de Encuentro y Recomendación de Escalas, Notación, Detección e Identificación de Progresiones Interactivas de Acordes.
 
-A personal guitar practice instrument: type a chord and see every playable position, mark a fretboard position and get the chord's name (with honest ambiguity), read the theory at whatever depth you choose, and build a progression that plays itself. Bilingual ES/EN, Anglo notation with Latin alongside.
+A personal guitar practice instrument: type a chord and see every playable position, mark a fretboard position and get the chord's name (with honest ambiguity), read the theory at whatever depth you choose, and build a progression that plays itself and reorders by drag. A metronome click runs over the progression or standalone. Bilingual ES/EN, Anglo notation with Latin alongside.
 
 ## Run it
 
 ```bash
 npm install
 npm run dev        # http://localhost:5173
-npm test           # 37 Vitest specs over the music domain
+npm test           # 75 Vitest specs over the music domain and audio timing
 npm run typecheck
 npm run build
 ```

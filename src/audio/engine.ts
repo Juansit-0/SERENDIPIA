@@ -1,6 +1,6 @@
 import * as Tone from 'tone'
 import { midiToFreq } from '../music/notes'
-import { beatsToNotation } from './timing'
+import { beatsToNotation, isAccentBeat } from './timing'
 import { SAMPLE_FILES } from '../assets/samples/generated'
 
 export type PlayPattern = 'strum-down' | 'strum-up' | 'arpeggio' | 'block'
@@ -22,6 +22,8 @@ export interface ProgressionOptions {
   getFrets: (index: number) => (number | null)[] | null
   onStep: (index: number) => void
   onEnd?: () => void
+  metronome?: boolean
+  onBeat?: (beat: number) => void
 }
 
 class AudioEngine {
@@ -35,6 +37,10 @@ class AudioEngine {
   private volume = 0.8
   private loopEvent: Tone.Loop | null = null
   private endEvent: number | null = null
+  private click: Tone.Synth | null = null
+  private clickGain: Tone.Gain | null = null
+  private metronomeEvent: Tone.Loop | null = null
+  private beat = 0
   private cursor = 0
   private options: ProgressionOptions | null = null
   private loadingTimbre: TimbreId | null = null
@@ -79,6 +85,8 @@ class AudioEngine {
       sampleFiles: Object.keys(SAMPLE_FILES[this.timbre] ?? {}).length,
       loaded: this.loadedTimbres.has(this.timbre),
       fallbackVoices: this.fallbackVoices.length,
+      metronome: this.metronomeEvent !== null,
+      beat: this.beat,
     }
   }
 
@@ -99,8 +107,19 @@ class AudioEngine {
 
     input.chain(highpass, compressor, master, reverb, limiter, Tone.getDestination())
 
+    const clickGain = new Tone.Gain(this.volume)
+    clickGain.connect(limiter)
+    const click = new Tone.Synth({
+      oscillator: { type: 'square' },
+      envelope: { attack: 0.001, decay: 0.032, sustain: 0, release: 0.02 },
+    })
+    click.volume.value = -9
+    click.connect(clickGain)
+
     this.input = input
     this.master = master
+    this.click = click
+    this.clickGain = clickGain
     this.started = true
     await this.loadTimbre(this.timbre)
     void this.loadFretNoise()
@@ -109,6 +128,7 @@ class AudioEngine {
   setVolume(value: number): void {
     this.volume = value
     if (this.master) this.master.gain.rampTo(value, 0.08)
+    if (this.clickGain) this.clickGain.gain.rampTo(value, 0.08)
   }
 
   async setTimbre(id: TimbreId): Promise<void> {
@@ -259,17 +279,40 @@ class AudioEngine {
     this.fretNoise.triggerAttackRelease(note, 0.18, time, 0.5)
   }
 
+  private startMetronomeLoop(): void {
+    if (this.metronomeEvent || !this.click) return
+    this.beat = 0
+    this.metronomeEvent = new Tone.Loop((time) => {
+      const accent = isAccentBeat(this.beat)
+      this.click?.triggerAttackRelease(accent ? 'C6' : 'C5', 0.04, time, accent ? 1 : 0.42)
+      const beat = this.beat
+      this.beat += 1
+      const onBeat = this.options?.onBeat
+      if (onBeat) Tone.getDraw().schedule(() => onBeat(beat), time)
+    }, '4n')
+    this.metronomeEvent.start(0)
+  }
+
+  private stopMetronomeLoop(): void {
+    if (this.metronomeEvent) {
+      this.metronomeEvent.dispose()
+      this.metronomeEvent = null
+    }
+    this.beat = 0
+  }
+
   playProgression(options: ProgressionOptions): void {
     if (!this.started) return
     this.stopProgression()
     const transport = Tone.getTransport()
     transport.bpm.value = options.tempo
     transport.timeSignature = 4
-    transport.loop = options.loop
+    transport.loop = options.stepCount === 0 ? true : options.loop
     transport.loopStart = 0
     transport.loopEnd = `${Math.max(1, options.stepCount)}m`
     this.cursor = 0
     this.options = options
+    if (options.metronome) this.startMetronomeLoop()
 
     this.loopEvent = new Tone.Loop((time) => {
       const current = this.options
@@ -286,7 +329,7 @@ class AudioEngine {
 
     this.loopEvent.start(0)
 
-    if (!options.loop) {
+    if (!options.loop && options.stepCount > 0) {
       this.endEvent = transport.scheduleOnce((time) => {
         Tone.getDraw().schedule(() => this.options?.onEnd?.(), time)
         this.stopProgression()
@@ -302,6 +345,10 @@ class AudioEngine {
     const transport = Tone.getTransport()
     if (patch.tempo !== undefined) transport.bpm.rampTo(patch.tempo, 0.06)
     if (patch.loop !== undefined) transport.loop = patch.loop
+    if (patch.metronome !== undefined) {
+      if (patch.metronome) this.startMetronomeLoop()
+      else this.stopMetronomeLoop()
+    }
     if (this.options.stepCount > 0) {
       transport.loopEnd = `${this.options.stepCount}m`
       if (this.cursor >= this.options.stepCount) this.cursor = 0
@@ -313,6 +360,7 @@ class AudioEngine {
 
   stopProgression(): void {
     const transport = Tone.getTransport()
+    this.stopMetronomeLoop()
     if (this.loopEvent) {
       this.loopEvent.dispose()
       this.loopEvent = null

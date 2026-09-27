@@ -23,6 +23,8 @@ export function TransportStrip() {
     setBeatsPerChord,
     loop,
     setLoop,
+    metronome,
+    setMetronome,
     timbre,
     setTimbre,
     capo,
@@ -30,6 +32,7 @@ export function TransportStrip() {
     volume,
     setVolume,
     playing,
+    activeBeat,
     togglePlay,
     progression,
     audioReady,
@@ -71,7 +74,7 @@ export function TransportStrip() {
           type="button"
           className={`stamp min-w-[86px] ${playing ? 'stamp--live' : 'stamp--ink'}`}
           onClick={togglePlay}
-          disabled={progression.length === 0}
+          disabled={progression.length === 0 && !metronome}
         >
           {playing ? t('transport.stop') : t('transport.run')}
         </button>
@@ -117,6 +120,29 @@ export function TransportStrip() {
         <button type="button" className="stamp" aria-pressed={loop} onClick={() => setLoop(!loop)}>
           {t('transport.loop')}
         </button>
+
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            className="stamp"
+            aria-pressed={metronome}
+            onClick={() => setMetronome(!metronome)}
+          >
+            {t('transport.metronome')}
+          </button>
+          {playing && activeBeat >= 0 && (
+            <span className="flex items-center gap-[3px]" aria-hidden="true">
+              {[0, 1, 2, 3].map((beat) => (
+                <span
+                  key={beat}
+                  className={`h-[6px] w-[6px] rounded-full ${
+                    activeBeat % 4 === beat ? (beat === 0 ? 'bg-ink' : 'bg-ink-soft') : 'bg-rule'
+                  }`}
+                />
+              ))}
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="ml-auto flex w-full flex-wrap items-center gap-x-4 gap-y-2 sm:w-auto">

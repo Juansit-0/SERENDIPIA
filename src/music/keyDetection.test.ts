@@ -67,3 +67,10 @@ describe('sameKey', () => {
     expect(sameKey({ rootPc: 9, mode: 'minor' }, { rootPc: 0, mode: 'major' })).toBe(false)
   })
 })
+
+describe('harmonic minor', () => {
+  it('offers the minor key whose dominant seventh is the chord', () => {
+    const keys = keyCandidates({ rootPc: 4, qualityId: '7' }).map((key) => `${key.keyAnglo} ${key.mode}`)
+    expect(keys).toContain('A minor')
+  })
+})

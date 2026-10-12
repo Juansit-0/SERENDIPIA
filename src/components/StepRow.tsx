@@ -172,7 +172,7 @@ export function StepRow() {
                   {notation === 'latin' ? step.latin : step.anglo}
                 </span>
                 {notation === 'both' && (
-                  <span className="truncate font-mono text-[8px] text-ink-soft">{step.latin}</span>
+                  <span className="fv-ui truncate text-[9px] text-ink-soft">{step.latin}</span>
                 )}
                 <span className="flex items-center gap-1">
                   <span

@@ -21,6 +21,7 @@ export function TheoryView() {
     t,
     lang,
     notation,
+    chord,
     setChord,
     loadProgression,
     suggestions,
@@ -29,6 +30,8 @@ export function TheoryView() {
   const [sevenths, setSevenths] = useState(false)
 
   const diatonic = useMemo(() => diatonicChords(keyRootPc, keyMode, sevenths), [keyRootPc, keyMode, sevenths])
+  const isCurrent = (rootPc: number, qualityId: string) =>
+    chord.bassPc === null && chord.rootPc === rootPc && chord.quality.id === qualityId
   const progressions = useMemo(() => PROGRESSIONS.filter((item) => item.mode === keyMode), [keyMode])
 
   return (
@@ -86,7 +89,10 @@ export function TheoryView() {
             <button
               key={`${degree.roman}-${degree.rootPc}`}
               type="button"
-              className="sheet flex flex-col items-start gap-0.5 overflow-hidden px-3 py-2 text-left"
+              aria-pressed={isCurrent(degree.rootPc, degree.qualityId)}
+              className={`sheet flex flex-col items-start gap-0.5 overflow-hidden px-3 py-2 text-left ${
+                isCurrent(degree.rootPc, degree.qualityId) ? 'border-ink bg-paper-deep' : ''
+              }`}
               onClick={() => {
                 const parsed = parseChord(degree.anglo)
                 if (parsed) setChord(parsed)
@@ -101,74 +107,77 @@ export function TheoryView() {
         </div>
 
         <div className="flex flex-col gap-2 border-t border-rule pt-3">
-          <h3 className="label-ink text-blue-ink">{t('suggestions.title')}</h3>
+          <h3 className="label-ink text-blue-ink">{t('theory.progressions')}</h3>
           <div className="flex flex-col gap-2">
-            {suggestions.map((suggestion) => (
-              <div className="flex items-stretch gap-2" key={suggestion.anglo}>
-                <button
-                  type="button"
-                  className="sheet flex flex-1 flex-col items-start gap-0.5 px-3 py-2 text-left"
-                  onClick={() => {
-                    const parsed = parseChord(suggestion.anglo)
-                    if (parsed) setChord(parsed)
-                  }}
-                >
-                  <span className="fv-ui text-[1rem] font-bold">
-                    {suggestion.roman ? `${suggestion.roman} · ` : ''}
-                    {notation === 'latin' ? suggestion.latin : suggestion.anglo}
-                  </span>
-                  <span className="text-[10px] leading-snug text-ink-soft">
-                    {lang === 'es' ? suggestion.reasonEs : suggestion.reasonEn}
-                  </span>
-                </button>
-                <button
-                  type="button"
-                  className="stamp px-2"
-                  onClick={() => addSuggestion(suggestion)}
-                  aria-label={t('progression.add')}
-                >
-                  +
-                </button>
-              </div>
-            ))}
+            {progressions.map((template) => {
+              const steps = resolveProgression(template, keyRootPc)
+              return (
+                <div className="flex items-center justify-between gap-3" key={template.id}>
+                  <div className="flex min-w-0 flex-col gap-0.5">
+                    <span className="fv-ui text-[0.9375rem] font-semibold">
+                      {lang === 'es' ? template.nameEs : template.nameEn}
+                    </span>
+                    <span className="truncate font-mono text-[10px] text-ink-soft">
+                      {steps.map((step) => step.anglo).join(' · ')}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    className="stamp shrink-0"
+                    onClick={() =>
+                      loadProgression(
+                        steps.map((step) => ({
+                          rootPc: step.rootPc,
+                          qualityId: step.qualityId,
+                          anglo: step.anglo,
+                          latin: step.latin,
+                        })),
+                      )
+                    }
+                  >
+                    {t('theory.load')}
+                  </button>
+                </div>
+              )
+            })}
           </div>
         </div>
       </section>
 
       <section className="plate flex flex-col gap-3 p-4">
-        <h2 className="label-ink text-blue-ink">{t('theory.progressions')}</h2>
+        <h2 className="label-ink text-blue-ink">{t('suggestions.title')}</h2>
         <div className="flex flex-col gap-2">
-          {progressions.map((template) => {
-            const steps = resolveProgression(template, keyRootPc)
-            return (
-              <div className="flex items-center justify-between gap-3" key={template.id}>
-                <div className="flex min-w-0 flex-col gap-0.5">
-                  <span className="fv-ui text-[0.9375rem] font-semibold">
-                    {lang === 'es' ? template.nameEs : template.nameEn}
-                  </span>
-                  <span className="truncate font-mono text-[10px] text-ink-soft">
-                    {steps.map((step) => step.anglo).join(' · ')}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  className="stamp shrink-0"
-                  onClick={() =>
-                    loadProgression(
-                      steps.map((step) => ({
-                        rootPc: step.rootPc,
-                        qualityId: step.qualityId,
-                        anglo: step.anglo,
-                        latin: step.latin,
-                      })),
-                    )
-                  }
-                >
-                  {t('theory.load')}
-                </button>
-              </div>
-            )
-          })}
+          {suggestions.map((suggestion) => (
+            <div className="flex items-stretch gap-2" key={suggestion.anglo}>
+              <button
+                type="button"
+                aria-pressed={isCurrent(suggestion.rootPc, suggestion.qualityId)}
+                className={`sheet flex flex-1 flex-col items-start gap-0.5 px-3 py-2 text-left ${
+                  isCurrent(suggestion.rootPc, suggestion.qualityId) ? 'border-ink bg-paper-deep' : ''
+                }`}
+                onClick={() => {
+                  const parsed = parseChord(suggestion.anglo)
+                  if (parsed) setChord(parsed)
+                }}
+              >
+                <span className="fv-ui text-[1rem] font-bold">
+                  {suggestion.roman ? `${suggestion.roman} · ` : ''}
+                  {notation === 'latin' ? suggestion.latin : suggestion.anglo}
+                </span>
+                <span className="text-[10px] leading-snug text-ink-soft">
+                  {lang === 'es' ? suggestion.reasonEs : suggestion.reasonEn}
+                </span>
+              </button>
+              <button
+                type="button"
+                className="stamp px-2"
+                onClick={() => addSuggestion(suggestion)}
+                aria-label={t('progression.add')}
+              >
+                +
+              </button>
+            </div>
+          ))}
         </div>
       </section>
 

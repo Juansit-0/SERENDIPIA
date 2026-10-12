@@ -9,15 +9,22 @@ A personal guitar practice instrument: type a chord and see every playable posit
 ```bash
 npm install
 npm run dev        # http://localhost:5173
-npm test           # 75 Vitest specs over the music domain and audio timing
+npm test           # Vitest: music domain, audio engine (mocked Tone.js), state and components (jsdom)
 npm run typecheck
+npm run lint       # oxlint, including the React hooks rules
 npm run build
 ```
+
+## Keyboard
+
+- **Space**: play / stop the progression (or the metronome alone)
+- **Fretboard**: one tab stop; arrows move between cells, Home / End jump along a string
+- **Progression**: tap or Enter on a step opens its picker (voicing, move ← / →, remove); **Alt+←/→** moves the focused step; **Alt+click** removes it; **Esc** closes the picker
 
 ## Stack
 
 - React 19 + Vite 8 + TypeScript, Tailwind CSS v4 (design tokens live in `@theme` in `src/styles/tailwind.css`)
-- Tone.js for the audio graph, with self-hosted guitar samples
+- Tone.js for the audio graph, with self-hosted guitar samples; loaded as a separate chunk, prefetched when the browser is idle
 - Pure TypeScript music domain in `src/music/` (notes, chord templates, parser, voicings, detector, scales, progressions), covered by Vitest
 
 ## Visual world
@@ -28,7 +35,7 @@ Riso Studio (direction seed `06d8a1d9`): music print culture — flat spot inks,
 
 The guitar samples in `src/assets/samples/` are extracted from the pre-rendered MusyngKite soundfonts published by [gleitz/midi-js-soundfonts](https://github.com/gleitz/midi-js-soundfonts) (generated from the Musyng Kite soundfont, licensed **CC BY-SA 3.0**). Only twelve notes per timbre plus three fret-noise hits are kept, trimmed to ~1.7s, mono, converted with ffmpeg, and loaded lazily per timbre. If the samples fail to load the engine falls back to a synthesized plucked-string voice.
 
-Regenerate the sample set with:
+Regenerate the sample set with (requires `ffmpeg` on the PATH):
 
 ```bash
 node scripts/fetch-samples.mjs

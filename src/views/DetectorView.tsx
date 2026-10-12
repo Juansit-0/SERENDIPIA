@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { OffsetPlate } from '../components/OffsetPlate'
 import { RegMark } from '../components/RegMark'
+import { StepRow } from '../components/StepRow'
 import { StepGrid } from '../components/StepGrid'
 import { detectChord } from '../music/detectChord'
 import { LATIN_SHARP, PITCH_SHARP, chordAccidental } from '../music/notes'
@@ -175,6 +176,10 @@ export function DetectorView() {
           <p className="text-[1.05rem] text-ink-soft">{t('detector.none')}</p>
         )}
       </aside>
+
+      <div className="min-w-0 xl:col-span-2">
+        <StepRow />
+      </div>
     </div>
   )
 }

@@ -83,6 +83,7 @@ const LOWER: Record<string, QualityId> = {}
 
 for (const quality of QUALITY_LIST) {
   EXACT[quality.suffix] = quality.id
+  if (quality.suffix.length > 1) LOWER[quality.suffix.toLowerCase()] ??= quality.id
   for (const alias of quality.aliases) {
     EXACT[alias] = quality.id
     if (alias.length > 1) LOWER[alias.toLowerCase()] = quality.id

@@ -36,3 +36,10 @@ describe('detectChord', () => {
     expect(detectChord(fret('x,x,x,x,x,x')).candidates).toEqual([])
   })
 })
+
+describe('bass note', () => {
+  it('uses the lowest sounding note, not the lowest string', () => {
+    // B2 on the 6th string (fret 7) sits above the open A2 on the 5th.
+    expect(detectChord([7, 0, 2, 2, 2, 0]).bassPc).toBe(9)
+  })
+})

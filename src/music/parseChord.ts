@@ -1,5 +1,5 @@
 import { Quality, QualityId, qualityById, qualityFromSuffix } from './chords'
-import { Accidental, chordAccidental, latinName, parsePitchToken, pitchName } from './notes'
+import { Accidental, chordAccidental, latinName, parsePitchToken, pitchName, typedAccidental } from './notes'
 
 export interface ParsedChord {
   rootPc: number
@@ -21,14 +21,18 @@ export function normalizeInput(input: string): string {
     .replace(/6\/9/g, '69')
 }
 
-function parseRoot(head: string): { rootPc: number; suffix: string } | null {
+export function isMinorQuality(quality: Quality): boolean {
+  return quality.intervals.includes(3) && !quality.intervals.includes(4)
+}
+
+function parseRoot(head: string): { rootPc: number; suffix: string; token: string } | null {
   for (let len = head.length; len >= 1; len -= 1) {
     const candidate = head.slice(0, len)
     const pc = parsePitchToken(candidate)
     if (pc === null) continue
     const suffix = head.slice(len)
     if (qualityFromSuffix(suffix) === null) continue
-    return { rootPc: pc, suffix }
+    return { rootPc: pc, suffix, token: candidate }
   }
   return null
 }
@@ -50,8 +54,9 @@ export function parseChord(input: string): ParsedChord | null {
     if (bassPc === null) return null
   }
 
-  const accidental = chordAccidental(root.rootPc)
-  const bassAccidental = bassPc !== null ? chordAccidental(bassPc) : accidental
+  const accidental = typedAccidental(root.token) ?? chordAccidental(root.rootPc, isMinorQuality(quality))
+  const bassAccidental =
+    bassPc !== null ? (typedAccidental(bassToken) ?? chordAccidental(bassPc)) : accidental
   const angloBase = `${pitchName(root.rootPc, accidental)}${quality.suffix}`
   const latinBase = `${latinName(root.rootPc, accidental)}${latinSuffix(quality.suffix)}`
 
@@ -77,7 +82,7 @@ export function formatChord(
   options: { accidental?: Accidental; bassPc?: number | null } = {},
 ): { anglo: string; latin: string } {
   const quality = qualityById(qualityId)
-  const accidental = options.accidental ?? chordAccidental(rootPc)
+  const accidental = options.accidental ?? chordAccidental(rootPc, isMinorQuality(quality))
   const baseAnglo = `${pitchName(rootPc, accidental)}${quality.suffix}`
   const baseLatin = `${latinName(rootPc, accidental)}${latinSuffix(quality.suffix)}`
   if (options.bassPc === undefined || options.bassPc === null) {

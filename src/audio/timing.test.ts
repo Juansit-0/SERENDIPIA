@@ -9,6 +9,11 @@ describe('beatsToNotation', () => {
     expect(beatsToNotation(8)).toBe('2m')
   })
 
+  it('spells odd lengths as bars:beats:sixteenths', () => {
+    expect(beatsToNotation(3)).toBe('0:3:0')
+    expect(beatsToNotation(6)).toBe('1:2:0')
+  })
+
   it('clamps degenerate values into a musical step', () => {
     expect(beatsToNotation(0)).toBe('4n')
     expect(beatsToNotation(16)).toBe('2m')
@@ -32,6 +37,7 @@ describe('stepDurationSeconds', () => {
     expect(stepDurationSeconds(60, 4)).toBeCloseTo(4)
     expect(stepDurationSeconds(120, 4)).toBeCloseTo(2)
     expect(stepDurationSeconds(92, 2)).toBeCloseTo(1.3043, 3)
+    expect(stepDurationSeconds(0, 4)).toBe(0)
   })
 })
 

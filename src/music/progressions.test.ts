@@ -43,6 +43,25 @@ describe('progressions', () => {
     expect(suggestions[0].reasonEs).toContain('Cadencia')
   })
 
+  it('labels cadences by degree, not only by function', () => {
+    const fromG = nextChordSuggestions(7, 0, 'major')
+    expect(fromG.find((s) => s.anglo === 'C')?.reasonEs).toMatch(/^Cadencia auténtica/)
+    expect(fromG.find((s) => s.anglo === 'Am')?.reasonEs).toMatch(/^Cadencia rota/)
+    expect(fromG.find((s) => s.anglo === 'F')?.reasonEs ?? '').not.toMatch(/rota/)
+    const fromBdim = nextChordSuggestions(11, 0, 'major')
+    expect(fromBdim.find((s) => s.anglo === 'C')?.reasonEs).toMatch(/sensible/)
+    expect(fromBdim.find((s) => s.anglo === 'Am')?.reasonEs ?? '').not.toMatch(/auténtica/)
+  })
+
+  it('only calls major/minor pairs relatives', () => {
+    const fromBdim = nextChordSuggestions(11, 0, 'major')
+    expect(fromBdim.some((s) => s.reasonEs.startsWith('Relativo'))).toBe(false)
+    for (const [rootPc, relative] of [[2, 'F'], [4, 'G'], [9, 'C']] as const) {
+      const labelled = nextChordSuggestions(rootPc, 0, 'major').filter((s) => s.reasonEs.startsWith('Relativo mayor'))
+      expect(labelled.every((s) => s.anglo === relative)).toBe(true)
+    }
+  })
+
   it('suggests useful options from the tonic', () => {
     const labels = nextChordSuggestions(0, 0, 'major').map((suggestion) => suggestion.anglo)
     expect(labels.some((label) => label === 'F' || label === 'G')).toBe(true)

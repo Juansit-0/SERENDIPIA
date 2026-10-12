@@ -36,7 +36,7 @@ export function soundingMidi(frets: (number | null)[], tuning: number[] = STANDA
 export function detectChord(frets: (number | null)[], tuning: number[] = STANDARD_TUNING): DetectionResult {
   const midi = soundingMidi(frets, tuning)
   const pcs = [...new Set(midi.map((note) => ((note % 12) + 12) % 12))]
-  const bassPc = midi.length > 0 ? ((midi[0] % 12) + 12) % 12 : null
+  const bassPc = midi.length > 0 ? ((Math.min(...midi) % 12) + 12) % 12 : null
 
   const notes = midi.map((note) => {
     const pc = ((note % 12) + 12) % 12

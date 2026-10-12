@@ -184,9 +184,9 @@ const RELATION_REASONS: Record<string, { es: string; en: string; weight: number 
     weight: 1,
   },
   'dominant>subdominant': {
-    es: 'Cadencia rota: la tensión se desvía',
-    en: 'Deceptive move: the tension sidesteps',
-    weight: 0.55,
+    es: 'Retrogresión: la dominante retrocede',
+    en: 'Retrogression: the dominant steps back',
+    weight: 0.5,
   },
   'subdominant>dominant': {
     es: 'Prepara la cadencia: subdominante hacia dominante',
@@ -207,6 +207,21 @@ const RELATION_REASONS: Record<string, { es: string; en: string; weight: number 
     es: 'Tensión directa desde la tónica',
     en: 'Direct tension from the tonic',
     weight: 0.7,
+  },
+  'deceptive': {
+    es: 'Cadencia rota: la tensión se desvía',
+    en: 'Deceptive cadence: the tension sidesteps',
+    weight: 0.8,
+  },
+  'leading-tone': {
+    es: 'Resuelve la sensible: el séptimo grado sube a la tónica',
+    en: 'Leading-tone resolution: the seventh degree rises home',
+    weight: 0.85,
+  },
+  'dominant>tonic-function': {
+    es: 'Hacia función de tónica: la tensión se relaja',
+    en: 'Toward tonic function: the tension relaxes',
+    weight: 0.6,
   },
   'tonic>tonic': {
     es: 'Continuidad: mismo centro tonal',
@@ -250,11 +265,16 @@ export function nextChordSuggestions(
     const fromFunction: HarmonicFunction = currentDegree.harmonicFunction
     for (const target of diatonic) {
       if (target.rootPc === currentRootPc) continue
-      const reason = RELATION_REASONS[`${fromFunction}>${target.harmonicFunction}`]
+      let reason = RELATION_REASONS[`${fromFunction}>${target.harmonicFunction}`]
+      if (fromFunction === 'dominant' && target.harmonicFunction === 'tonic' && target.degree !== 0) {
+        reason = currentDegree.degree === 4 && target.degree === 5 ? RELATION_REASONS.deceptive : RELATION_REASONS['dominant>tonic-function']
+      } else if (fromFunction === 'dominant' && target.degree === 0 && currentDegree.degree !== 4) {
+        reason = RELATION_REASONS['leading-tone']
+      }
       if (!reason) continue
       let weight = reason.weight
       if (target.harmonicFunction === 'tonic' && fromFunction === 'dominant') weight += 0.1
-      if (target.rootPc === (currentRootPc + 9) % 12) {
+      if (target.rootPc === (currentRootPc + 9) % 12 && currentDegree.qualityId === 'maj' && target.qualityId === 'min') {
         push(
           target.rootPc,
           target.qualityId,
@@ -274,7 +294,7 @@ export function nextChordSuggestions(
 
     const relative = (currentRootPc + 3) % 12
     const relativeChord = diatonic.find((chord) => chord.rootPc === relative)
-    if (relativeChord) {
+    if (relativeChord && currentDegree.qualityId === 'min' && relativeChord.qualityId === 'maj') {
       push(
         relativeChord.rootPc,
         relativeChord.qualityId,

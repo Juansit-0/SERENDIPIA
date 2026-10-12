@@ -302,7 +302,7 @@ The app is one paper sheet: `.grain` wraps a centered column of max-width 1560px
 - **Theory**: one column until 1280px, then `minmax(320px,1.1fr) minmax(320px,1fr)` — diatonic plate (with progression templates below it) / suggestions plate, then the strip.
 - **Fret grid**: `24px` string-label column + `34px` open-string column + N equal fret columns, 3px gaps, 30px cells; window 5 frets in the dictionary, 12 in the detector.
 - **Root grids**: six equal columns, 6px gaps. **Diatonic degrees**: 2 columns below `sm`, 4 above, 8px gaps.
-- **Progression strip**: 16 equal slots with 6px gaps; 68px sheets; a "Swipe →" hint shows below `sm`, an "Arrastra para reordenar · Ctrl+←/→" readout from `lg` up.
+- **Progression strip**: 16 equal slots with 6px gaps; 68px sheets; a "Swipe →" hint shows below `sm`, an "Arrastra o toca un paso para moverlo · Alt+←/→" readout from `lg` up (screen-reader text below `lg`); the step picker carries "← Mover / Mover →" stamps so touch can reorder.
 
 ### Named Rules
 **The Fold-At-XL Rule.** Every view is a single column until 1280px. Panels reflow and reorder; they do not shrink into unreadable grids.

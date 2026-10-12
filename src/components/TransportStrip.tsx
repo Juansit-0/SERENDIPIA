@@ -80,7 +80,7 @@ export function TransportStrip() {
         </button>
 
         <div className="flex items-center gap-2">
-          <span className="label-ink">{t('transport.tempo')}</span>
+          <span className="label-ink text-blue-ink">{t('transport.tempo')}</span>
           <div className="flex items-center gap-1">
             <button
               type="button"
@@ -106,7 +106,7 @@ export function TransportStrip() {
         </div>
 
         <div className="flex items-center gap-1" role="group" aria-label={t('a11y.beats')}>
-          <span className="label-ink">{t('transport.beats')}</span>
+          <span className="label-ink text-blue-ink">{t('transport.beats')}</span>
           {BEAT_OPTIONS.map((beats) => (
             <button
               key={beats}
@@ -139,7 +139,7 @@ export function TransportStrip() {
 
       <div className="ml-auto flex w-full flex-wrap items-center gap-x-4 gap-y-2 sm:w-auto">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="label-ink">{t('transport.timbre')}</span>
+          <span className="label-ink text-blue-ink">{t('transport.timbre')}</span>
           <select
             className="stamp min-w-0 max-w-[9rem] flex-1 cursor-pointer appearance-none px-2 py-0.5 sm:flex-none"
             value={timbre}
@@ -155,7 +155,7 @@ export function TransportStrip() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <span className="label-ink">{t('transport.capo')}</span>
+          <span className="label-ink text-blue-ink">{t('transport.capo')}</span>
           <div className="flex items-center gap-1">
             <button
               type="button"
@@ -183,7 +183,7 @@ export function TransportStrip() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <span className="label-ink">{t('transport.key')}</span>
+          <span className="label-ink text-blue-ink">{t('transport.key')}</span>
           <select
             className="stamp min-w-0 max-w-[9rem] flex-1 cursor-pointer appearance-none px-2 py-0.5 sm:flex-none"
             value={keyRootPc}
@@ -208,7 +208,7 @@ export function TransportStrip() {
         </div>
 
         <div className="flex flex-wrap items-center gap-1" role="group" aria-label={t('transport.notation')}>
-          <span className="label-ink">{t('transport.notation')}</span>
+          <span className="label-ink text-blue-ink">{t('transport.notation')}</span>
           {NOTATIONS.map((item) => (
             <button
               key={item}
@@ -223,7 +223,7 @@ export function TransportStrip() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <span className="label-ink">{t('transport.volume')}</span>
+          <span className="label-ink text-blue-ink">{t('transport.volume')}</span>
           <input
             type="range"
             min={0}

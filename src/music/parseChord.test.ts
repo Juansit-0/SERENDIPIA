@@ -54,3 +54,29 @@ describe('parseChord', () => {
     expect(formatChord(9, '7', { bassPc: 0 }).anglo).toBe('A7/C')
   })
 })
+
+describe('typed spelling', () => {
+  it('keeps the sharps or flats the user typed', () => {
+    expect(parseChord('C#m')?.anglo).toBe('C#m')
+    expect(parseChord('F#')?.anglo).toBe('F#')
+    expect(parseChord('Gb')?.anglo).toBe('Gb')
+    expect(parseChord('Dbm')?.anglo).toBe('Dbm')
+    expect(parseChord('Sol#m')?.latin).toBe('Sol# m')
+    expect(parseChord('Sib')?.anglo).toBe('Bb')
+  })
+
+  it('prefers sharps for minor chords on black keys when nothing was typed', () => {
+    expect(formatChord(1, 'min').anglo).toBe('C#m')
+    expect(formatChord(6, 'min').anglo).toBe('F#m')
+    expect(formatChord(8, 'm7').anglo).toBe('G#m7')
+    expect(formatChord(3, 'min').anglo).toBe('Ebm')
+    expect(formatChord(1, 'maj').anglo).toBe('Db')
+  })
+
+  it('accepts suffixes in any case', () => {
+    expect(parseChord('CMaj7')?.quality.id).toBe('maj7')
+    expect(parseChord('CSus4')?.quality.id).toBe('sus4')
+    expect(parseChord('Cm7')?.quality.id).toBe('m7')
+    expect(parseChord('CM7')?.quality.id).toBe('maj7')
+  })
+})

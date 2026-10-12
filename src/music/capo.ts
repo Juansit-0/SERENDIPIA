@@ -1,6 +1,6 @@
 import { qualityById, type QualityId } from './chords'
 import { chordAccidental, latinName, pitchName } from './notes'
-import { formatChord, latinSuffix, type ParsedChord } from './parseChord'
+import { formatChord, isMinorQuality, latinSuffix, type ParsedChord } from './parseChord'
 
 export const MAX_CAPO = 7
 
@@ -30,7 +30,7 @@ export function transposeLabels(
   semitones: number,
 ): ChordLabels {
   return formatChord(mod12(rootPc + semitones), qualityId, {
-    accidental: chordAccidental(mod12(rootPc + semitones)),
+    accidental: chordAccidental(mod12(rootPc + semitones), isMinorQuality(qualityById(qualityId))),
     bassPc: bassPc === null ? null : mod12(bassPc + semitones),
   })
 }
@@ -38,7 +38,7 @@ export function transposeLabels(
 export function transposeChord(chord: ParsedChord, semitones: number): ParsedChord {
   const rootPc = mod12(chord.rootPc + semitones)
   const bassPc = chord.bassPc === null ? null : mod12(chord.bassPc + semitones)
-  const accidental = chordAccidental(rootPc)
+  const accidental = chordAccidental(rootPc, isMinorQuality(chord.quality))
   const bassAccidental = bassPc !== null ? chordAccidental(bassPc) : accidental
   const labels = formatChord(rootPc, chord.quality.id, { accidental, bassPc })
   return {

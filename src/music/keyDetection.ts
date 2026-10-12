@@ -31,12 +31,20 @@ export function keyCandidates(chord: { rootPc: number; qualityId: QualityId }, l
       const seventh = sevenths.find((degree) => degree.rootPc === chord.rootPc)
 
       const isExtended = qualityById(chord.qualityId).intervals.length >= 4
+      // Harmonic minor raises the 7th, so a major V / V7 belongs to the minor key too.
+      const harmonicDominant =
+        mode === 'minor' && chord.rootPc === (rootPc + 7) % 12 && (chord.qualityId === 'maj' || chord.qualityId === '7')
       let score = 0
       let roman = ''
       let harmonicFunction: HarmonicFunction | null = null
       let qualityMatched = false
 
-      if (triad && triad.qualityId === chord.qualityId) {
+      if (harmonicDominant) {
+        score += 5
+        roman = chord.qualityId === '7' ? 'V7' : 'V'
+        harmonicFunction = 'dominant'
+        qualityMatched = true
+      } else if (triad && triad.qualityId === chord.qualityId) {
         score += 6
         roman = triad.roman
         harmonicFunction = triad.harmonicFunction
@@ -60,7 +68,7 @@ export function keyCandidates(chord: { rootPc: number; qualityId: QualityId }, l
 
       if (harmonicFunction) score += FUNCTION_WEIGHT[harmonicFunction]
       if (chord.rootPc === rootPc && (qualityMatched || !isExtended)) score += 1.5
-      if (chord.qualityId === '7' && triad?.roman === 'V') score += 1.5
+      if (chord.qualityId === '7' && (triad?.roman === 'V' || harmonicDominant)) score += 1.5
       if (mode === 'minor' && qualityById(chord.qualityId).family === 'triad' && chord.qualityId === 'maj') score -= 0.8
 
       const accidental = keyAccidental(rootPc, mode)

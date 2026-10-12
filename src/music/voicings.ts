@@ -197,7 +197,7 @@ function buildVoicing(
   const essential = essentialTones(rootPc, quality)
   if (!essential.every((pc) => soundingPcs.has(pc))) return null
 
-  const bassPitch = midi[0] % 12
+  const bassPitch = Math.min(...midi) % 12
   if (bassPc !== null && bassPitch !== bassPc) return null
 
   const fretted = frets.filter((f): f is number => f !== null)
@@ -211,7 +211,7 @@ function buildVoicing(
   const difficulty = difficultyOf(barre, span, muted, distinct)
 
   const coverage = [...chordPcSet].filter((pc) => soundingPcs.has(pc)).length / chordPcSet.size
-  const bassBonus = bassPitch === rootPc ? 14 : bassPc !== null ? 14 : 0
+  const bassBonus = bassPitch === rootPc ? 14 : 0
   let score = 100
   score += open * 6
   score -= muted * 7

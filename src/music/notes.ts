@@ -77,8 +77,19 @@ export function bothNames(pc: number, accidental: Accidental = 'sharp'): { anglo
   return { anglo: pitchName(pc, accidental), latin: latinName(pc, accidental) }
 }
 
-export function chordAccidental(rootPc: number): Accidental {
-  return FLAT_ROOTS.has(mod12(rootPc)) ? 'flat' : 'sharp'
+// Black-key minor chords read as sharps (C#m, F#m, G#m); Ebm and Bbm stay flat.
+const SHARP_MINOR_ROOTS = new Set([1, 6, 8])
+
+export function chordAccidental(rootPc: number, minor = false): Accidental {
+  const pc = mod12(rootPc)
+  if (minor && SHARP_MINOR_ROOTS.has(pc)) return 'sharp'
+  return FLAT_ROOTS.has(pc) ? 'flat' : 'sharp'
+}
+
+export function typedAccidental(token: string): Accidental | null {
+  if (token.includes('#') || token.includes('♯')) return 'sharp'
+  if (/.[b♭]/i.test(token)) return 'flat'
+  return null
 }
 
 export function keyAccidental(rootPc: number, mode: 'major' | 'minor'): Accidental {

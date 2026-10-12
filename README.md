@@ -15,6 +15,13 @@ As you build a progression, SERENDIPIA reads it with music-theory rules (no AI, 
 
 The logic lives in `src/music/analysis.ts`.
 
+## Easier to play
+
+- **Chain** (progression strip) re-voices every step so the hand moves as little as possible across the whole progression: a shortest-path search over each chord's best shapes that rewards held fingers and nearby positions, without giving up root-position, common shapes.
+- **Suggested capo** appears under the strip when another capo turns the progression into clearly easier shapes (e.g. `Bb F Gm Eb` → capo 3 → `G D Em C`); **Apply** moves the capo and re-spells the steps, so the progression sounds the same.
+
+The logic lives in `src/music/playability.ts`.
+
 ## Run it
 
 ```bash

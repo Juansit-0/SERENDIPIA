@@ -34,6 +34,8 @@ import { clampCapo, withCapo } from '../music/capo'
 import { resolveStepFrets, type StepVoicingRef, type StepVoicingSource } from '../music/stepVoicing'
 import { STANDARD_TUNING, TUNINGS, Voicing, voicingFromFrets, voicingsFor } from '../music/voicings'
 import { playhead } from './playhead'
+import { chainVoicings, recommendCapo, type CapoOption } from '../music/playability'
+import { voicingLabel } from '../music/stepVoicing'
 import { appendStep, applyStepVoicing, MAX_STEPS, removeStep, stepId, toggleDetectorFret } from './progressionOps'
 import { loadSettings, saveSettings, type Notation, type PersistedSettings } from './settings'
 
@@ -97,6 +99,10 @@ interface StoreValue {
   analysis: ProgressionAnalysis
   /** Next-chord ideas from the last chords of the progression (or the selected chord when empty). */
   nextSteps: Suggestion[]
+  /** Re-voice every step to minimise hand movement across the progression. */
+  chainProgression: () => void
+  capoSuggestion: CapoOption | null
+  applyCapoSuggestion: (option: CapoOption) => void
   chord: ParsedChord
   chordInput: string
   chordError: boolean
@@ -487,6 +493,33 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   }, [progression, keyRootPc, keyMode, notation])
 
+  const chainProgression = useCallback(() => {
+    setProgression((current) => {
+      const chained = chainVoicings(current, tuning)
+      return current.map((step, index) => {
+        const frets = chained[index]
+        return frets ? { ...step, frets, voicingLabel: voicingLabel(frets), voicingSource: 'proof' as const } : step
+      })
+    })
+  }, [tuning])
+
+  const capoSuggestion = useMemo(
+    () => (progression.length >= 2 ? recommendCapo(progression, capo, tuning) : null),
+    [progression, capo, tuning],
+  )
+
+  const applyCapoSuggestion = useCallback((option: CapoOption) => {
+    setCapoState(option.capo)
+    setProgression((current) =>
+      current.map((step, index) => {
+        const shape = option.shapes[index]
+        if (!shape) return step
+        // New shapes: drop any pinned voicing so each step picks its easiest form again.
+        return { id: step.id, rootPc: shape.rootPc, qualityId: shape.qualityId, bassPc: shape.bassPc, anglo: shape.anglo, latin: shape.latin }
+      }),
+    )
+  }, [])
+
   const suggestions = useMemo(
     () => nextChordSuggestions(chord.rootPc, keyRootPc, keyMode),
     [chord.rootPc, keyRootPc, keyMode],
@@ -532,6 +565,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     detectedKey,
     analysis,
     nextSteps,
+    chainProgression,
+    capoSuggestion,
+    applyCapoSuggestion,
     chord,
     chordInput,
     chordError,
@@ -565,7 +601,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }), [
     t, lang, notation, view, setView, tuningId, setTuningId, tuning, soundingTuning, capo, setCapo, tempo, volume, loop,
     metronome, setMetronome, beatsPerChord, timbre, setTimbre, keyRootPc, setKeyRootPc, keyMode, setKeyMode, keyAuto,
-    detectedKey, analysis, nextSteps, chord, chordInput, chordError, setChordInput,
+    detectedKey, analysis, nextSteps, chainProgression, capoSuggestion, applyCapoSuggestion, chord, chordInput, chordError, setChordInput,
     setChord, voicings, selectedVoicing, selectVoicing, playVoicing, playFrets, progression, loadProgression,
     addToProgression, moveStep, setStepVoicing, removeFromProgression, markedVoicing, setMarkedVoicing,
     clearProgression, playing, togglePlay, audioReady, audioLoading, audioFallback, enableAudio, suggestions,

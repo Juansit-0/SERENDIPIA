@@ -73,3 +73,30 @@ describe('progression analysis', () => {
     expect(firstGhost?.textContent).toContain('F')
   })
 })
+
+describe('playability helpers', () => {
+  it('chains a position onto every step', () => {
+    renderApp()
+    const voicingTags = () =>
+      Array.from(document.querySelectorAll('[data-step-index]')).map(
+        (step) => step.querySelectorAll('.font-mono')[1]?.textContent,
+      )
+    expect(voicingTags().every((tag) => tag === 'Auto')).toBe(true)
+    fireEvent.click(screen.getByRole('button', { name: /^Encadenar/ }))
+    const tags = voicingTags()
+    expect(tags.every((tag) => tag && tag !== 'Auto')).toBe(true)
+    expect(tags[0]).toBe('x 3 2 0 1 0')
+  })
+
+  it('recommends and applies a capo for a barre-heavy progression', () => {
+    renderApp()
+    fireEvent.click(screen.getByRole('button', { name: 'Teoría' }))
+    fireEvent.change(screen.getByRole('combobox', { name: 'Tonalidad' }), { target: { value: '10' } })
+    fireEvent.click(screen.getAllByRole('button', { name: 'Cargar' })[0])
+    expect(stepNames()).toEqual(['Bb', 'F', 'Gm', 'Eb'])
+    expect(screen.getByText('Capo recomendado')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Aplicar' }))
+    expect(stepNames()).toEqual(['G', 'D', 'Em', 'C'])
+    expect(screen.queryByText('Capo recomendado')).toBeNull()
+  })
+})

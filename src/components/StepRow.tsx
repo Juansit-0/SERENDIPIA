@@ -45,6 +45,9 @@ export function StepRow() {
     analysis,
     keyAuto,
     detectedKey,
+    chainProgression,
+    capoSuggestion,
+    applyCapoSuggestion,
     notation,
     keyRootPc,
     keyMode,
@@ -138,6 +141,24 @@ export function StepRow() {
           )}
         </div>
         <div className="flex items-center gap-3">
+          {progression.length > 1 && (
+            <button
+              type="button"
+              className="stamp"
+              onClick={() => {
+                chainProgression()
+                setAnnouncement(t('progression.chained'))
+              }}
+              disabled={playing}
+              title={t('progression.chainHint')}
+              aria-describedby="chain-hint"
+            >
+              {t('progression.chain')}
+              <span id="chain-hint" className="sr-only">
+                {t('progression.chainHint')}
+              </span>
+            </button>
+          )}
           {progression.length > 0 && (
             <button type="button" className="stamp" onClick={clearProgression}>
               {t('progression.clear')}
@@ -335,6 +356,29 @@ export function StepRow() {
             </p>
           ) : (
             <p className="text-[12px] text-ink-soft">{t('analysis.addMore')}</p>
+          )}
+          {capoSuggestion && (
+            <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
+              <span className="label-ink text-blue-ink">{t('capo.recommend')}</span>
+              <span className="fv-ui text-[13px] font-semibold">
+                {capoSuggestion.capo === 0 ? t('capo.without') : `${t('capo.with')} ${capoSuggestion.capo}`}
+              </span>
+              <span className="readout text-[11px] text-ink-soft">
+                {capoSuggestion.shapes.map((shape) => (notation === 'latin' ? shape.latin : shape.anglo)).join(' · ')}
+              </span>
+              <span className="text-[12px] text-ink-soft">{t('capo.easier')}</span>
+              <button
+                type="button"
+                className="stamp"
+                onClick={() => {
+                  applyCapoSuggestion(capoSuggestion)
+                  setAnnouncement(`${t('capo.with')} ${capoSuggestion.capo}`)
+                }}
+                disabled={playing}
+              >
+                {t('capo.apply')}
+              </button>
+            </p>
           )}
         </div>
       )}

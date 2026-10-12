@@ -31,6 +31,12 @@ The logic lives in `src/music/playability.ts`.
 
 Records stay in the browser (`localStorage`).
 
+## Organize and share
+
+- **Undo / redo** every progression edit with ↶ ↷ in the strip or **⌘Z / Ctrl+Z** and **⌘⇧Z / Ctrl+Y** (up to 50 steps back).
+- **Library**: **Save** names the progression (with its tempo, beats, capo and strum); **Library** lists them to load or delete. Saving with an existing name replaces it.
+- **Share link** copies a URL such as `?p=C_G:3-2-0-0-0-3_Am~folk_F&t=96&b=4&c=0&s=single` — chord symbols, optional pinned shape (`:frets`) and strum (`~id`) per step. Opening it loads that progression; unknown chords or values are skipped. No server involved.
+
 ## Run it
 
 ```bash
@@ -46,7 +52,9 @@ npm run build
 
 - **Space**: play / stop the progression (or the metronome alone)
 - **Fretboard**: one tab stop; arrows move between cells, Home / End jump along a string
-- **Progression**: tap or Enter on a step opens its picker (voicing, move ← / →, remove); **Alt+←/→** moves the focused step; **Alt+click** removes it; **Esc** closes the picker
+- **Progression**: tap or Enter on a step opens its picker (voicing, strum, move ← / →, remove); **Alt+←/→** moves the focused step; **Alt+click** removes it; **Esc** closes the picker
+- **Undo / redo**: **⌘Z / Ctrl+Z**, **⌘⇧Z / Ctrl+Y**
+- **Practice tab**: **Space** counts a change in the one-minute drill
 
 ## Stack
 

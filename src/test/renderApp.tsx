@@ -8,8 +8,8 @@ vi.mock('../audio/loader', () => ({
   prefetchAudioEngine: () => undefined,
 }))
 
-export function renderApp() {
+export function renderApp(search = '') {
   localStorage.clear()
-  window.location.hash = ''
+  window.history.replaceState(null, '', `/${search}`)
   return render(<App />)
 }

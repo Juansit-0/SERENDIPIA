@@ -6,6 +6,7 @@ import { diatonicChords, type HarmonicFunction } from '../music/scales'
 import { usePlayheadStep } from '../state/playhead'
 import { useStore } from '../state/store'
 import { OffsetPlate } from './OffsetPlate'
+import { ProgressionTools } from './ProgressionTools'
 import { StepVoicingPicker } from './StepVoicingPicker'
 
 const SLOTS = 16
@@ -48,6 +49,10 @@ export function StepRow() {
     chainProgression,
     capoSuggestion,
     applyCapoSuggestion,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
     notation,
     keyRootPc,
     keyMode,
@@ -130,7 +135,7 @@ export function StepRow() {
 
   return (
     <section className="plate flex min-w-0 flex-col gap-2 p-4">
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-baseline gap-3">
           <h2 className="label-ink text-blue-ink">{t('progression.title')}</h2>
           <span className="label-ink sm:hidden">{t('progression.swipe')}</span>
@@ -140,7 +145,13 @@ export function StepRow() {
             </span>
           )}
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-1.5">
+          <button type="button" className="stamp px-2" onClick={undo} disabled={!canUndo} aria-label={t('history.undo')} title={`${t('history.undo')} (⌘Z)`}>
+            ↶
+          </button>
+          <button type="button" className="stamp px-2" onClick={redo} disabled={!canRedo} aria-label={t('history.redo')} title={`${t('history.redo')} (⌘⇧Z)`}>
+            ↷
+          </button>
           {progression.length > 1 && (
             <button
               type="button"
@@ -382,6 +393,8 @@ export function StepRow() {
           )}
         </div>
       )}
+
+      <ProgressionTools onAnnounce={(message) => setAnnouncement(message)} />
 
       <p className="sr-only" role="status" aria-live="polite">
         {announcement}

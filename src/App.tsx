@@ -7,7 +7,7 @@ import { PracticeView } from './views/PracticeView'
 import { TheoryView } from './views/TheoryView'
 
 function Shell() {
-  const { view, togglePlay } = useStore()
+  const { view, togglePlay, undo, redo } = useStore()
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -23,6 +23,25 @@ function Shell() {
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [togglePlay, view])
+
+  // ⌘Z / Ctrl+Z undoes a progression edit; ⌘⇧Z / Ctrl+Y redoes it. Text fields keep their own undo.
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (!(event.metaKey || event.ctrlKey) || event.altKey) return
+      const tag = (event.target as HTMLElement | null)?.tagName
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || (event.target as HTMLElement | null)?.isContentEditable) return
+      const key = event.key.toLowerCase()
+      if (key === 'z' && !event.shiftKey) {
+        event.preventDefault()
+        undo()
+      } else if ((key === 'z' && event.shiftKey) || key === 'y') {
+        event.preventDefault()
+        redo()
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [undo, redo])
 
   return (
     <div className="grain min-h-screen bg-paper text-ink">

@@ -38,6 +38,9 @@ import { playhead } from './playhead'
 import { chainVoicings, recommendCapo, type CapoOption } from '../music/playability'
 import { voicingLabel } from '../music/stepVoicing'
 import { appendStep, applyStepVoicing, MAX_STEPS, removeStep, stepId, toggleDetectorFret } from './progressionOps'
+import { createHistory, pushHistory, redoHistory, undoHistory, type History } from './history'
+import { loadLibrary, removeFromLibrary, saveToLibrary as storeInLibrary, type LibraryEntry } from './library'
+import { decodeShare, shareUrl, type SharedProgression } from './share'
 import { loadSettings, saveSettings, type Notation, type PersistedSettings } from './settings'
 
 export type { Notation } from './settings'
@@ -106,6 +109,16 @@ interface StoreValue {
   analysis: ProgressionAnalysis
   /** Next-chord ideas from the last chords of the progression (or the selected chord when empty). */
   nextSteps: Suggestion[]
+  undo: () => void
+  redo: () => void
+  canUndo: boolean
+  canRedo: boolean
+  /** A link that opens this progression (with tempo, beats, capo and strum). */
+  shareLink: () => string
+  library: LibraryEntry[]
+  saveToLibrary: (name: string) => void
+  loadFromLibrary: (entry: LibraryEntry) => void
+  deleteFromLibrary: (id: string) => void
   /** Re-voice every step to minimise hand movement across the progression. */
   chainProgression: () => void
   capoSuggestion: CapoOption | null
@@ -151,6 +164,8 @@ const StoreContext = createContext<StoreValue | null>(null)
 
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [initial] = useState(loadSettings)
+  // A shared link (?p=…) opens its progression and settings instead of the saved ones.
+  const [shared] = useState(() => (typeof window === 'undefined' ? null : decodeShare(window.location.search)))
   const [lang, setLang] = useState<Lang>(initial.lang)
   const [notation, setNotation] = useState<Notation>(initial.notation)
   const [view, setViewState] = useState<ViewId>(() => {
@@ -159,14 +174,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return hash === 'detector' || hash === 'theory' || hash === 'practice' ? hash : 'dictionary'
   })
   const [tuningId, setTuningIdState] = useState(initial.tuningId)
-  const [tempo, setTempo] = useState(initial.tempo)
+  const [tempo, setTempo] = useState(shared?.tempo ?? initial.tempo)
   const [volume, setVolume] = useState(initial.volume)
   const [loop, setLoop] = useState(initial.loop)
   const [metronome, setMetronomeState] = useState(initial.metronome)
-  const [beatsPerChord, setBeatsPerChord] = useState(initial.beatsPerChord)
+  const [beatsPerChord, setBeatsPerChord] = useState(shared?.beatsPerChord ?? initial.beatsPerChord)
   const [timbre, setTimbreState] = useState<TimbreId>(initial.timbre)
-  const [strum, setStrum] = useState<StrumId>(initial.strum)
-  const [capo, setCapoState] = useState(initial.capo)
+  const [strum, setStrum] = useState<StrumId>(shared?.strum ?? initial.strum)
+  const [capo, setCapoState] = useState(shared?.capo ?? initial.capo)
   const [manualKeyRootPc, setManualKeyRootPc] = useState(initial.keyRootPc)
   const [manualKeyMode, setManualKeyMode] = useState<Mode>(initial.keyMode)
   const [keyAuto, setKeyAuto] = useState(initial.keyAuto)
@@ -174,15 +189,35 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [chord, setChordState] = useState<ParsedChord>(() => parseChord('Am7')!)
   const [chordError, setChordError] = useState(false)
   const [selectedVoicing, setSelectedVoicing] = useState(0)
-  const [progression, setProgression] = useState<ProgressionStep[]>(() =>
-    resolveProgression(PROGRESSIONS[0], initial.keyRootPc).map((step, index) => ({
-      rootPc: step.rootPc,
-      qualityId: step.qualityId,
-      anglo: step.anglo,
-      latin: step.latin,
-      id: `seed-${index}`,
-    })),
+  const [history, setHistory] = useState<History<ProgressionStep[]>>(() =>
+    createHistory(
+      shared
+        ? shared.steps.map((step, index) => ({ ...step, id: `shared-${index}` }))
+        : resolveProgression(PROGRESSIONS[0], initial.keyRootPc).map((step, index) => ({
+            rootPc: step.rootPc,
+            qualityId: step.qualityId,
+            anglo: step.anglo,
+            latin: step.latin,
+            id: `seed-${index}`,
+          })),
+    ),
   )
+  const progression = history.present
+  // Every progression edit goes through the undo history.
+  const setProgression = useCallback(
+    (next: ProgressionStep[] | ((current: ProgressionStep[]) => ProgressionStep[])) =>
+      setHistory((current) => pushHistory(current, typeof next === 'function' ? next(current.present) : next)),
+    [],
+  )
+  const undo = useCallback(() => setHistory(undoHistory), [])
+  const redo = useCallback(() => setHistory(redoHistory), [])
+
+  // Once a shared link is opened, drop ?p=… so a reload keeps the player's own edits.
+  useEffect(() => {
+    if (shared) window.history.replaceState(null, '', `${window.location.pathname}${window.location.hash}`)
+  }, [shared])
+
+  const [library, setLibrary] = useState<LibraryEntry[]>(loadLibrary)
   const [playing, setPlaying] = useState(false)
   const [detectorFrets, setDetectorFrets] = useState<(number | null)[]>([0, 0, 0, 0, 0, 0])
   const [markedVoicing, setMarkedVoicingState] = useState<MarkedVoicing | null>(null)
@@ -345,7 +380,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const addToProgression = useCallback((step: Omit<ProgressionStep, 'id'>) => {
     setProgression((current) => appendStep(current, step, stepId()))
-  }, [])
+  }, [setProgression])
 
   const stopPlayback = useCallback(() => {
     loadedAudioEngine()?.stopProgression()
@@ -358,23 +393,23 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       stopPlayback()
       setProgression(steps.slice(0, MAX_STEPS).map((step, index) => ({ ...step, id: stepId(`loaded-${index}`) })))
     },
-    [stopPlayback],
+    [stopPlayback, setProgression],
   )
 
   const moveStep = useCallback((from: number, to: number) => {
     setProgression((current) => reorderSteps(current, from, to))
-  }, [])
+  }, [setProgression])
 
   const setStepVoicing = useCallback((index: number, voicing: StepVoicingRef | null) => {
     setProgression((current) => applyStepVoicing(current, index, voicing))
-  }, [])
+  }, [setProgression])
 
   const removeFromProgression = useCallback(
     (index: number) => {
       setProgression((current) => removeStep(current, index))
       if (progression.length <= 1 && !metronome) stopPlayback()
     },
-    [progression.length, metronome, stopPlayback],
+    [progression.length, metronome, stopPlayback, setProgression],
   )
 
   const setMetronome = useCallback(
@@ -388,7 +423,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const clearProgression = useCallback(() => {
     setProgression([])
     stopPlayback()
-  }, [stopPlayback])
+  }, [stopPlayback, setProgression])
 
   const getFretsForStep = useCallback(
     (index: number): (number | null)[] | null => {
@@ -405,7 +440,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setProgression((current) =>
       current.map((step, position) => (position === index ? { ...step, strum: next ?? undefined } : step)),
     )
-  }, [])
+  }, [setProgression])
 
   const togglePlay = useCallback(() => {
     if (playing) {
@@ -513,6 +548,36 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   }, [progression, keyRootPc, keyMode, notation])
 
+  const snapshot = useCallback(
+    (): SharedProgression => ({
+      steps: progression.map(({ id: _id, ...step }) => step),
+      tempo,
+      beatsPerChord,
+      capo,
+      strum,
+    }),
+    [progression, tempo, beatsPerChord, capo, strum],
+  )
+
+  const shareLink = useCallback(() => shareUrl(snapshot(), window.location), [snapshot])
+
+  const saveProgressionToLibrary = useCallback((name: string) => setLibrary(storeInLibrary(name, snapshot())), [snapshot])
+
+  const loadFromLibrary = useCallback(
+    (entry: LibraryEntry) => {
+      stopPlayback()
+      const { steps, tempo: savedTempo, beatsPerChord: savedBeats, capo: savedCapo, strum: savedStrum } = entry.progression
+      setProgression(steps.map((step, index) => ({ ...step, id: stepId(`lib-${index}`) })))
+      if (savedTempo !== undefined) setTempo(savedTempo)
+      if (savedBeats !== undefined) setBeatsPerChord(savedBeats)
+      if (savedCapo !== undefined) setCapoState(savedCapo)
+      if (savedStrum !== undefined) setStrum(savedStrum)
+    },
+    [stopPlayback, setProgression],
+  )
+
+  const deleteFromLibrary = useCallback((id: string) => setLibrary(removeFromLibrary(id)), [])
+
   const chainProgression = useCallback(() => {
     setProgression((current) => {
       const chained = chainVoicings(current, tuning)
@@ -521,7 +586,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         return frets ? { ...step, frets, voicingLabel: voicingLabel(frets), voicingSource: 'proof' as const } : step
       })
     })
-  }, [tuning])
+  }, [tuning, setProgression])
 
   const capoSuggestion = useMemo(
     () => (progression.length >= 2 ? recommendCapo(progression, capo, tuning) : null),
@@ -538,7 +603,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         return { id: step.id, rootPc: shape.rootPc, qualityId: shape.qualityId, bassPc: shape.bassPc, anglo: shape.anglo, latin: shape.latin, strum: step.strum }
       }),
     )
-  }, [])
+  }, [setProgression])
 
   const suggestions = useMemo(
     () => nextChordSuggestions(chord.rootPc, keyRootPc, keyMode),
@@ -589,6 +654,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     detectedKey,
     analysis,
     nextSteps,
+    undo,
+    redo,
+    canUndo: history.past.length > 0,
+    canRedo: history.future.length > 0,
+    shareLink,
+    library,
+    saveToLibrary: saveProgressionToLibrary,
+    loadFromLibrary,
+    deleteFromLibrary,
     chainProgression,
     capoSuggestion,
     applyCapoSuggestion,
@@ -625,7 +699,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }), [
     t, lang, notation, view, setView, tuningId, setTuningId, tuning, soundingTuning, capo, setCapo, tempo, volume, loop,
     metronome, setMetronome, beatsPerChord, timbre, setTimbre, strum, setStepStrum, stopPlayback, keyRootPc, setKeyRootPc, keyMode, setKeyMode, keyAuto,
-    detectedKey, analysis, nextSteps, chainProgression, capoSuggestion, applyCapoSuggestion, chord, chordInput, chordError, setChordInput,
+    detectedKey, analysis, nextSteps, undo, redo, history.past.length, history.future.length, shareLink, library,
+    saveProgressionToLibrary, loadFromLibrary, deleteFromLibrary, chainProgression, capoSuggestion, applyCapoSuggestion, chord, chordInput, chordError, setChordInput,
     setChord, voicings, selectedVoicing, selectVoicing, playVoicing, playFrets, progression, loadProgression,
     addToProgression, moveStep, setStepVoicing, removeFromProgression, markedVoicing, setMarkedVoicing,
     clearProgression, playing, togglePlay, audioReady, audioLoading, audioFallback, enableAudio, suggestions,

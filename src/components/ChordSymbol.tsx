@@ -3,7 +3,7 @@ import { chordToneSpelling } from '../music/chords'
 import { keyCandidates, sameKey } from '../music/keyDetection'
 import { voicingLabel } from '../music/stepVoicing'
 import { intervalName } from '../music/notes'
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, type CSSProperties } from 'react'
 import { useStore } from '../state/store'
 import { MiniPlate } from './MiniPlate'
 import { OffsetPlate } from './OffsetPlate'
@@ -28,6 +28,7 @@ export function ChordSymbol() {
     setKeyMode,
   } = useStore()
   const voicing = voicings[selectedVoicing]
+  const heroName = notation === 'latin' ? chord.latin : chord.anglo
   const inputRef = useRef<HTMLInputElement | null>(null)
 
   // Autofocus only with a precise pointer: on phones it would pop the keyboard on load.
@@ -95,23 +96,18 @@ export function ChordSymbol() {
         </p>
       )}
 
-      <div className="desk:order-2 desk:mr-[5px] desk:mb-[5px]">
+      <div className="@container desk:order-2 desk:mr-[5px] desk:mb-[5px]">
       <OffsetPlate offset={5}>
         <p
-          className="fv-name halftone relative overflow-hidden bg-ink px-3 py-1 text-[clamp(2.5rem,5.5vw,5rem)] leading-[0.92] tracking-[-0.02em] text-paper desk:flex desk:items-baseline desk:justify-between desk:gap-2 desk:text-[clamp(2rem,min(calc(16vh-60px),6vw),7.5rem)]"
+          className="hero-name fv-name halftone relative overflow-hidden whitespace-nowrap bg-ink px-3 py-1 leading-[0.92] tracking-[-0.02em] text-paper [--hero-max:clamp(2.5rem,5.5vw,5rem)] desk:[--hero-max:clamp(2rem,min(calc(16vh-60px),6vw),7.5rem)]"
+          style={{ '--chars': Math.max(4, heroName.length) } as CSSProperties}
           aria-live="polite"
         >
-          <span className="desk:min-w-0">{notation === 'latin' ? chord.latin : chord.anglo}</span>
-          {/* On `desk` the Latin name rides inside the hero plate instead of taking its own line. */}
-          {notation === 'both' && (
-            <span className="fv-display hidden shrink-0 text-[0.36em] tracking-normal text-paper/75 desk:inline">
-              {chord.latin}
-            </span>
-          )}
+          {heroName}
         </p>
       </OffsetPlate>
       </div>
-      {notation === 'both' && <p className="fv-display text-[1.15rem] text-ink-soft desk:hidden">{chord.latin}</p>}
+      {notation === 'both' && <p className="fv-display text-[1.15rem] text-ink-soft desk:order-2 desk:text-[1rem]">{chord.latin}</p>}
       {capo > 0 && (
         <p className="flex flex-wrap items-center gap-2 desk:order-2">
           <span className="chip chip--blue">

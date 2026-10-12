@@ -196,6 +196,12 @@
     }
   }
 
+  /* Hero chord name: as big as --hero-max allows, but never wider than its plate.
+     ~0.66em per glyph at the hero width/weight; --chars is the name length, set inline. */
+  .hero-name {
+    font-size: min(var(--hero-max), calc((100cqi - 1.5rem - 5px) / (var(--chars, 4) * 0.66)));
+  }
+
   .fv-name {
     font-variation-settings: 'wdth' 104, 'wght' 800;
   }

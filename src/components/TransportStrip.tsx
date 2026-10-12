@@ -75,15 +75,15 @@ export function TransportStrip() {
   } = useStore()
 
   return (
-    <header className="plate relative flex flex-col gap-3 px-4 py-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-5 sm:px-5">
+    <header className="plate dense relative flex flex-col gap-3 px-4 py-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-5 sm:px-5 desk:gap-x-3 desk:gap-y-0.5 desk:py-0.5">
       <RegMark className="left-1.5 top-1.5" />
       <RegMark className="right-1.5 top-1.5" />
       <RegMark className="bottom-1.5 left-1.5" />
       <RegMark className="bottom-1.5 right-1.5" />
 
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-        <h1 className="fv-display text-[1.0625rem] tracking-[0.24em]">SERENDIPIA</h1>
-        <nav className="flex flex-wrap gap-1.5" aria-label={t('a11y.views')}>
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 desk:shrink-0 desk:flex-nowrap desk:gap-x-3">
+        <h1 className="fv-display text-[1.0625rem] tracking-[0.24em] desk:text-[0.9375rem] desk:tracking-[0.18em]">SERENDIPIA</h1>
+        <nav className="flex flex-wrap gap-1.5 desk:flex-nowrap desk:gap-1" aria-label={t('a11y.views')}>
           {VIEWS.map((item) => (
             <button
               key={item}
@@ -98,10 +98,10 @@ export function TransportStrip() {
         </nav>
       </div>
 
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 desk:shrink-0 desk:flex-nowrap desk:gap-x-2">
         <button
           type="button"
-          className={`stamp min-w-[86px] ${playing ? 'stamp--live' : 'stamp--ink'}`}
+          className={`stamp min-w-[86px] desk:min-w-[64px] ${playing ? 'stamp--live' : 'stamp--ink'}`}
           onClick={togglePlay}
           disabled={progression.length === 0 && !metronome}
         >
@@ -109,24 +109,24 @@ export function TransportStrip() {
         </button>
         {playing && <BeatDots />}
 
-        <div className="flex items-center gap-2">
-          <span className="label-ink text-blue-ink">{t('transport.tempo')}</span>
+        <div className="flex items-center gap-2 desk:gap-1">
+          <span className="label-ink text-blue-ink desk:sr-only">{t('transport.tempo')}</span>
           <div className="flex items-center gap-1">
             <button
               type="button"
-              className="stamp px-2 py-0.5"
+              className="stamp px-2 py-0.5 desk:min-w-7"
               onClick={() => setTempo(Math.max(TEMPO_MIN, tempo - 4))}
               aria-label={t('a11y.tempoDown')}
             >
               −
             </button>
-            <span className="ink-block font-mono text-[1.05rem] font-semibold tabular-nums" aria-live="polite" aria-atomic="true">
+            <span className="ink-block font-mono text-[1.05rem] font-semibold tabular-nums desk:text-[0.9375rem]" aria-live="polite" aria-atomic="true">
               <span className="sr-only">{t('transport.tempo')} </span>
               {tempo}
             </span>
             <button
               type="button"
-              className="stamp px-2 py-0.5"
+              className="stamp px-2 py-0.5 desk:min-w-7"
               onClick={() => setTempo(Math.min(TEMPO_MAX, tempo + 4))}
               aria-label={t('a11y.tempoUp')}
             >
@@ -155,12 +155,12 @@ export function TransportStrip() {
 
         <div id="transport-rhythm" className={foldable}>
           <div className="flex items-center gap-1" role="group" aria-label={t('a11y.beats')}>
-            <span className="label-ink text-blue-ink">{t('transport.beats')}</span>
+            <span className="label-ink text-blue-ink desk:sr-only">{t('transport.beats')}</span>
             {BEAT_OPTIONS.map((beats) => (
               <button
                 key={beats}
                 type="button"
-                className="stamp px-1.5 py-0.5"
+                className="stamp px-1.5 py-0.5 desk:min-w-7"
                 aria-pressed={beatsPerChord === beats}
                 onClick={() => setBeatsPerChord(beats)}
               >
@@ -189,12 +189,12 @@ export function TransportStrip() {
 
       <div
         id="transport-settings"
-        className={`ml-auto w-full flex-wrap items-center gap-x-4 gap-y-2 sm:flex sm:w-auto ${open ? 'flex' : 'hidden'}`}
+        className={`ml-auto w-full flex-wrap items-center gap-x-4 gap-y-2 sm:flex sm:w-auto desk:min-w-0 desk:flex-nowrap desk:gap-x-2.5 ${open ? 'flex' : 'hidden'}`}
       >
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="label-ink text-blue-ink">{t('transport.timbre')}</span>
+        <div className="flex flex-wrap items-center gap-2 desk:flex-nowrap desk:gap-1">
+          <span className="label-ink text-blue-ink desk:sr-only">{t('transport.timbre')}</span>
           <select
-            className="stamp min-w-0 max-w-[9rem] flex-1 cursor-pointer appearance-none px-2 py-0.5 sm:flex-none"
+            className="stamp min-w-0 max-w-[9rem] flex-1 cursor-pointer appearance-none px-2 py-0.5 sm:flex-none desk:max-w-[7.5rem]"
             value={timbre}
             aria-label={t('transport.timbre')}
             onChange={(event) => setTimbre(event.target.value as TimbreId)}
@@ -205,9 +205,9 @@ export function TransportStrip() {
               </option>
             ))}
           </select>
-          <span className="label-ink text-blue-ink">{t('transport.strum')}</span>
+          <span className="label-ink text-blue-ink desk:sr-only">{t('transport.strum')}</span>
           <select
-            className="stamp min-w-0 max-w-[11rem] flex-1 cursor-pointer appearance-none px-2 py-0.5 sm:flex-none"
+            className="stamp min-w-0 max-w-[11rem] flex-1 cursor-pointer appearance-none px-2 py-0.5 sm:flex-none desk:max-w-[8.5rem]"
             value={strum}
             aria-label={t('transport.strum')}
             onChange={(event) => setStrum(event.target.value as StrumId)}
@@ -220,25 +220,25 @@ export function TransportStrip() {
           </select>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 desk:flex-nowrap desk:gap-1">
           <span className="label-ink text-blue-ink">{t('transport.capo')}</span>
           <div className="flex items-center gap-1">
             <button
               type="button"
-              className="stamp px-2 py-0.5"
+              className="stamp px-2 py-0.5 desk:min-w-7"
               onClick={() => setCapo(capo - 1)}
               disabled={capo === 0}
               aria-label={t('a11y.capoDown')}
             >
               −
             </button>
-            <span className="ink-block font-mono text-[0.9375rem] font-semibold tabular-nums" aria-live="polite" aria-atomic="true">
+            <span className="ink-block font-mono text-[0.9375rem] font-semibold tabular-nums desk:text-[0.8125rem]" aria-live="polite" aria-atomic="true">
               <span className="sr-only">{t('transport.capo')} </span>
               {capo}
             </span>
             <button
               type="button"
-              className="stamp px-2 py-0.5"
+              className="stamp px-2 py-0.5 desk:min-w-7"
               onClick={() => setCapo(capo + 1)}
               disabled={capo >= MAX_CAPO}
               aria-label={t('a11y.capoUp')}
@@ -248,10 +248,10 @@ export function TransportStrip() {
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="label-ink text-blue-ink">{t('transport.key')}</span>
+        <div className="flex flex-wrap items-center gap-2 desk:flex-nowrap desk:gap-1">
+          <span className="label-ink text-blue-ink desk:sr-only">{t('transport.key')}</span>
           <select
-            className="stamp min-w-0 max-w-[9rem] flex-1 cursor-pointer appearance-none px-2 py-0.5 sm:flex-none"
+            className="stamp min-w-0 max-w-[9rem] flex-1 cursor-pointer appearance-none px-2 py-0.5 sm:flex-none desk:max-w-[6.5rem]"
             value={keyRootPc}
             aria-label={t('transport.key')}
             onChange={(event) => setKeyRootPc(Number(event.target.value))}
@@ -283,8 +283,8 @@ export function TransportStrip() {
           </button>
         </div>
 
-        <div className="flex flex-wrap items-center gap-1" role="group" aria-label={t('transport.notation')}>
-          <span className="label-ink text-blue-ink">{t('transport.notation')}</span>
+        <div className="flex flex-wrap items-center gap-1 desk:flex-nowrap" role="group" aria-label={t('transport.notation')}>
+          <span className="label-ink text-blue-ink desk:sr-only">{t('transport.notation')}</span>
           {NOTATIONS.map((item) => (
             <button
               key={item}
@@ -298,8 +298,8 @@ export function TransportStrip() {
           ))}
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="label-ink text-blue-ink">{t('transport.volume')}</span>
+        <div className="flex flex-wrap items-center gap-2 desk:flex-nowrap desk:gap-1">
+          <span className="label-ink text-blue-ink desk:sr-only">{t('transport.volume')}</span>
           <input
             type="range"
             min={0}
@@ -307,7 +307,7 @@ export function TransportStrip() {
             step={0.01}
             value={volume}
             onChange={(event) => setVolume(Number(event.target.value))}
-            className="w-20"
+            className="w-20 desk:h-7 desk:w-16 desk:cursor-pointer"
             aria-label={t('transport.volume')}
           />
         </div>

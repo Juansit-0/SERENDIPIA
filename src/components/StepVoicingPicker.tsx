@@ -1,10 +1,14 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef } from 'react'
 import { STRUMS, isStrumId } from '../audio/strums'
 import { qualityById } from '../music/chords'
 import { absoluteLabel, autoVoicing, voicingLabel, voicingSignature } from '../music/stepVoicing'
 import { voicingsFor, type Voicing } from '../music/voicings'
 import { useStore, type ProgressionStep } from '../state/store'
 import { MiniPlate } from './MiniPlate'
+
+// Same query as the `desk:` variant in tailwind.css.
+const DESK_QUERY = '(min-width: 1024px) and (min-height: 640px)'
+const EDGE = 8
 
 export function StepVoicingPicker({
   step,
@@ -25,6 +29,7 @@ export function StepVoicingPicker({
     onMove(to)
   }
   const container = useRef<HTMLDivElement | null>(null)
+  const notch = useRef<HTMLSpanElement | null>(null)
 
   const bassPc = step.bassPc ?? null
 
@@ -79,14 +84,45 @@ export function StepVoicingPicker({
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
+  // On `desk` the picker floats above the strip: centre it over the tapped step, clamped inside the viewport,
+  // with the notch pointing at the step.
+  useLayoutEffect(() => {
+    const place = () => {
+      const dialog = container.current
+      if (!dialog) return
+      dialog.style.left = ''
+      dialog.style.width = ''
+      const parent = dialog.offsetParent as HTMLElement | null
+      const sheet = document.querySelector<HTMLElement>(`[data-step-index="${index}"]`)
+      const desk = typeof window.matchMedia === 'function' && window.matchMedia(DESK_QUERY).matches
+      if (!desk || !parent || !sheet) return
+      const width = dialog.offsetWidth
+      const parentRect = parent.getBoundingClientRect()
+      const sheetRect = sheet.getBoundingClientRect()
+      const center = sheetRect.left + sheetRect.width / 2
+      const left = Math.max(EDGE, Math.min(center - width / 2, window.innerWidth - EDGE - width))
+      dialog.style.width = `${width}px`
+      dialog.style.left = `${left - parentRect.left}px`
+      if (notch.current) notch.current.style.left = `${Math.max(12, Math.min(width - 12, center - left))}px`
+    }
+    place()
+    window.addEventListener('resize', place)
+    return () => window.removeEventListener('resize', place)
+  }, [index, step.id])
+
   return (
     <div
       ref={container}
       role="dialog"
       aria-label={`${t('voicing.pick')}: ${step.anglo}`}
       tabIndex={-1}
-      className="plate wipe-in mt-2 flex w-fit max-w-full flex-col gap-3 p-4 focus:outline-none"
+      className="plate desk-pop wipe-in mt-2 flex w-fit max-w-full flex-col gap-3 p-4 focus:outline-none desk:bottom-full desk:left-0 desk:mt-0 desk:mb-3 desk:gap-2 desk:overflow-visible desk:p-3"
     >
+      <span
+        ref={notch}
+        className="pointer-events-none absolute top-full hidden h-2.5 w-2.5 -translate-x-1/2 -translate-y-[5px] rotate-45 border-r border-b border-ink bg-paper desk:block"
+        aria-hidden="true"
+      />
       <div className="flex items-start justify-between gap-3">
         <div className="flex flex-col gap-0.5">
           <span className="label-ink text-blue-ink">{t('voicing.pick')}</span>
@@ -124,7 +160,7 @@ export function StepVoicingPicker({
           <span className={`label-ink w-full text-center ${currentSignature === null ? 'bg-turquoise text-ink' : ''}`}>
             {t('voicing.auto')}
           </span>
-          <span className="font-mono text-[8px] tracking-tight text-ink-soft">
+          <span className="font-mono text-[10px] tracking-tight text-ink-soft">
             {auto ? voicingLabel(auto.frets) : t('voicing.autoHint')}
           </span>
         </button>
@@ -158,7 +194,7 @@ export function StepVoicingPicker({
               <span className={`label-ink w-full text-center ${selected ? 'bg-turquoise text-ink' : ''}`}>
                 {label}
               </span>
-              <span className="font-mono text-[8px] tracking-tight text-ink-soft">
+              <span className="font-mono text-[10px] tracking-tight text-ink-soft">
                 {voicingLabel(voicing.frets)}
               </span>
             </button>

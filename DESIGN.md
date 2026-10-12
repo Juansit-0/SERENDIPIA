@@ -296,6 +296,8 @@ Flat riso spot inks on paper: two papers, three inks in the black-brown family, 
 
 ## Layout
 
+**Desktop app shell (`desk:` = width ≥ 1024px and height ≥ 640px).** The app is exactly one viewport tall and never scrolls as a page: the transport strip on top (two dense rows, 64px, stamps ≥ 28px), the current view filling the middle, and the progression strip always visible at the bottom (≈ 144px: header with undo/redo, Chain, Clear and Save/Library/Share; 52px sheets; a one-line analysis with key, latest change and suggested capo). Views split the remaining height into columns; only secondary lists (suggestions, templates) may scroll inside their plate. The step picker and the Save/Library/Share panels float above the strip as popovers (Escape or a click outside closes them). Extra height at large screens goes to the fretboard rows (StepGrid `fill`, up to 64px), the hero chord name, degree cards and practice diagrams. Meaningful text never goes below 10px. Phones and short windows keep the flowing layout described below.
+
 Below `sm` the transport strip folds to the view tabs, Run, tempo and a **Ajustes ▾** stamp (with a one-line readout of beats · loop · click · capo); the stamp reveals the rest of the strip and the choice is remembered per browser. From `sm` up the strip is always fully open.
 
 The app is one paper sheet: `.grain` wraps a centered column of max-width 1560px with 12px padding (20px horizontal, 16px vertical from `sm` up) and 16px gaps between the transport strip and the view. Every view ends with the progression plate spanning all columns.

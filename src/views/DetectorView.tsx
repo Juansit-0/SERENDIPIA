@@ -1,7 +1,6 @@
 import { useMemo } from 'react'
 import { OffsetPlate } from '../components/OffsetPlate'
 import { RegMark } from '../components/RegMark'
-import { StepRow } from '../components/StepRow'
 import { StepGrid } from '../components/StepGrid'
 import { detectChord } from '../music/detectChord'
 import { LATIN_SHARP, PITCH_SHARP, chordAccidental } from '../music/notes'
@@ -48,8 +47,8 @@ export function DetectorView() {
   }
 
   return (
-    <div className="grid items-start gap-4 xl:grid-cols-[minmax(420px,1.6fr)_minmax(280px,1fr)]">
-      <section className="plate relative flex flex-col gap-4 p-4">
+    <div className="grid items-start gap-4 xl:grid-cols-[minmax(420px,1.6fr)_minmax(280px,1fr)] desk:h-full desk:min-h-0 desk:grid-cols-[minmax(0,1.8fr)_minmax(240px,1fr)] desk:grid-rows-[minmax(0,1fr)] desk:items-stretch desk:gap-2">
+      <section className="plate relative flex flex-col gap-4 p-4 desk:min-h-0 desk:gap-3 desk:overflow-y-auto desk:p-3">
         <RegMark className="left-1.5 top-1.5" />
         <RegMark className="right-1.5 top-1.5" />
         <RegMark className="bottom-1.5 left-1.5" />
@@ -57,45 +56,48 @@ export function DetectorView() {
 
         <div className="flex items-center justify-between gap-3">
           <h2 className="label-ink text-blue-ink">{t('detector.title')}</h2>
-          <button type="button" className="stamp" onClick={() => setDetectorFrets(OPEN)}>
+          <button type="button" className="stamp desk:min-h-[28px] desk:py-0.5" onClick={() => setDetectorFrets(OPEN)}>
             {t('detector.clear')}
           </button>
         </div>
 
-        <div className="overflow-x-auto pb-1">
-          <div className="min-w-[560px]">
-            <StepGrid
-              frets={frets}
-              tuning={soundingTuning}
-              stringLabels={stringLabels(soundingTuning)}
-              accidental={best ? chordAccidental(best.rootPc) : 'sharp'}
-              windowStart={1}
-              windowSize={12}
-              capo={capo}
-              interactive
-              onToggle={toggle}
-              showNotes
-              noteNames={noteNames}
-            />
+        <div className="flex flex-col gap-4 desk:min-h-0 desk:flex-1 desk:gap-3">
+          <div className="overflow-x-auto pb-1 desk:min-h-[230px] desk:flex-1">
+            <div className="min-w-[560px] desk:h-full">
+              <StepGrid
+                frets={frets}
+                tuning={soundingTuning}
+                stringLabels={stringLabels(soundingTuning)}
+                accidental={best ? chordAccidental(best.rootPc) : 'sharp'}
+                windowStart={1}
+                windowSize={12}
+                capo={capo}
+                interactive
+                onToggle={toggle}
+                showNotes
+                noteNames={noteNames}
+                fill
+              />
+            </div>
           </div>
-        </div>
 
-        <p className="readout text-[11px] text-ink-faint">{t('detector.hint')}</p>
+          <p className="readout text-[11px] text-ink-faint">{t('detector.hint')}</p>
+        </div>
       </section>
 
-      <aside className="plate flex flex-col gap-4 p-4">
+      <aside className="plate flex flex-col gap-4 p-4 desk:min-h-0 desk:gap-[clamp(0.625rem,1.6vh,1.25rem)] desk:overflow-y-auto desk:p-3">
         <h2 className="label-ink text-blue-ink">{t('detector.detected')}</h2>
         {best ? (
           <>
             <OffsetPlate offset={5}>
               <p
-                className="fv-name halftone overflow-hidden bg-ink px-3 py-1 text-[clamp(2.25rem,4vw,3.5rem)] leading-[0.95] text-paper"
+                className="fv-name halftone overflow-hidden bg-ink px-3 py-1 text-[clamp(2.25rem,4vw,3.5rem)] leading-[0.95] text-paper desk:text-[clamp(2.25rem,min(4.5vw,9vh),6rem)]"
                 aria-live="polite"
               >
                 {notation === 'latin' ? best.latin : best.anglo}
               </p>
             </OffsetPlate>
-            {notation === 'both' && <p className="text-[1.1rem] text-ink-soft">{best.latin}</p>}
+            {notation === 'both' && <p className="text-[1.1rem] text-ink-soft desk:text-[clamp(1.1rem,2.2vh,1.5rem)]">{best.latin}</p>}
 
             <div className="flex flex-wrap gap-1.5">
               <span className="chip chip--ink">{lang === 'es' ? best.quality.nameEs : best.quality.nameEn}</span>
@@ -149,7 +151,7 @@ export function DetectorView() {
             </div>
 
             {detection.candidates.length > 1 && (
-              <div className="flex flex-col gap-2 border-t border-rule pt-3">
+              <div className="flex flex-col gap-2 border-t border-rule pt-3 desk:gap-1.5 desk:pt-2">
                 <h3 className="label-ink text-blue-ink">{t('detector.alternatives')}</h3>
                 <div className="flex flex-wrap gap-1.5">
                   {detection.candidates.slice(1).map((candidate) => (
@@ -162,8 +164,8 @@ export function DetectorView() {
                         if (parsed) setChord(shapeChord(parsed, capo))
                       }}
                     >
-                      <span className="text-[0.8125rem] font-bold normal-case">{candidate.anglo}</span>
-                      <span className="font-mono text-[8px] opacity-70">
+                      <span className="text-[0.8125rem] font-bold normal-case desk:text-[clamp(0.8125rem,1.7vh,1.125rem)]">{candidate.anglo}</span>
+                      <span className="font-mono text-[10px] opacity-70">
                         {lang === 'es' ? candidate.quality.nameEs : candidate.quality.nameEn}
                       </span>
                     </button>
@@ -177,9 +179,6 @@ export function DetectorView() {
         )}
       </aside>
 
-      <div className="min-w-0 xl:col-span-2">
-        <StepRow />
-      </div>
     </div>
   )
 }

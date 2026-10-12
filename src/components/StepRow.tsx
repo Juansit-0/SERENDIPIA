@@ -134,18 +134,18 @@ export function StepRow() {
   const emptySlots = Math.max(0, SLOTS - progression.length - ghosts.length)
 
   return (
-    <section className="plate flex min-w-0 flex-col gap-2 p-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-baseline gap-3">
+    <section className="plate dense flex min-w-0 flex-col gap-2 p-4 desk:grid desk:shrink-0 desk:grid-cols-[minmax(0,1fr)_auto] desk:items-center desk:gap-x-2 desk:gap-y-0 desk:px-3 desk:py-1">
+      <div className="flex flex-wrap items-center justify-between gap-3 desk:col-start-1 desk:row-start-1 desk:flex-nowrap desk:gap-2">
+        <div className="flex min-w-0 items-baseline gap-3">
           <h2 className="label-ink text-blue-ink">{t('progression.title')}</h2>
           <span className="label-ink sm:hidden">{t('progression.swipe')}</span>
           {progression.length > 1 && (
-            <span id="step-reorder-hint" className="readout sr-only text-[10px] text-ink-faint lg:not-sr-only">
+            <span id="step-reorder-hint" className="readout sr-only min-w-0 truncate text-[10px] text-ink-faint lg:not-sr-only">
               {t('progression.reorderHint')}
             </span>
           )}
         </div>
-        <div className="flex flex-wrap items-center gap-1.5">
+        <div className="flex flex-wrap items-center gap-1.5 desk:shrink-0 desk:flex-nowrap desk:gap-1">
           <button type="button" className="stamp px-2" onClick={undo} disabled={!canUndo} aria-label={t('history.undo')} title={`${t('history.undo')} (⌘Z)`}>
             ↶
           </button>
@@ -181,9 +181,9 @@ export function StepRow() {
         </div>
       </div>
 
-      <div className="-mx-1 min-w-0 overflow-x-auto px-1 pt-3 pb-2">
+      <div className="-mx-1 min-w-0 overflow-x-auto px-1 pt-6 pb-2 desk:col-span-2 desk:pb-0.5">
         <div
-          className="grid min-w-[760px] snap-x snap-mandatory gap-1.5 sm:min-w-0"
+          className="grid min-w-[880px] snap-x snap-mandatory gap-1.5 sm:min-w-0"
           style={{ gridTemplateColumns: `repeat(${SLOTS}, minmax(0, 1fr))` }}
           role="group"
           aria-label={t('a11y.stepRow')}
@@ -203,7 +203,7 @@ export function StepRow() {
             const sheet = (
               <button
                 type="button"
-                className={`sheet flex min-h-[68px] w-full snap-start flex-col justify-between p-1.5 text-left ${
+                className={`sheet flex min-h-[68px] w-full snap-start flex-col justify-between p-1.5 text-left desk:min-h-[52px] desk:px-1 desk:py-1 ${
                   active ? 'wipe-in border-ink' : ''
                 } ${dragging ? 'border-dashed opacity-40' : ''}`}
                 data-step-index={index}
@@ -227,7 +227,7 @@ export function StepRow() {
                 title={playing ? t('transport.stop') : `${t('voicing.pick')}: ${step.anglo}`}
               >
                 <span className={`h-[3px] w-full ${fn ? FUNCTION_INK[fn] : 'bg-rule-strong'}`} aria-hidden="true" />
-                <span className="flex items-baseline gap-1 font-mono text-[8px] text-ink-faint">
+                <span className="flex items-baseline gap-1 font-mono text-[10px] leading-[1.15] text-ink-faint">
                   {index + 1}
                   {analysis.chords[index] && (
                     <span className={`truncate ${STATUS_INK[analysis.chords[index].status]}`}>
@@ -235,15 +235,18 @@ export function StepRow() {
                     </span>
                   )}
                 </span>
-                <span className="fv-ui text-[clamp(9px,0.72vw,13px)] font-bold leading-tight">
-                  {notation === 'latin' ? step.latin : step.anglo}
+                <span className="contents desk:flex desk:min-w-0 desk:items-baseline desk:gap-1">
+                  <span className="fv-ui text-[clamp(10px,0.8vw,13px)] font-bold leading-tight desk:shrink-0">
+                    {notation === 'latin' ? step.latin : step.anglo}
+                  </span>
+                  {notation === 'both' && (
+                    <span className="fv-ui truncate text-[10px] text-ink-soft">{step.latin}</span>
+                  )}
                 </span>
-                {notation === 'both' && (
-                  <span className="fv-ui truncate text-[9px] text-ink-soft">{step.latin}</span>
-                )}
-                <span className="flex items-center gap-1">
+                <span className="contents desk:flex desk:min-w-0 desk:items-center desk:gap-0.5">
+                <span className="flex min-w-0 items-center gap-1">
                   <span
-                    className={`truncate px-1 font-mono text-[8px] ${
+                    className={`truncate px-1 font-mono text-[10px] leading-[1.25] desk:px-0.5 ${
                       step.frets
                         ? 'bg-turquoise font-semibold text-ink mix-blend-multiply'
                         : 'text-ink-faint'
@@ -254,10 +257,11 @@ export function StepRow() {
                   </span>
                 </span>
                 <span
-                  className="truncate bg-turquoise px-1 font-mono text-[9px] font-semibold text-ink mix-blend-multiply"
+                  className="truncate bg-turquoise px-1 font-mono text-[10px] leading-[1.25] font-semibold desk:px-0.5 text-ink mix-blend-multiply"
                   title={t('a11y.sharedNotes')}
                 >
                   {sharedLabel || '—'}
+                </span>
                 </span>
               </button>
             )
@@ -283,18 +287,24 @@ export function StepRow() {
                 )}
                 {active ? <OffsetPlate>{sheet}</OffsetPlate> : sheet}
                 {analysis.transitions[index] && (
+                  // 24px hit area sitting above the sheets, centred on the gap, so it never covers a step.
                   <button
                     type="button"
-                    className={`absolute -right-[11px] top-0 z-20 grid h-[18px] w-[18px] -translate-y-1/2 place-items-center rounded-full border font-mono text-[10px] leading-none after:absolute after:-inset-2 after:content-[''] ${
-                      MARK_INK[analysis.transitions[index].tone]
-                    } ${transitionIndex === index ? 'ring-2 ring-ink ring-offset-1 ring-offset-paper' : ''}`}
+                    className="absolute -right-[15px] bottom-full z-20 grid h-6 w-6 place-items-center"
                     aria-pressed={transitionIndex === index}
                     aria-label={`${t('analysis.change')} ${index + 1}–${index + 2}: ${
                       lang === 'es' ? analysis.transitions[index].titleEs : analysis.transitions[index].titleEn
                     }`}
                     onClick={() => setPickedTransition(index)}
                   >
-                    {analysis.transitions[index].mark}
+                    <span
+                      className={`grid h-[18px] w-[18px] place-items-center rounded-full border font-mono text-[10px] leading-none ${
+                        MARK_INK[analysis.transitions[index].tone]
+                      } ${transitionIndex === index ? 'ring-2 ring-ink ring-offset-1 ring-offset-paper' : ''}`}
+                      aria-hidden="true"
+                    >
+                      {analysis.transitions[index].mark}
+                    </span>
                   </button>
                 )}
               </div>
@@ -305,24 +315,24 @@ export function StepRow() {
             <button
               key={`ghost-${suggestion.anglo}`}
               type="button"
-              className="cutline flex min-h-[68px] snap-start flex-col justify-between p-1.5 text-left text-ink-faint hover:border-blue-ink hover:text-blue-ink"
+              className="cutline flex min-h-[68px] snap-start flex-col justify-between p-1.5 text-left desk:min-h-[52px] desk:py-1 text-ink-faint hover:border-blue-ink hover:text-blue-ink"
               onClick={() => addSuggestion(suggestion)}
               onDragOver={(event) => handleDragOver(event, progression.length + ghostIndex)}
               onDrop={handleDrop}
               title={`${t('suggestions.title')}: ${lang === 'es' ? suggestion.reasonEs : suggestion.reasonEn}`}
             >
-              <span className="font-mono text-[8px]">+</span>
-              <span className="fv-ui text-[clamp(9px,0.72vw,13px)] font-semibold leading-tight">
+              <span className="font-mono text-[10px] leading-[1.15]">+</span>
+              <span className="fv-ui text-[clamp(10px,0.8vw,13px)] font-semibold leading-tight">
                 {suggestion.anglo}
               </span>
-              <span className="truncate font-mono text-[8px]">{suggestion.roman ?? ''}</span>
+              <span className="truncate font-mono text-[10px] leading-[1.25]">{suggestion.roman ?? ''}</span>
             </button>
           ))}
 
           {Array.from({ length: emptySlots }, (_, index) => (
             <span
               key={`empty-${index}`}
-              className="min-h-[68px] border border-rule bg-paper-deep/40"
+              className="min-h-[68px] border border-rule bg-paper-deep/40 desk:min-h-[52px]"
               aria-hidden="true"
               onDragOver={(event) => handleDragOver(event, progression.length + ghosts.length + index)}
               onDrop={handleDrop}
@@ -331,11 +341,14 @@ export function StepRow() {
         </div>
       </div>
 
-      {progression.length === 0 && <p className="readout text-[11px] text-ink-faint">{t('progression.empty')}</p>}
+      {progression.length === 0 && <p className="readout text-[11px] text-ink-faint desk:col-span-2 desk:truncate">{t('progression.empty')}</p>}
 
       {progression.length > 0 && (
-        <div className="flex flex-col gap-1 border-t border-rule pt-2" aria-live="polite">
-          <p className="flex flex-wrap items-baseline gap-x-2">
+        <div
+          className="flex flex-col gap-1 border-t border-rule pt-2 desk:col-span-2 desk:min-h-[28px] desk:flex-row desk:items-center desk:gap-x-4 desk:overflow-hidden desk:pt-1"
+          aria-live="polite"
+        >
+          <p className="flex flex-wrap items-baseline gap-x-2 desk:shrink-0 desk:flex-nowrap">
             <span className="label-ink text-blue-ink">{t('analysis.key')}</span>
             <span className="fv-ui text-[13px] font-semibold">
               {keyName({ rootPc: keyRootPc, mode: keyMode }, lang)}
@@ -343,7 +356,7 @@ export function StepRow() {
             {keyAuto && detectedKey && <span className="readout text-[10px] text-ink-faint">{t('analysis.auto')}</span>}
           </p>
           {shownTransition ? (
-            <p className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+            <p className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 desk:min-w-0 desk:flex-1 desk:flex-nowrap">
               <span
                 className={`grid h-[18px] w-[18px] shrink-0 place-items-center self-center rounded-full border font-mono text-[10px] leading-none ${
                   MARK_INK[shownTransition.tone]
@@ -352,24 +365,27 @@ export function StepRow() {
               >
                 {shownTransition.mark}
               </span>
-              <span className="fv-ui text-[13px] font-semibold">
+              <span className="fv-ui text-[13px] font-semibold desk:shrink-0">
                 {lang === 'es' ? shownTransition.titleEs : shownTransition.titleEn}
               </span>
-              <span className="text-[12px] leading-snug text-ink-soft">
+              <span
+                className="text-[12px] leading-snug text-ink-soft desk:min-w-0 desk:truncate"
+                title={lang === 'es' ? shownTransition.detailEs : shownTransition.detailEn}
+              >
                 {lang === 'es' ? shownTransition.detailEs : shownTransition.detailEn}
               </span>
               {shownTransition.commonTones.length > 0 && (
-                <span className="readout text-[10px] text-ink-faint">
+                <span className="readout text-[10px] text-ink-faint desk:shrink-0">
                   {t('analysis.common')}:{' '}
                   {shownTransition.commonTones.map((pc) => pitchName(pc, keyAccidental(keyRootPc, keyMode))).join(' ')}
                 </span>
               )}
             </p>
           ) : (
-            <p className="text-[12px] text-ink-soft">{t('analysis.addMore')}</p>
+            <p className="text-[12px] text-ink-soft desk:min-w-0 desk:flex-1 desk:truncate">{t('analysis.addMore')}</p>
           )}
           {capoSuggestion && (
-            <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <p className="flex flex-wrap items-center gap-x-2 gap-y-1 desk:shrink-0 desk:flex-nowrap">
               <span className="label-ink text-blue-ink">{t('capo.recommend')}</span>
               <span className="fv-ui text-[13px] font-semibold">
                 {capoSuggestion.capo === 0 ? t('capo.without') : `${t('capo.with')} ${capoSuggestion.capo}`}
@@ -377,7 +393,7 @@ export function StepRow() {
               <span className="readout text-[11px] text-ink-soft">
                 {capoSuggestion.shapes.map((shape) => (notation === 'latin' ? shape.latin : shape.anglo)).join(' · ')}
               </span>
-              <span className="text-[12px] text-ink-soft">{t('capo.easier')}</span>
+              <span className="text-[12px] text-ink-soft desk:hidden xl:desk:inline">{t('capo.easier')}</span>
               <button
                 type="button"
                 className="stamp"

@@ -1,4 +1,4 @@
-import { useRef, useState, type KeyboardEvent } from 'react'
+import { useRef, useState, type CSSProperties, type KeyboardEvent } from 'react'
 import { pitchName, type Accidental } from '../music/notes'
 import { useStore } from '../state/store'
 
@@ -16,6 +16,11 @@ export interface StepGridProps {
   showNotes?: boolean
   noteNames?: Record<number, string>
   label?: string
+  /**
+   * On `desk` screens, stretch the rows to fill the parent's height (30px min, 64px max per string).
+   * The parent must have a definite height. Elsewhere the grid keeps its fixed 30px rows.
+   */
+  fill?: boolean
 }
 
 const MARKERS = [3, 5, 7, 9, 12, 15, 17, 19, 21, 24]
@@ -34,11 +39,15 @@ export function StepGrid({
   showNotes = false,
   noteNames,
   label,
+  fill = false,
 }: StepGridProps) {
   const { t } = useStore()
   const fretColumns = Array.from({ length: windowSize }, (_, index) => windowStart + index)
   const rowOrder = frets.map((_, index) => index).reverse()
   const absolute = (fret: number | null) => (fret === null ? null : fret + capo)
+  const fillCell = fill ? 'desk:h-full desk:min-h-[26px]' : ''
+  // Taller cells get a bigger "pressed" dot (the stylesheet's ::before is a fixed 15px).
+  const fillDot = fill ? 'desk:before:!h-[min(58%,26px)] desk:before:!w-auto desk:before:aspect-square' : ''
   const capoVisible = capo > 0 && capo >= windowStart && capo < windowStart + windowSize
 
   // Roving tabindex: the whole fretboard is one tab stop; arrows move between cells.
@@ -77,8 +86,17 @@ export function StepGrid({
       role="group"
       aria-label={label ?? t('a11y.grid')}
       onKeyDown={onKeyDown}
-      className="grid items-center gap-[3px]"
-      style={{ gridTemplateColumns: `24px 34px repeat(${windowSize}, minmax(0, 1fr))` }}
+      className={`grid items-center gap-[3px] ${
+        fill
+          ? 'desk:h-full desk:max-h-full desk:content-start desk:[grid-template-rows:auto_auto_repeat(var(--grid-rows),minmax(26px,64px))]'
+          : ''
+      }`}
+      style={
+        {
+          gridTemplateColumns: `24px 34px repeat(${windowSize}, minmax(0, 1fr))`,
+          '--grid-rows': frets.length,
+        } as CSSProperties
+      }
     >
       <span aria-hidden="true" />
       <span className="label-ink text-center">0</span>
@@ -117,7 +135,7 @@ export function StepGrid({
             <button
               type="button"
               {...roving(rowIndex, 0)}
-              className="label-ink min-h-[30px] text-right"
+              className={`label-ink min-h-[30px] text-right ${fillCell}`}
               onClick={() => {
                 if (!interactive) return
                 onToggle?.(stringIndex, muted ? 0 : -1)
@@ -137,7 +155,7 @@ export function StepGrid({
               type="button"
               {...roving(rowIndex, 1)}
               aria-pressed={interactive ? open : undefined}
-              className={`cell h-[30px] ${open ? 'border-ink' : ''}`}
+              className={`cell h-[30px] ${fillCell} ${open ? 'border-ink' : ''}`}
               onClick={() => {
                 if (!interactive) {
                   if (open) onPlayString?.(stringIndex, tuning[stringIndex])
@@ -151,7 +169,7 @@ export function StepGrid({
                 {muted ? '×' : open ? '○' : '·'}
               </span>
               {showNotes && open && (
-                <span className="absolute bottom-[1px] font-mono text-[7px] text-ink-faint">{openNote}</span>
+                <span className="absolute bottom-[1px] font-mono text-[10px] leading-none text-ink-faint">{openNote}</span>
               )}
             </button>
 
@@ -163,7 +181,7 @@ export function StepGrid({
                   key={`cell-${stringIndex}-${fret}`}
                   type="button"
                   {...roving(rowIndex, fretIndex + 2)}
-                  className={`cell h-[30px] ${isCapo ? 'cell--capo' : ''} ${lit ? 'cell--lit' : ''}`}
+                  className={`cell h-[30px] ${fillCell} ${isCapo ? 'cell--capo' : ''} ${lit ? `cell--lit ${fillDot}` : ''}`}
                   aria-pressed={interactive ? lit : undefined}
                   aria-disabled={isCapo || undefined}
                   title={isCapo ? t('capo.label') : undefined}
@@ -178,7 +196,7 @@ export function StepGrid({
                   aria-label={`${stringLabel} ${t('a11y.fret')} ${fret}${isCapo ? ` · ${t('capo.label')}` : ''}`}
                 >
                   {lit && showNotes && (
-                    <span className="relative z-10 font-mono text-[7px] font-bold text-ink">
+                    <span className="relative z-10 font-mono text-[10px] font-bold leading-none text-ink">
                       {noteNames?.[((soundingMidiAt(fret) % 12) + 12) % 12] ??
                         pitchName(((soundingMidiAt(fret) % 12) + 12) % 12, accidental)}
                     </span>

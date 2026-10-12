@@ -2,7 +2,6 @@ import { useMemo } from 'react'
 import { ChordSymbol } from '../components/ChordSymbol'
 import { RegMark } from '../components/RegMark'
 import { StepGrid } from '../components/StepGrid'
-import { StepRow } from '../components/StepRow'
 import { SuggestionsPanel } from '../components/SuggestionsPanel'
 import { VoicingPads } from '../components/VoicingPads'
 import { chordToneSpelling, QUALITY_LIST, QualityId, qualityById } from '../music/chords'
@@ -45,10 +44,10 @@ export function DictionaryView() {
   }, [voicing, capo])
 
   return (
-    <div className="grid items-start gap-4 xl:grid-cols-[minmax(280px,1fr)_minmax(420px,1.7fr)_minmax(250px,0.9fr)]">
+    <div className="grid items-start gap-4 xl:grid-cols-[minmax(280px,1fr)_minmax(420px,1.7fr)_minmax(250px,0.9fr)] desk:h-full desk:min-h-0 desk:grid-cols-[minmax(232px,1fr)_minmax(360px,1.75fr)_minmax(216px,0.9fr)] desk:grid-rows-[minmax(0,1fr)] desk:items-stretch desk:gap-3">
       <ChordSymbol />
 
-      <section className="plate relative flex flex-col gap-4 p-4">
+      <section className="plate relative flex flex-col gap-4 p-4 desk:min-h-0 desk:gap-2 desk:p-3">
         <RegMark className="left-1.5 top-1.5" />
         <RegMark className="right-1.5 top-1.5" />
         <RegMark className="bottom-1.5 left-1.5" />
@@ -64,7 +63,9 @@ export function DictionaryView() {
         </div>
 
         {voicing && (
+          <div className="desk:min-h-0 desk:flex-1">
           <StepGrid
+            fill
             frets={voicing.frets}
             tuning={soundingTuning}
             stringLabels={stringLabels(soundingTuning)}
@@ -78,20 +79,21 @@ export function DictionaryView() {
               playFrets(single)
             }}
           />
+          </div>
         )}
 
         <VoicingPads />
       </section>
 
-      <aside className="flex flex-col gap-4">
-        <section className="plate flex flex-col gap-3 p-4">
+      <aside className="flex flex-col gap-4 desk:min-h-0 desk:gap-3">
+        <section className="plate flex shrink-0 flex-col gap-3 p-4 desk:gap-1.5 desk:p-3">
           <h2 className="label-ink text-blue-ink">{t('chord.root')}</h2>
           <div className="grid grid-cols-6 gap-1.5">
             {PITCH_SHARP.map((name, pc) => (
               <button
                 key={name}
                 type="button"
-                className="stamp flex-col gap-0 px-1 py-1"
+                className="stamp flex-col gap-0 px-1 py-1 desk:min-h-[30px] desk:py-0.5 desk:[@media(min-height:900px)]:min-h-10"
                 aria-pressed={pc === chord.rootPc}
                 onClick={() => {
                   const next = parseChord(`${name}${chord.quality.suffix}`)
@@ -99,12 +101,12 @@ export function DictionaryView() {
                 }}
               >
                 <span className="text-[0.8125rem] font-bold leading-none">{name}</span>
-                <span className="font-mono text-[7px] opacity-70">{LATIN_SHARP[pc]}</span>
+                <span className="font-mono text-[10px] leading-none opacity-70">{LATIN_SHARP[pc]}</span>
               </button>
             ))}
           </div>
 
-          <label className="label-ink text-blue-ink" htmlFor="quality-select">
+          <label className="label-ink text-blue-ink desk:mt-1" htmlFor="quality-select">
             {t('chord.quality')}
           </label>
           <select
@@ -129,9 +131,6 @@ export function DictionaryView() {
         <SuggestionsPanel />
       </aside>
 
-      <div className="min-w-0 xl:col-span-3">
-        <StepRow />
-      </div>
     </div>
   )
 }

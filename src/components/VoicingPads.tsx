@@ -11,9 +11,10 @@ export function VoicingPads() {
   }
 
   return (
-    <section className="flex flex-col gap-2">
+    <section className="flex flex-col gap-2 desk:shrink-0 desk:gap-1">
       <h2 className="label-ink text-blue-ink">{t('chord.proofs')}</h2>
-      <div className="relative flex flex-wrap items-start gap-2 border border-dashed border-rule-strong p-3">
+      {/* On `desk` every proof stays visible: a wrapping grid of compact landscape proofs. */}
+      <div className="relative flex flex-wrap items-start gap-2 border border-dashed border-rule-strong p-3 desk:grid desk:grid-cols-[repeat(auto-fill,minmax(7.75rem,1fr))] desk:gap-x-2 desk:gap-y-3 desk:px-2.5 desk:pb-3.5 desk:pt-2.5">
         <span className="cropmark left-1 top-1 border-l border-t" aria-hidden="true" />
         <span className="cropmark right-1 top-1 border-r border-t" aria-hidden="true" />
         <span className="cropmark bottom-1 left-1 border-b border-l" aria-hidden="true" />
@@ -25,13 +26,14 @@ export function VoicingPads() {
           const proof = (
             <button
               type="button"
-              className={`sheet flex w-[84px] flex-col items-center gap-1 p-2 ${selected ? 'border-ink' : ''}`}
+              className={`sheet flex w-[84px] flex-col items-center gap-1 p-2 desk:w-full desk:flex-row desk:gap-1.5 desk:p-1.5 ${selected ? 'border-ink' : ''}`}
               aria-pressed={selected}
               onClick={() => selectVoicing(index)}
             >
-              <MiniPlate frets={voicing.frets} />
+              <MiniPlate frets={voicing.frets} className="h-[46px] w-[40px] shrink-0 desk:h-[40px] desk:w-[35px]" />
+              <span className="contents desk:flex desk:min-w-0 desk:flex-col desk:items-start desk:gap-0.5">
               <span
-                className={`label-ink w-full text-center ${selected ? 'bg-turquoise text-ink mix-blend-multiply' : ''}`}
+                className={`label-ink w-full text-center desk:whitespace-nowrap desk:text-left desk:tracking-[0.08em] ${selected ? 'bg-turquoise text-ink mix-blend-multiply' : ''}`}
               >
                 {isMarked
                   ? t('voicing.marked')
@@ -39,11 +41,12 @@ export function VoicingPads() {
                     ? t('chord.common')
                     : `${t('chord.position')} ${voicing.baseFret}`}
               </span>
-              <span className="font-mono text-[8px] text-ink-faint">
+              <span className="font-mono text-[10px] leading-tight text-ink-faint">
                 {t(`difficulty.${voicing.difficulty}` as TKey)}
               </span>
-              <span className="font-mono text-[8px] tracking-tight text-ink-soft">
+              <span className="font-mono text-[10px] leading-tight tracking-tight whitespace-nowrap text-ink-soft">
                 {voicing.frets.map((fret) => (fret === null ? 'x' : fret)).join(' ')}
+              </span>
               </span>
             </button>
           )
@@ -51,7 +54,7 @@ export function VoicingPads() {
           return (
             <div
               key={voicing.signature}
-              className="relative"
+              className="relative desk:min-w-0"
               style={{ transform: `translateY(${(index % 3) * 4}px)` }}
             >
               {isMarked && markedVoicing && (

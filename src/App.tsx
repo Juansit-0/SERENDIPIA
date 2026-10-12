@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { StepRow } from './components/StepRow'
 import { TransportStrip } from './components/TransportStrip'
 import { StoreProvider, useStore } from './state/store'
 import { DetectorView } from './views/DetectorView'
@@ -44,15 +45,17 @@ function Shell() {
   }, [undo, redo])
 
   return (
-    <div className="grain min-h-screen bg-paper text-ink">
-      <div className="mx-auto flex max-w-[1560px] flex-col gap-4 px-3 py-3 sm:px-5 sm:py-4">
+    <div className="grain min-h-screen bg-paper text-ink desk:h-dvh desk:overflow-hidden">
+      {/* On `desk` screens the shell is exactly one viewport tall: transport, the view (fills the rest), strip. */}
+      <div className="mx-auto flex max-w-[1560px] flex-col gap-4 px-3 py-3 sm:px-5 sm:py-4 desk:h-full desk:gap-2 desk:py-2">
         <TransportStrip />
-        <main className="contents">
+        <main className="flex min-w-0 flex-col desk:min-h-0 desk:flex-1">
           {view === 'dictionary' && <DictionaryView />}
           {view === 'detector' && <DetectorView />}
           {view === 'theory' && <TheoryView />}
           {view === 'practice' && <PracticeView />}
         </main>
+        {view !== 'practice' && <StepRow />}
       </div>
     </div>
   )

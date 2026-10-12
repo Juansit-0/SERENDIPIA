@@ -185,8 +185,8 @@ export function PracticeView() {
   const best = key ? records[mode === 'minute' ? key : `${key}@tempo`]?.best : undefined
 
   return (
-    <div className="grid items-start gap-4 xl:grid-cols-[minmax(320px,1fr)_minmax(320px,1fr)]">
-      <section className="plate flex flex-col gap-4 p-4">
+    <div className="grid items-start gap-4 xl:grid-cols-[minmax(320px,1fr)_minmax(320px,1fr)] desk:h-full desk:min-h-0 desk:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] desk:grid-rows-[minmax(0,1fr)] desk:items-stretch desk:gap-2">
+      <section className="plate flex flex-col gap-4 p-4 desk:min-h-0 desk:gap-3 desk:overflow-y-auto desk:p-3">
         <div className="flex flex-col gap-1">
           <h2 className="label-ink text-blue-ink">{t('practice.title')}</h2>
           <p className="text-[12px] leading-snug text-ink-soft">{t('practice.intro')}</p>
@@ -201,7 +201,7 @@ export function PracticeView() {
           ).map(([value, setValue, chord, frets, label, id], index) => (
             <div
               key={id}
-              className={`sheet flex flex-col items-center gap-2 p-3 ${live && active === index ? 'border-ink bg-paper-deep' : ''}`}
+              className={`sheet flex flex-col items-center gap-2 p-3 desk:gap-1.5 desk:p-2.5 ${live && active === index ? 'border-ink bg-paper-deep' : ''}`}
             >
               <label className="label-ink self-start text-blue-ink" htmlFor={id}>
                 {t(label)}
@@ -218,8 +218,8 @@ export function PracticeView() {
               />
               {chord && frets ? (
                 <>
-                  <MiniPlate frets={frets} className="h-[92px] w-[80px]" />
-                  <span className="fv-ui text-[1.25rem] font-bold">{nameOf(chord)}</span>
+                  <MiniPlate frets={frets} className="h-[92px] w-[80px] desk:h-auto desk:w-[clamp(5rem,min(18vw,30vh),22rem)] desk:aspect-[80/92]" />
+                  <span className="fv-ui text-[1.25rem] font-bold desk:text-[clamp(1.5rem,3vh,2.25rem)] desk:leading-none">{nameOf(chord)}</span>
                   <span className="readout text-[10px] text-ink-soft">{voicingLabel(frets)}</span>
                 </>
               ) : (
@@ -299,12 +299,12 @@ export function PracticeView() {
         </div>
       </section>
 
-      <section className="plate flex flex-col gap-4 p-4" aria-live="polite">
+      <section className="plate flex flex-col gap-4 p-4 desk:min-h-0 desk:gap-3 desk:p-3" aria-live="polite">
         <div className="flex flex-wrap items-end gap-6">
           {mode === 'minute' && (
             <div className="flex flex-col">
               <span className="label-ink text-blue-ink">{t('practice.left')}</span>
-              <span className="font-mono text-[2.5rem] font-semibold leading-none tabular-nums">
+              <span className="font-mono text-[2.5rem] font-semibold leading-none tabular-nums desk:text-[clamp(3.25rem,7vh,5rem)]">
                 {live ? remaining : 60}
                 <span className="text-[1rem]">{t('practice.seconds')}</span>
               </span>
@@ -313,23 +313,23 @@ export function PracticeView() {
           {mode === 'metronome' && (
             <div className="flex flex-col">
               <span className="label-ink text-blue-ink">{t('practice.tempo')}</span>
-              <span className="font-mono text-[2.5rem] font-semibold leading-none tabular-nums">{live ? tempo : startTempo}</span>
+              <span className="font-mono text-[2.5rem] font-semibold leading-none tabular-nums desk:text-[clamp(3.25rem,7vh,5rem)]">{live ? tempo : startTempo}</span>
             </div>
           )}
           <div className="flex flex-col">
             <span className="label-ink text-blue-ink">{t('practice.changes')}</span>
-            <span className="font-mono text-[2.5rem] font-semibold leading-none tabular-nums">{count}</span>
+            <span className="font-mono text-[2.5rem] font-semibold leading-none tabular-nums desk:text-[clamp(3.25rem,7vh,5rem)]">{count}</span>
           </div>
           <div className="flex flex-col">
             <span className="label-ink text-blue-ink">{mode === 'minute' ? t('practice.best') : t('practice.bestTempo')}</span>
-            <span className="font-mono text-[2.5rem] font-semibold leading-none tabular-nums text-ink-soft">{best ?? '—'}</span>
+            <span className="font-mono text-[2.5rem] font-semibold leading-none tabular-nums desk:text-[clamp(3.25rem,7vh,5rem)] text-ink-soft">{best ?? '—'}</span>
           </div>
         </div>
 
         {mode === 'minute' && (
           <button
             type="button"
-            className="sheet grid min-h-[120px] place-items-center text-[1.75rem] font-bold disabled:opacity-40"
+            className="sheet grid min-h-[120px] place-items-center text-[1.75rem] font-bold disabled:opacity-40 desk:max-h-[50vh] desk:min-h-[140px] desk:flex-1 desk:text-[clamp(2.5rem,6vh,4.5rem)]"
             onClick={tap}
             disabled={!live}
           >

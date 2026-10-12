@@ -79,3 +79,7 @@ node scripts/fetch-samples.mjs
 ## Regenerating the world
 
 The direction contract for this surface lives in `.impeccable/surfaces/src-app-tsx.md`; the product record is `PRODUCT.md` and the built design system is `DESIGN.md`.
+
+## License
+
+The code is released under the [MIT License](LICENSE). The guitar samples in `src/assets/samples/` keep their own license, **CC BY-SA 3.0** (see *Audio* above).

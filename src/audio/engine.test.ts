@@ -5,6 +5,7 @@ const tone = vi.hoisted(() => {
     toneStartCalls: 0,
     samplersCreated: 0,
     disposed: 0,
+    notes: [] as unknown[][],
     loaded: () => Promise.resolve() as Promise<void>,
   }
 
@@ -21,7 +22,9 @@ const tone = vi.hoisted(() => {
     dispose() {
       state.disposed += 1
     }
-    triggerAttackRelease() {}
+    triggerAttackRelease(...args: unknown[]) {
+      state.notes.push(args)
+    }
     triggerAttack() {}
     async generate() {}
   }
@@ -89,6 +92,7 @@ vi.mock('tone', () => ({
   loaded: () => tone.state.loaded(),
   now: () => 0,
   Frequency: () => ({ toNote: () => 'C4' }),
+  Time: () => ({ toSeconds: () => 0.25 }),
   Gain: tone.FakeNode,
   Filter: tone.FakeNode,
   Compressor: tone.FakeNode,
@@ -234,5 +238,37 @@ describe('audioEngine.playProgression', () => {
     engine.updateProgression({ stepCount: 2 })
     const [end] = [...tone.scheduled.values()]
     expect(end.time).toBe('2001i')
+  })
+})
+
+describe('strumming', () => {
+  const runFirstStep = async (strum?: 'single' | 'folk' | 'arpeggio') => {
+    const engine = await freshEngine()
+    await engine.start()
+    tone.state.notes = []
+    engine.playProgression({ ...baseOptions, loop: true, ...(strum ? { getStrum: () => strum } : {}) })
+    const loop = (engine as unknown as { loopEvent: { callback: (time: number) => void } }).loopEvent
+    loop.callback(10)
+    // [note, duration, time, velocity]
+    return tone.state.notes as Array<[string, number, number, number]>
+  }
+
+  it('plays one ringing strum by default', async () => {
+    const notes = await runFirstStep()
+    expect(notes).toHaveLength(6)
+    expect(notes.every(([, duration]) => duration === 1.9)).toBe(true)
+  })
+
+  it('spreads the folk pattern over the bar with softer upstrokes', async () => {
+    const notes = await runFirstStep('folk')
+    // 3 downstrokes x 6 strings + 3 upstrokes x 4 treble strings
+    expect(notes).toHaveLength(3 * 6 + 3 * 4)
+    const starts = [...new Set(notes.map(([, , time]) => Math.floor((time - 10) / 0.25 + 0.05)))].sort((a, b) => a - b)
+    expect(starts).toEqual([0, 2, 3, 5, 6, 7])
+  })
+
+  it('arpeggiates one note per eighth', async () => {
+    const notes = await runFirstStep('arpeggio')
+    expect(notes).toHaveLength(8)
   })
 })

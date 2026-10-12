@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef } from 'react'
+import { STRUMS, isStrumId } from '../audio/strums'
 import { qualityById } from '../music/chords'
 import { absoluteLabel, autoVoicing, voicingLabel, voicingSignature } from '../music/stepVoicing'
 import { voicingsFor, type Voicing } from '../music/voicings'
@@ -18,7 +19,7 @@ export function StepVoicingPicker({
   onMove: (to: number) => void
   onClose: () => void
 }) {
-  const { tuning, capo, setStepVoicing, removeFromProgression, moveStep, notation, t } = useStore()
+  const { tuning, capo, setStepVoicing, removeFromProgression, moveStep, notation, lang, strum, setStepStrum, t } = useStore()
   const move = (to: number) => {
     moveStep(index, to)
     onMove(to)
@@ -164,6 +165,24 @@ export function StepVoicingPicker({
           )
         })}
       </div>
+
+      <label className="flex flex-wrap items-center gap-2">
+        <span className="label-ink text-blue-ink">{t('voicing.strum')}</span>
+        <select
+          className="stamp cursor-pointer appearance-none px-2 py-0.5"
+          value={step.strum ?? ''}
+          onChange={(event) => setStepStrum(index, isStrumId(event.target.value) ? event.target.value : null)}
+        >
+          <option value="">
+            {t('strum.global')} ({(lang === 'es' ? STRUMS.find((s) => s.id === strum)?.nameEs : STRUMS.find((s) => s.id === strum)?.nameEn) ?? ''})
+          </option>
+          {STRUMS.map((item) => (
+            <option key={item.id} value={item.id}>
+              {lang === 'es' ? item.nameEs : item.nameEn} {item.glyph}
+            </option>
+          ))}
+        </select>
+      </label>
 
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-rule pt-2">
         {count > 1 && (

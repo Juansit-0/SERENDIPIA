@@ -1,3 +1,4 @@
+import { STRUMS, type StrumId } from '../audio/strums'
 import { TIMBRES, type TimbreId } from '../audio/types'
 import { MAX_CAPO } from '../music/capo'
 import { LATIN_SHARP, PITCH_SHARP } from '../music/notes'
@@ -6,7 +7,7 @@ import { BEAT_OPTIONS, TEMPO_MAX, TEMPO_MIN } from '../state/settings'
 import { useStore, type Notation, type ViewId } from '../state/store'
 import { RegMark } from './RegMark'
 
-const VIEWS: ViewId[] = ['dictionary', 'detector', 'theory']
+const VIEWS: ViewId[] = ['dictionary', 'detector', 'theory', 'practice']
 const NOTATIONS: Notation[] = ['anglo', 'both', 'latin']
 
 export function TransportStrip() {
@@ -28,6 +29,8 @@ export function TransportStrip() {
     setMetronome,
     timbre,
     setTimbre,
+    strum,
+    setStrum,
     capo,
     setCapo,
     volume,
@@ -151,6 +154,19 @@ export function TransportStrip() {
             {TIMBRES.map((item) => (
               <option key={item.id} value={item.id}>
                 {lang === 'es' ? item.nameEs : item.nameEn}
+              </option>
+            ))}
+          </select>
+          <span className="label-ink text-blue-ink">{t('transport.strum')}</span>
+          <select
+            className="stamp min-w-0 max-w-[11rem] flex-1 cursor-pointer appearance-none px-2 py-0.5 sm:flex-none"
+            value={strum}
+            aria-label={t('transport.strum')}
+            onChange={(event) => setStrum(event.target.value as StrumId)}
+          >
+            {STRUMS.map((item) => (
+              <option key={item.id} value={item.id}>
+                {lang === 'es' ? item.nameEs : item.nameEn} {item.glyph}
               </option>
             ))}
           </select>

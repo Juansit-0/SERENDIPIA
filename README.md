@@ -22,6 +22,15 @@ The logic lives in `src/music/analysis.ts`.
 
 The logic lives in `src/music/playability.ts`.
 
+## Practice
+
+- **Strumming patterns**: pick a **Strum** in the transport (single strum, quarters, folk `↓ ↓↑ ↑↓↑`, ballad, eighths, offbeat, arpeggio) and the progression plays it on every step; the step picker can override it per step. Patterns live in `src/audio/strums.ts`.
+- **Change trainer** (**Practice** tab): two chords, shaped for the least hand movement.
+  - **One minute**: tap the big button (or Space) on every clean change; the score is changes per minute and the best score per pair of chords is kept.
+  - **With metronome**: the two chords alternate with the click; the tempo can ramp up by itself (+4 bpm every 8 changes) and **Slower** drops it 8 bpm. The top tempo per pair is kept.
+
+Records stay in the browser (`localStorage`).
+
 ## Run it
 
 ```bash

@@ -1,3 +1,4 @@
+import { isStrumId, type StrumId } from '../audio/strums'
 import { TIMBRES, type TimbreId } from '../audio/types'
 import type { Lang } from '../i18n'
 import { MAX_CAPO } from '../music/capo'
@@ -19,6 +20,7 @@ export interface PersistedSettings {
   metronome: boolean
   beatsPerChord: number
   timbre: TimbreId
+  strum: StrumId
   capo: number
 }
 
@@ -42,6 +44,7 @@ export const DEFAULT_SETTINGS: PersistedSettings = {
   metronome: false,
   beatsPerChord: 4,
   timbre: 'nylon',
+  strum: 'single',
   capo: 0,
 }
 
@@ -69,6 +72,7 @@ export function sanitizeSettings(raw: unknown): PersistedSettings {
     metronome: typeof input.metronome === 'boolean' ? input.metronome : d.metronome,
     beatsPerChord: oneOf(input.beatsPerChord, BEAT_OPTIONS, d.beatsPerChord),
     timbre: oneOf(input.timbre, TIMBRES.map((timbre) => timbre.id), d.timbre),
+    strum: isStrumId(input.strum) ? input.strum : d.strum,
     capo: intIn(input.capo, 0, MAX_CAPO, d.capo),
   }
 }

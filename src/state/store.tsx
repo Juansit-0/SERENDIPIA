@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from 'react'
 import { loadAudioEngine, loadedAudioEngine, prefetchAudioEngine } from '../audio/loader'
+import type { StrumId } from '../audio/strums'
 import type { PlayPattern, TimbreId } from '../audio/types'
 import { translate, type Lang, type TKey } from '../i18n'
 import { QualityId } from '../music/chords'
@@ -40,7 +41,7 @@ import { appendStep, applyStepVoicing, MAX_STEPS, removeStep, stepId, toggleDete
 import { loadSettings, saveSettings, type Notation, type PersistedSettings } from './settings'
 
 export type { Notation } from './settings'
-export type ViewId = 'dictionary' | 'detector' | 'theory'
+export type ViewId = 'dictionary' | 'detector' | 'theory' | 'practice'
 
 export interface ProgressionStep {
   id: string
@@ -52,6 +53,8 @@ export interface ProgressionStep {
   frets?: (number | null)[] | null
   voicingLabel?: string
   voicingSource?: StepVoicingSource
+  /** Strumming pattern for this step; follows the global one when absent. */
+  strum?: StrumId
 }
 
 export interface MarkedVoicing {
@@ -88,6 +91,10 @@ interface StoreValue {
   setBeatsPerChord: (beats: number) => void
   timbre: TimbreId
   setTimbre: (timbre: TimbreId) => void
+  strum: StrumId
+  setStrum: (strum: StrumId) => void
+  setStepStrum: (index: number, strum: StrumId | null) => void
+  stopPlayback: () => void
   keyRootPc: number
   setKeyRootPc: (pc: number) => void
   keyMode: Mode
@@ -149,7 +156,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [view, setViewState] = useState<ViewId>(() => {
     if (typeof window === 'undefined') return 'dictionary'
     const hash = window.location.hash.replace('#', '')
-    return hash === 'detector' || hash === 'theory' ? hash : 'dictionary'
+    return hash === 'detector' || hash === 'theory' || hash === 'practice' ? hash : 'dictionary'
   })
   const [tuningId, setTuningIdState] = useState(initial.tuningId)
   const [tempo, setTempo] = useState(initial.tempo)
@@ -158,6 +165,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [metronome, setMetronomeState] = useState(initial.metronome)
   const [beatsPerChord, setBeatsPerChord] = useState(initial.beatsPerChord)
   const [timbre, setTimbreState] = useState<TimbreId>(initial.timbre)
+  const [strum, setStrum] = useState<StrumId>(initial.strum)
   const [capo, setCapoState] = useState(initial.capo)
   const [manualKeyRootPc, setManualKeyRootPc] = useState(initial.keyRootPc)
   const [manualKeyMode, setManualKeyMode] = useState<Mode>(initial.keyMode)
@@ -223,10 +231,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       metronome,
       beatsPerChord,
       timbre,
+      strum,
       capo,
     }
     saveSettings(payload)
-  }, [lang, notation, tuningId, tempo, volume, manualKeyRootPc, manualKeyMode, keyAuto, loop, metronome, beatsPerChord, timbre, capo])
+  }, [lang, notation, tuningId, tempo, volume, manualKeyRootPc, manualKeyMode, keyAuto, loop, metronome, beatsPerChord, timbre, strum, capo])
 
   useEffect(() => {
     volumeRef.current = volume
@@ -390,6 +399,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [progression, tuning],
   )
 
+  const getStrumForStep = useCallback((index: number): StrumId => progression[index]?.strum ?? strum, [progression, strum])
+
+  const setStepStrum = useCallback((index: number, next: StrumId | null) => {
+    setProgression((current) =>
+      current.map((step, position) => (position === index ? { ...step, strum: next ?? undefined } : step)),
+    )
+  }, [])
+
   const togglePlay = useCallback(() => {
     if (playing) {
       stopPlayback()
@@ -407,6 +424,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         tuning: soundingTuning,
         metronome,
         getFrets: getFretsForStep,
+        getStrum: getStrumForStep,
         onStep: playhead.setStep,
         onBeat: playhead.setBeat,
         onEnd: () => {
@@ -427,6 +445,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     beatsPerChord,
     soundingTuning,
     getFretsForStep,
+    getStrumForStep,
   ])
 
   useEffect(() => {
@@ -439,8 +458,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       tuning: soundingTuning,
       stepCount: progression.length,
       getFrets: getFretsForStep,
+      getStrum: getStrumForStep,
     })
-  }, [playing, progression.length, metronome, tempo, loop, beatsPerChord, soundingTuning, getFretsForStep])
+  }, [playing, progression.length, metronome, tempo, loop, beatsPerChord, soundingTuning, getFretsForStep, getStrumForStep])
 
   const toggleDetectorString = useCallback((stringIndex: number, fret: number) => {
     setDetectorFrets((previous) => toggleDetectorFret(previous, stringIndex, fret, capo))
@@ -515,7 +535,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         const shape = option.shapes[index]
         if (!shape) return step
         // New shapes: drop any pinned voicing so each step picks its easiest form again.
-        return { id: step.id, rootPc: shape.rootPc, qualityId: shape.qualityId, bassPc: shape.bassPc, anglo: shape.anglo, latin: shape.latin }
+        return { id: step.id, rootPc: shape.rootPc, qualityId: shape.qualityId, bassPc: shape.bassPc, anglo: shape.anglo, latin: shape.latin, strum: step.strum }
       }),
     )
   }, [])
@@ -556,6 +576,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setBeatsPerChord,
     timbre,
     setTimbre,
+    strum,
+    setStrum,
+    setStepStrum,
+    stopPlayback,
     keyRootPc,
     setKeyRootPc,
     keyMode,
@@ -600,7 +624,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     toggleDetectorString,
   }), [
     t, lang, notation, view, setView, tuningId, setTuningId, tuning, soundingTuning, capo, setCapo, tempo, volume, loop,
-    metronome, setMetronome, beatsPerChord, timbre, setTimbre, keyRootPc, setKeyRootPc, keyMode, setKeyMode, keyAuto,
+    metronome, setMetronome, beatsPerChord, timbre, setTimbre, strum, setStepStrum, stopPlayback, keyRootPc, setKeyRootPc, keyMode, setKeyMode, keyAuto,
     detectedKey, analysis, nextSteps, chainProgression, capoSuggestion, applyCapoSuggestion, chord, chordInput, chordError, setChordInput,
     setChord, voicings, selectedVoicing, selectVoicing, playVoicing, playFrets, progression, loadProgression,
     addToProgression, moveStep, setStepVoicing, removeFromProgression, markedVoicing, setMarkedVoicing,

@@ -3,6 +3,7 @@ import { TransportStrip } from './components/TransportStrip'
 import { StoreProvider, useStore } from './state/store'
 import { DetectorView } from './views/DetectorView'
 import { DictionaryView } from './views/DictionaryView'
+import { PracticeView } from './views/PracticeView'
 import { TheoryView } from './views/TheoryView'
 
 function Shell() {
@@ -10,7 +11,8 @@ function Shell() {
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.code !== 'Space' || event.repeat || event.defaultPrevented) return
+      // The practice view uses Space for its own tap counter.
+      if (event.code !== 'Space' || event.repeat || event.defaultPrevented || view === 'practice') return
       const target = event.target as HTMLElement | null
       const tag = target?.tagName
       if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA' || target?.isContentEditable) return
@@ -20,7 +22,7 @@ function Shell() {
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [togglePlay])
+  }, [togglePlay, view])
 
   return (
     <div className="grain min-h-screen bg-paper text-ink">
@@ -30,6 +32,7 @@ function Shell() {
           {view === 'dictionary' && <DictionaryView />}
           {view === 'detector' && <DetectorView />}
           {view === 'theory' && <TheoryView />}
+          {view === 'practice' && <PracticeView />}
         </main>
       </div>
     </div>

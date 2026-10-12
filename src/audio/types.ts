@@ -1,3 +1,5 @@
+import type { StrumId } from './strums'
+
 export type PlayPattern = 'strum-down' | 'strum-up' | 'arpeggio' | 'block'
 export type TimbreId = 'nylon' | 'steel' | 'electric' | 'jazz'
 
@@ -19,4 +21,6 @@ export interface ProgressionOptions {
   onEnd?: () => void
   metronome?: boolean
   onBeat?: (beat: number) => void
+  /** Strumming pattern for each step; a single strum when absent. */
+  getStrum?: (index: number) => StrumId
 }

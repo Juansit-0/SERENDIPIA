@@ -1,6 +1,7 @@
 import * as Tone from 'tone'
 import { midiToFreq } from '../music/notes'
 import { beatsToNotation, isAccentBeat, progressionTicks } from './timing'
+import { strumHits, type StrumId } from './strums'
 import { SAMPLE_FILES } from '../assets/samples/generated'
 
 import type { PlayPattern, ProgressionOptions, TimbreId } from './types'
@@ -281,11 +282,25 @@ class AudioEngine {
     this.triggerNote(stringIndex, midi, Tone.now() + 0.03, 1, 1.8)
   }
 
-  private triggerFrets(frets: (number | null)[], tuning: number[], time: number, velocity: number): void {
+  private playStrum(frets: (number | null)[], tuning: number[], time: number, strum: StrumId, beats: number): void {
     const notes = this.planNotes(frets, tuning)
-    notes.forEach((note, order) => {
-      this.triggerNote(note.stringIndex, note.midi, time + order * 0.028, velocity, 1.9)
-    })
+    if (notes.length === 0) return
+    const eighth = Tone.Time('8n').toSeconds()
+    for (const hit of strumHits(strum, beats)) {
+      const at = time + hit.eighth * eighth
+      // A single strum rings out; pattern hits are damped by the next stroke.
+      const ring = strum === 'single' ? 1.9 : Math.max(0.12, hit.length * eighth * 0.98)
+      const velocity = hit.accent ? 0.95 : 0.7
+      if (hit.kind === 'arpeggio') {
+        const note = notes[hit.order % notes.length]
+        this.triggerNote(note.stringIndex, note.midi, at, velocity * 0.9, Math.max(ring, eighth * 3))
+        continue
+      }
+      // Upstrokes catch only the treble strings, from high to low.
+      const ordered = hit.kind === 'up' ? notes.slice(-4).reverse() : notes
+      const spread = hit.kind === 'up' ? 0.018 : 0.028
+      ordered.forEach((note, order) => this.triggerNote(note.stringIndex, note.midi, at + order * spread, velocity, ring))
+    }
   }
 
   private triggerFretNoise(time: number): void {
@@ -337,7 +352,7 @@ class AudioEngine {
       const frets = current.getFrets(index)
       if (frets) {
         if (index > 0 || this.cursor > 0) this.triggerFretNoise(time - 0.09)
-        this.triggerFrets(frets, current.tuning, time, 0.95)
+        this.playStrum(frets, current.tuning, time, current.getStrum?.(index) ?? 'single', current.beatsPerChord)
       }
       Tone.getDraw().schedule(() => current.onStep(index), time)
       this.cursor = (this.cursor + 1) % current.stepCount

@@ -8,7 +8,7 @@ import { BEAT_OPTIONS, TEMPO_MAX, TEMPO_MIN } from '../state/settings'
 import { useStore, type Notation, type ViewId } from '../state/store'
 import { RegMark } from './RegMark'
 
-const VIEWS: ViewId[] = ['dictionary', 'detector', 'theory', 'practice']
+const VIEWS: ViewId[] = ['chord', 'theory', 'practice']
 const NOTATIONS: Notation[] = ['anglo', 'both', 'latin']
 const OPEN_KEY = 'serendipia.transportOpen'
 

@@ -143,7 +143,7 @@ export function DetectorView() {
                       capo,
                     })
                   }
-                  setView('dictionary')
+                  setView('chord')
                 }}
               >
                 {t('detector.toDictionary')}

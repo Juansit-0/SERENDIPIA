@@ -1,5 +1,6 @@
 export const es = {
   'app.name': 'SERENDIPIA',
+  'tabs.chord': 'Acorde',
   'tabs.dictionary': 'Diccionario',
   'tabs.detector': 'Detector',
   'tabs.theory': 'Teoría',

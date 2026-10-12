@@ -31,7 +31,8 @@ import {
   type DetectedKey,
   type TransitionAnalysis,
 } from '../music/analysis'
-import { clampCapo, withCapo } from '../music/capo'
+import { clampCapo, shapeChord, withCapo } from '../music/capo'
+import { detectChord, type DetectionResult } from '../music/detectChord'
 import { resolveStepFrets, type StepVoicingRef, type StepVoicingSource } from '../music/stepVoicing'
 import { STANDARD_TUNING, TUNINGS, Voicing, voicingFromFrets, voicingsFor } from '../music/voicings'
 import { playhead } from './playhead'
@@ -44,7 +45,10 @@ import { decodeShare, shareUrl, type SharedProgression } from './share'
 import { loadSettings, saveSettings, type Notation, type PersistedSettings, type SuggestFrom } from './settings'
 
 export type { Notation } from './settings'
-export type ViewId = 'dictionary' | 'detector' | 'theory' | 'practice'
+export type ViewId = 'chord' | 'theory' | 'practice'
+
+/** Where the Acorde fretboard reads its notes from: the selected voicing, or the user's own marks. */
+export type ChartSource = 'voicing' | 'marks'
 
 export interface ProgressionStep {
   id: string
@@ -159,6 +163,20 @@ interface StoreValue {
   detectorFrets: (number | null)[]
   setDetectorFrets: (frets: (number | null)[]) => void
   toggleDetectorString: (stringIndex: number, fret: number) => void
+  /** Acorde view: one fretboard, two sources (see ChartSource). */
+  chartSource: ChartSource
+  /** Shape frets currently drawn on the Acorde fretboard. */
+  chartFrets: (number | null)[]
+  /** Detection of the user's marks (null while the chart shows a catalogue voicing). */
+  detection: DetectionResult | null
+  /** Toggle a fret on the Acorde fretboard: switches to marks, detects and names the chord. */
+  toggleChartFret: (stringIndex: number, fret: number) => void
+  /** Pick one of the detector's alternative names, keeping the marks. */
+  pickDetectedName: (anglo: string) => void
+  /** Empty the user's marks ("Borrar marcas"). */
+  clearChartMarks: () => void
+  /** The Acorde input reports focus so detection never rewrites what the user is typing. */
+  setChordInputFocused: (focused: boolean) => void
 }
 
 export interface ProgressionAnalysis {
@@ -175,9 +193,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [lang, setLang] = useState<Lang>(initial.lang)
   const [notation, setNotation] = useState<Notation>(initial.notation)
   const [view, setViewState] = useState<ViewId>(() => {
-    if (typeof window === 'undefined') return 'dictionary'
+    if (typeof window === 'undefined') return 'chord'
     const hash = window.location.hash.replace('#', '')
-    return hash === 'detector' || hash === 'theory' || hash === 'practice' ? hash : 'dictionary'
+    // Old links (#dictionary, #detector) land on the merged Acorde view.
+    return hash === 'theory' || hash === 'practice' ? hash : 'chord'
   })
   const [tuningId, setTuningIdState] = useState(initial.tuningId)
   const [tempo, setTempo] = useState(shared?.tempo ?? initial.tempo)
@@ -227,6 +246,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [library, setLibrary] = useState<LibraryEntry[]>(loadLibrary)
   const [playing, setPlaying] = useState(false)
   const [detectorFrets, setDetectorFrets] = useState<(number | null)[]>([0, 0, 0, 0, 0, 0])
+  const [chartSource, setChartSource] = useState<ChartSource>('voicing')
+  const chordInputFocused = useRef(false)
   const [markedVoicing, setMarkedVoicingState] = useState<MarkedVoicing | null>(null)
   const [audioReady, setAudioReady] = useState(false)
   const [audioLoading, setAudioLoading] = useState<TimbreId | null>(null)
@@ -349,6 +370,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const selectVoicing = useCallback(
     (index: number, play = true) => {
       setSelectedVoicing(index)
+      setChartSource('voicing')
       if (play) playVoicing(index)
     },
     [playVoicing],
@@ -369,6 +391,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (parsed) {
       setChordState(parsed)
       setSelectedVoicing(0)
+      setChartSource('voicing')
       setChordError(false)
     } else {
       setChordError(value.trim().length > 0)
@@ -382,6 +405,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const setChord = useCallback((next: ParsedChord) => {
     setChordState(next)
     setSelectedVoicing(0)
+    setChartSource('voicing')
     setChordInputState(next.anglo)
     setChordError(false)
   }, [])
@@ -508,6 +532,60 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const toggleDetectorString = useCallback((stringIndex: number, fret: number) => {
     setDetectorFrets((previous) => toggleDetectorFret(previous, stringIndex, fret, capo))
   }, [capo])
+
+  // ---- Acorde view: one fretboard, name <-> marks in both directions ----
+  const chartFrets = useMemo<(number | null)[]>(
+    () => (chartSource === 'marks' ? detectorFrets : (voicings[selectedVoicing]?.frets ?? [null, null, null, null, null, null])),
+    [chartSource, detectorFrets, voicings, selectedVoicing],
+  )
+
+  const detection = useMemo(
+    () => (chartSource === 'marks' ? detectChord(detectorFrets, soundingTuning) : null),
+    [chartSource, detectorFrets, soundingTuning],
+  )
+
+  /** Name the chord the marks make (as the shape played behind the capo) without touching the marks. */
+  const adoptMarks = useCallback(
+    (marks: (number | null)[], anglo: string | null) => {
+      const sounding = anglo ? parseChord(anglo) : null
+      if (!sounding) return
+      const shape = shapeChord(sounding, capo)
+      setChordState(shape)
+      setSelectedVoicing(0)
+      setChordError(false)
+      setMarkedVoicingState({ rootPc: shape.rootPc, qualityId: shape.quality.id, frets: marks, label: voicingLabel(marks), capo })
+      if (!chordInputFocused.current) setChordInputState(shape.anglo)
+    },
+    [capo],
+  )
+
+  const toggleChartFret = useCallback(
+    (stringIndex: number, fret: number) => {
+      const next = toggleDetectorFret(chartFrets, stringIndex, fret, capo)
+      setDetectorFrets(next)
+      setChartSource('marks')
+      adoptMarks(next, detectChord(next, soundingTuning).candidates[0]?.anglo ?? null)
+    },
+    [chartFrets, capo, soundingTuning, adoptMarks],
+  )
+
+  const pickDetectedName = useCallback(
+    (anglo: string) => {
+      setChartSource('marks')
+      adoptMarks(detectorFrets, anglo)
+    },
+    [detectorFrets, adoptMarks],
+  )
+
+  const clearChartMarks = useCallback(() => {
+    setDetectorFrets([null, null, null, null, null, null])
+    setChartSource('marks')
+    setMarkedVoicingState(null)
+  }, [])
+
+  const setChordInputFocused = useCallback((focused: boolean) => {
+    chordInputFocused.current = focused
+  }, [])
 
   const addSuggestion = useCallback(
     (suggestion: Suggestion) => {
@@ -711,6 +789,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     detectorFrets,
     setDetectorFrets,
     toggleDetectorString,
+    chartSource,
+    chartFrets,
+    detection,
+    toggleChartFret,
+    pickDetectedName,
+    clearChartMarks,
+    setChordInputFocused,
   }), [
     t, lang, notation, view, setView, tuningId, setTuningId, tuning, soundingTuning, capo, setCapo, tempo, volume, loop,
     metronome, setMetronome, beatsPerChord, timbre, setTimbre, strum, setStepStrum, stopPlayback, keyRootPc, setKeyRootPc, keyMode, setKeyMode, keyAuto,
@@ -719,7 +804,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setChord, voicings, selectedVoicing, selectVoicing, playVoicing, playFrets, progression, loadProgression,
     addToProgression, moveStep, setStepVoicing, removeFromProgression, markedVoicing, setMarkedVoicing,
     clearProgression, playing, togglePlay, audioReady, audioLoading, audioFallback, enableAudio, suggestions,
-    addSuggestion, detectorFrets, toggleDetectorString,
+    addSuggestion, detectorFrets, toggleDetectorString, chartSource, chartFrets, detection, toggleChartFret,
+    pickDetectedName, clearChartMarks, setChordInputFocused,
   ])
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>

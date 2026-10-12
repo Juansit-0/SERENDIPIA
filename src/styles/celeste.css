@@ -1,0 +1,394 @@
+/*
+ * Carta celeste — design system shared by every surface (see .impeccable/surfaces/src-app-tsx.md).
+ * One system, two themes on <html data-theme="night|day">. Color is information:
+ * function and note-role colors are the same meaning in both themes.
+ * `.on-dark` re-applies the night palette locally (the day strip band is charcoal).
+ */
+
+@theme inline {
+  --color-ground: var(--cc-ground);
+  --color-ground-2: var(--cc-ground-2);
+  --color-ground-3: var(--cc-ground-3);
+  --color-line: var(--cc-line);
+  --color-line-strong: var(--cc-line-strong);
+  --color-ink: var(--cc-ink);
+  --color-ink-soft: var(--cc-ink-soft);
+  --color-ink-faint: var(--cc-ink-faint);
+  --color-accent: var(--cc-accent);
+  --color-accent-ink: var(--cc-accent-ink);
+  --color-accent-deep: var(--cc-accent-deep);
+  --color-accent-soft: var(--cc-accent-soft);
+  --color-fn-tonic: var(--cc-fn-tonic);
+  --color-fn-sub: var(--cc-fn-sub);
+  --color-fn-dom: var(--cc-fn-dom);
+  --color-fn-borrowed: var(--cc-fn-borrowed);
+  --color-fn-tonic-fill: var(--cc-fn-tonic-fill);
+  --color-fn-sub-fill: var(--cc-fn-sub-fill);
+  --color-fn-dom-fill: var(--cc-fn-dom-fill);
+  --color-fn-borrowed-fill: var(--cc-fn-borrowed-fill);
+  --color-danger: var(--cc-danger);
+  --color-focus: var(--cc-focus);
+
+  --font-display: 'IM Fell English', 'Iowan Old Style', Georgia, serif;
+  --font-serif: 'EB Garamond', 'Iowan Old Style', Georgia, serif;
+  --font-ui: 'Jost Variable', 'Avenir Next', system-ui, sans-serif;
+}
+
+:root,
+:root[data-theme='night'],
+.on-dark {
+  --cc-ground: #0d0b14;
+  --cc-ground-2: #14111d;
+  --cc-ground-3: #1e1a2b;
+  --cc-line: #3b3352;
+  --cc-line-strong: #6a5d8c;
+  --cc-ink: #ece5f8;
+  --cc-ink-soft: #c2b7da;
+  --cc-ink-faint: #9b90b5;
+  --cc-accent: #c7b3e8;
+  --cc-accent-ink: #120f1a;
+  --cc-accent-deep: #d6c6f0;
+  --cc-accent-soft: rgba(199, 179, 232, 0.14);
+  --cc-fn-tonic: #c7b3e8;
+  --cc-fn-sub: #40e0d0;
+  --cc-fn-dom: #e8c37a;
+  --cc-fn-borrowed: #e2a4bf;
+  --cc-fn-tonic-fill: #c7b3e8;
+  --cc-fn-sub-fill: #40e0d0;
+  --cc-fn-dom-fill: #e8c37a;
+  --cc-fn-borrowed-fill: #e2a4bf;
+  --cc-danger: #ff8f8f;
+  --cc-focus: #40e0d0;
+  --cc-grain-opacity: 0.09;
+  --cc-hero-filter: url(#cc-distress);
+  color-scheme: dark;
+}
+
+:root[data-theme='day'] {
+  --cc-ground: #e8e7ec;
+  --cc-ground-2: #f3f2f6;
+  --cc-ground-3: #ffffff;
+  --cc-line: #b5b2c0;
+  --cc-line-strong: #5f5b6c;
+  --cc-ink: #15131c;
+  --cc-ink-soft: #37343f;
+  --cc-ink-faint: #595565;
+  --cc-accent: #40e0d0;
+  --cc-accent-ink: #0b1716;
+  --cc-accent-deep: #0a6f68;
+  --cc-accent-soft: rgba(64, 224, 208, 0.18);
+  --cc-fn-tonic: #5d43a3;
+  --cc-fn-sub: #0a6f68;
+  --cc-fn-dom: #8a5d0c;
+  --cc-fn-borrowed: #9c3f66;
+  --cc-fn-tonic-fill: #b7a1e6;
+  --cc-fn-sub-fill: #40e0d0;
+  --cc-fn-dom-fill: #e9b949;
+  --cc-fn-borrowed-fill: #e6a2c0;
+  --cc-danger: #b3261e;
+  --cc-focus: #0a6f68;
+  --cc-grain-opacity: 0.06;
+  --cc-hero-filter: none;
+  color-scheme: light;
+}
+
+/* The day strip band stays charcoal: re-apply the night palette inside it. */
+:root[data-theme='day'] .on-dark {
+  --cc-ground: #2a2a2f;
+  --cc-ground-2: #323238;
+  --cc-ground-3: #3c3c44;
+  --cc-line: #55545f;
+}
+
+@layer base {
+  html {
+    background: var(--cc-ground);
+  }
+
+  ::selection {
+    background: var(--cc-accent);
+    color: var(--cc-accent-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--cc-focus);
+    outline-offset: 2px;
+  }
+
+  * {
+    scrollbar-color: var(--cc-line-strong) transparent;
+  }
+}
+
+@layer components {
+  /* Page ground with print grain (night stronger, day subtler). */
+  .cc-ground {
+    position: relative;
+    background: var(--cc-ground);
+    color: var(--cc-ink);
+    font-family: var(--font-ui);
+  }
+
+  .cc-ground::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 60;
+    opacity: var(--cc-grain-opacity);
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 1 0'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>");
+    mix-blend-mode: overlay;
+  }
+
+  /*
+   * Module: the poster cell. A clearly bounded section (user note: sections must read
+   * as sections): hairline border, slightly raised ground, corner ticks.
+   */
+  .cc-module {
+    position: relative;
+    background: var(--cc-ground-2);
+    border: 1px solid var(--cc-line);
+    border-radius: 3px;
+  }
+
+  .cc-module::before,
+  .cc-module::after {
+    content: '';
+    position: absolute;
+    width: 7px;
+    height: 7px;
+    pointer-events: none;
+    border-color: var(--cc-line-strong);
+  }
+
+  .cc-module::before {
+    top: -1px;
+    left: -1px;
+    border-top: 1px solid;
+    border-left: 1px solid;
+  }
+
+  .cc-module::after {
+    right: -1px;
+    bottom: -1px;
+    border-right: 1px solid;
+    border-bottom: 1px solid;
+  }
+
+  /* Section header: small spaced caps in accent-deep, with a rule — always visible. */
+  .cc-label {
+    font-family: var(--font-ui);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--cc-accent-deep);
+  }
+
+  /*
+   * Buttons: every control reads as a control (user note). Three ranks:
+   * primary = filled accent, secondary = framed with raised ground, ghost = framed hairline.
+   */
+  .cc-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    min-height: 32px;
+    padding: 0.35rem 0.85rem;
+    border-radius: 999px;
+    border: 1px solid var(--cc-line-strong);
+    background: var(--cc-ground-3);
+    color: var(--cc-ink);
+    font-family: var(--font-ui);
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
+  }
+
+  .cc-btn:hover {
+    border-color: var(--cc-accent-deep);
+    box-shadow: 0 0 0 3px var(--cc-accent-soft);
+  }
+
+  .cc-btn:active {
+    transform: translateY(1px);
+  }
+
+  .cc-btn[aria-pressed='true'],
+  .cc-btn[aria-current='page'],
+  .cc-btn[aria-expanded='true'] {
+    background: var(--cc-accent);
+    border-color: var(--cc-accent);
+    color: var(--cc-accent-ink);
+  }
+
+  .cc-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  .cc-btn--primary {
+    background: var(--cc-accent);
+    border-color: var(--cc-accent);
+    color: var(--cc-accent-ink);
+    font-weight: 600;
+  }
+
+  .cc-btn--primary:hover {
+    box-shadow: 0 0 0 4px var(--cc-accent-soft), 0 6px 18px -8px rgba(0, 0, 0, 0.5);
+  }
+
+  .cc-btn--ghost {
+    background: transparent;
+    border-color: var(--cc-line);
+  }
+
+  .cc-btn--icon {
+    width: 32px;
+    padding: 0;
+  }
+
+  .cc-btn--lg {
+    min-height: 48px;
+    padding: 0.5rem 1.4rem;
+    font-size: 1.125rem;
+  }
+
+  /* Segmented control: a framed group whose options are clearly separate buttons. */
+  .cc-seg {
+    display: inline-flex;
+    border: 1px solid var(--cc-line-strong);
+    border-radius: 999px;
+    padding: 2px;
+    background: var(--cc-ground);
+  }
+
+  .cc-seg > button {
+    min-height: 28px;
+    min-width: 28px;
+    padding: 0 0.7rem;
+    border-radius: 999px;
+    color: var(--cc-ink-soft);
+    font-size: 0.8125rem;
+    font-weight: 500;
+  }
+
+  .cc-seg > button[aria-pressed='true'],
+  .cc-seg > button[aria-current='page'] {
+    background: var(--cc-accent);
+    color: var(--cc-accent-ink);
+  }
+
+  .cc-seg > button:hover:not([aria-pressed='true']):not([aria-current='page']) {
+    color: var(--cc-ink);
+    background: var(--cc-accent-soft);
+  }
+
+  /* Chip: information, not a control (framed hairline, no hover). */
+  .cc-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.15rem 0.55rem;
+    border: 1px solid var(--cc-line);
+    border-radius: 999px;
+    font-size: 0.75rem;
+    color: var(--cc-ink-soft);
+  }
+
+  /* Popover panel for the one-click menus (top bar, strip tools, step picker). */
+  .cc-pop {
+    background: var(--cc-ground-2);
+    border: 1px solid var(--cc-line-strong);
+    border-radius: 6px;
+    box-shadow: 0 18px 40px -16px rgba(0, 0, 0, 0.55);
+    color: var(--cc-ink);
+  }
+
+  /* Hero chord name: engraved serif; distressed at night, clean by day; never wider than its box. */
+  .cc-hero {
+    font-family: var(--font-display);
+    font-weight: 400;
+    line-height: 0.95;
+    letter-spacing: -0.01em;
+    color: var(--cc-accent-deep);
+    filter: var(--cc-hero-filter);
+    white-space: nowrap;
+    font-size: min(var(--hero-max, 6rem), calc((100cqi - 1rem) / (var(--chars, 4) * 0.56)));
+  }
+
+  /* Gloss: dictionary-style entry in classic serif. */
+  .cc-gloss {
+    font-family: var(--font-serif);
+    color: var(--cc-ink-soft);
+  }
+
+  /* Tabular readouts. */
+  .cc-num {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+  }
+
+  /* Dashed "/////" strip ornament. */
+  .cc-hatch {
+    height: 6px;
+    background: repeating-linear-gradient(-60deg, var(--cc-line-strong) 0 1.5px, transparent 1.5px 6px);
+    opacity: 0.7;
+  }
+
+  /* Diamond checker band (day divider; also used quietly at night). */
+  .cc-checker {
+    height: 12px;
+    background:
+      conic-gradient(from 45deg at 50% 50%, var(--cc-accent) 0 25%, transparent 0 50%, var(--cc-accent) 0 75%, transparent 0) 0 0 / 12px 12px,
+      var(--cc-ink);
+  }
+
+  /* Eclipse: the theme switch reveal (View Transitions). */
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+    mix-blend-mode: normal;
+  }
+
+  ::view-transition-new(root) {
+    animation: cc-eclipse 700ms cubic-bezier(0.65, 0, 0.35, 1) both;
+  }
+
+  @keyframes cc-eclipse {
+    from {
+      clip-path: circle(0 at var(--cc-eclipse-x, 100%) var(--cc-eclipse-y, 0));
+    }
+    to {
+      clip-path: circle(var(--cc-eclipse-r, 150vmax) at var(--cc-eclipse-x, 100%) var(--cc-eclipse-y, 0));
+    }
+  }
+
+  @keyframes cc-twinkle {
+    0%,
+    100% {
+      opacity: 0.55;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .cc-twinkle {
+      animation: cc-twinkle 3.2s ease-in-out infinite;
+    }
+  }
+
+  @media (pointer: coarse) {
+    .cc-btn,
+    .cc-seg > button {
+      min-height: 44px;
+      min-width: 44px;
+    }
+  }
+}

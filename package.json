@@ -1,7 +1,7 @@
 {
   "name": "serendipia",
   "private": true,
-  "version": "1.13.1",
+  "version": "1.14.0",
   "license": "MIT",
   "type": "module",
   "scripts": {
@@ -15,6 +15,9 @@
     "lint": "oxlint"
   },
   "dependencies": {
+    "@fontsource-variable/jost": "^5.3.0",
+    "@fontsource/eb-garamond": "^5.3.0",
+    "@fontsource/im-fell-english": "^5.3.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "tone": "^15.1.22"

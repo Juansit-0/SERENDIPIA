@@ -5,3 +5,4 @@ dist
 .impeccable/mocks
 .impeccable/review
 .impeccable/build
+.impeccable/references/*.png

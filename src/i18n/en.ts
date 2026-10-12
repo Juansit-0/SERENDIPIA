@@ -2,6 +2,7 @@ import type { Dictionary } from './es'
 
 export const en: Dictionary = {
   'app.name': 'SERENDIPIA',
+  'tabs.chord': 'Chord',
   'tabs.dictionary': 'Dictionary',
   'tabs.detector': 'Detector',
   'tabs.theory': 'Theory',

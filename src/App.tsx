@@ -2,7 +2,6 @@ import { useEffect } from 'react'
 import { StepRow } from './components/StepRow'
 import { TransportStrip } from './components/TransportStrip'
 import { StoreProvider, useStore } from './state/store'
-import { DetectorView } from './views/DetectorView'
 import { DictionaryView } from './views/DictionaryView'
 import { PracticeView } from './views/PracticeView'
 import { TheoryView } from './views/TheoryView'
@@ -50,8 +49,7 @@ function Shell() {
       <div className="mx-auto flex max-w-[1560px] flex-col gap-4 px-3 py-3 sm:px-5 sm:py-4 desk:h-full desk:gap-2 desk:py-2">
         <TransportStrip />
         <main className="flex min-w-0 flex-col desk:min-h-0 desk:flex-1">
-          {view === 'dictionary' && <DictionaryView />}
-          {view === 'detector' && <DetectorView />}
+          {view === 'chord' && <DictionaryView />}
           {view === 'theory' && <TheoryView />}
           {view === 'practice' && <PracticeView />}
         </main>

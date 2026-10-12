@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import './celeste.css';
 
 /* Desktop app shell: a wide and tall-enough window gets a fixed, no-scroll layout
    (transport on top, the view in the middle, the progression strip always visible below). */

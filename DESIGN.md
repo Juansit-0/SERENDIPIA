@@ -10,6 +10,7 @@ colors:
   ink-faint: "#6f6b60"
   rule: "#cbc2ae"
   rule-strong: "#a79c84"
+  rule-cell: "#938870"
   blue: "#0078bf"
   blue-ink: "#005f96"
   orange: "#ff6c2f"
@@ -253,7 +254,8 @@ Flat riso spot inks on paper: two papers, three inks in the black-brown family, 
 - **Ink** (#1A1A1A): body text, plate borders, cell lit borders, the ink block behind chord names, the field underline, fat 2px rules, pressed-stamp fill.
 - **Ink Soft** (#4C4A44): the label class's base color, readout secondary text, registration-mark strokes, cell hover border.
 - **Ink Faint** (#6F6B60): field placeholders, fret/step indices, difficulty tags, empty-slot hints, the free-fret dot glyph.
-- **Rule** (#CBC2AE): 1px cell borders, divider rules above chip lists, empty strip slots.
+- **Rule** (#CBC2AE): divider rules above chip lists, empty strip slots.
+- **Rule Cell** (#938870): 1px fretboard cell borders. Darker than Rule so each cell, a control, reaches the WCAG 3:1 non-text contrast on paper (3.1:1); lit cells still step up to ink.
 - **Rule Strong** (#A79C84): sheet and chip borders, dashed cut lines, 9px crop marks, mini-plate string/fret strokes, scrollbar thumbs.
 
 ### Named Rules

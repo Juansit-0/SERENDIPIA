@@ -29,6 +29,8 @@
   --color-ink-faint: #6f6b60;
   --color-rule: #cbc2ae;
   --color-rule-strong: #a79c84;
+  /* Fretboard cell borders: 3.1:1 on paper, the WCAG minimum for control boundaries. */
+  --color-rule-cell: #938870;
   --color-blue: #0078bf;
   --color-blue-ink: #005f96;
   --color-orange: #ff6c2f;
@@ -331,7 +333,7 @@
     position: relative;
     min-height: 30px;
     background: transparent;
-    border: 1px solid var(--color-rule);
+    border: 1px solid var(--color-rule-cell);
     border-radius: 1px;
     display: grid;
     place-items: center;

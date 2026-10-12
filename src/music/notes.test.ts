@@ -7,6 +7,7 @@ import {
   midiToFreq,
   pcFromName,
   pitchName,
+  spelledScale,
 } from './notes'
 
 describe('pcFromName', () => {
@@ -62,5 +63,15 @@ describe('accidental preference', () => {
     expect(keyAccidental(5, 'major')).toBe('flat')
     expect(keyAccidental(2, 'minor')).toBe('flat')
     expect(keyAccidental(7, 'major')).toBe('sharp')
+  })
+})
+
+describe('spelledScale', () => {
+  it('starts F major on F, not E#', () => {
+    expect(spelledScale(5, [0, 2, 4, 5, 7, 9, 11], false).map((note) => note.anglo)).toEqual(['F', 'G', 'A', 'Bb', 'C', 'D', 'E'])
+  })
+
+  it('starts B on B, not Cb, when flats are preferred', () => {
+    expect(spelledScale(11, [0, 2, 3, 5, 7, 8, 10], true)[0].anglo).toBe('B')
   })
 })

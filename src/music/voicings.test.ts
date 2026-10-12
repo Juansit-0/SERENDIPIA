@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { essentialTones, qualityById } from './chords'
-import { STANDARD_TUNING, voicingsFor } from './voicings'
+import { QualityId, chordTones, essentialTones, qualityById } from './chords'
+import { COMMON_SHAPES, STANDARD_TUNING, voicingsFor } from './voicings'
 
 describe('voicingsFor', () => {
   it('finds the classic open C first', () => {
@@ -44,5 +44,24 @@ describe('voicingsFor', () => {
     expect(voicings.length).toBeLessThanOrEqual(5)
     const signatures = voicings.map((voicing) => voicing.signature)
     expect(new Set(signatures).size).toBe(signatures.length)
+  })
+})
+
+describe('COMMON_SHAPES', () => {
+  const entries = Object.entries(COMMON_SHAPES).flatMap(([key, shapes]) =>
+    shapes.map((shape) => ({ key, shape })),
+  )
+
+  it.each(entries)('$key $shape contains only chord tones and every essential tone', ({ key, shape }) => {
+    const [root, qualityId] = key.split(':')
+    const rootPc = Number(root)
+    const quality = qualityById(qualityId as QualityId)
+    const allowed = new Set(chordTones(rootPc, quality))
+    const sounding = shape
+      .map((fret, index) => (fret === null || fret === -1 ? null : (STANDARD_TUNING[index] + fret) % 12))
+      .filter((pc): pc is number => pc !== null)
+    for (const pc of sounding) expect(allowed.has(pc)).toBe(true)
+    for (const pc of essentialTones(rootPc, quality)) expect(sounding).toContain(pc)
+    expect(sounding).toContain(rootPc)
   })
 })

@@ -1,5 +1,5 @@
 import { QualityId, qualityById } from './chords'
-import { keyAccidental, spelledScale } from './notes'
+import { keyAccidental, spellNote, spelledScale, tonicLetterIndex } from './notes'
 import { latinSuffix } from './parseChord'
 import { HarmonicFunction, MAJOR_SCALE, Mode, NATURAL_MINOR, diatonicChords } from './scales'
 
@@ -10,6 +10,7 @@ export interface ProgressionTemplate {
   category: 'pop' | 'rock' | 'jazz' | 'blues' | 'flamenco' | 'classical'
   mode: Mode
   degrees: number[]
+  alterations?: number[]
   qualities: QualityId[]
   romans: string[]
 }
@@ -71,6 +72,7 @@ export const PROGRESSIONS: ProgressionTemplate[] = [
     category: 'rock',
     mode: 'major',
     degrees: [0, 6, 3],
+    alterations: [0, -1, 0],
     qualities: ['maj', 'maj', 'maj'],
     romans: ['I', '♭VII', 'IV'],
   },
@@ -137,9 +139,12 @@ export const PROGRESSIONS: ProgressionTemplate[] = [
 ]
 
 export function resolveProgression(template: ProgressionTemplate, rootPc: number): ResolvedStep[] {
-  const spelled = spelledScale(rootPc, template.mode === 'major' ? MAJOR_SCALE : NATURAL_MINOR, keyAccidental(rootPc, template.mode) === 'flat')
+  const preferFlat = keyAccidental(rootPc, template.mode) === 'flat'
+  const spelled = spelledScale(rootPc, template.mode === 'major' ? MAJOR_SCALE : NATURAL_MINOR, preferFlat)
+  const tonicLetter = tonicLetterIndex(rootPc, preferFlat)
   return template.degrees.map((degree, index) => {
-    const note = spelled[degree]
+    const alteration = template.alterations?.[index] ?? 0
+    const note = alteration === 0 ? spelled[degree] : spellNote((tonicLetter + degree) % 7, (spelled[degree].pc + alteration + 12) % 12)
     const quality = qualityById(template.qualities[index])
     return {
       degree,

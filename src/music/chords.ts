@@ -115,7 +115,7 @@ const DEGREE_BY_INTERVAL: Record<number, number> = {
   3: 2,
   4: 2,
   5: 3,
-  6: 3,
+  6: 4,
   7: 4,
   8: 4,
   9: 5,
@@ -139,7 +139,7 @@ export interface ChordTone {
 export function chordToneSpelling(rootPc: number, quality: Quality, preferFlat: boolean): ChordTone[] {
   const tonicLetter = tonicLetterIndex(rootPc, preferFlat)
   return quality.intervals.map((interval) => {
-    const degree = DEGREE_BY_INTERVAL[interval] ?? 0
+    const degree = quality.id === 'dim7' && interval === 9 ? 6 : (DEGREE_BY_INTERVAL[interval] ?? 0)
     const letter = (tonicLetter + degree) % 7
     const pc = (((rootPc + interval) % 12) + 12) % 12
     const spelled = spellNote(letter, pc)

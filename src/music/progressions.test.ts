@@ -19,6 +19,15 @@ describe('progressions', () => {
     expect(steps[8].anglo).toBe('E7')
   })
 
+  it('flattens the seventh degree in the Mixolydian rock progression', () => {
+    expect(resolveProgression(byId('rock-bvii'), 0).map((step) => step.anglo)).toEqual(['C', 'Bb', 'F'])
+    expect(resolveProgression(byId('rock-bvii'), 9).map((step) => step.anglo)).toEqual(['A', 'G', 'D'])
+    expect(resolveProgression(byId('rock-bvii'), 9)[1].latin).toBe('Sol')
+    const inDb = resolveProgression(byId('rock-bvii'), 1)
+    expect(inDb.map((step) => step.anglo)).toEqual(['Db', 'Cb', 'Gb'])
+    expect(inDb[1].rootPc).toBe(11)
+  })
+
   it('transposes to Bb without wrong spellings', () => {
     expect(resolveProgression(byId('pop-1564'), 10).map((step) => step.anglo)).toEqual([
       'Bb',

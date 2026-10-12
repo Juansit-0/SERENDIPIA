@@ -1,6 +1,6 @@
 import * as Tone from 'tone'
 import { midiToFreq } from '../music/notes'
-import { beatsToNotation, isAccentBeat } from './timing'
+import { beatsToNotation, isAccentBeat, progressionTicks } from './timing'
 import { SAMPLE_FILES } from '../assets/samples/generated'
 
 export type PlayPattern = 'strum-down' | 'strum-up' | 'arpeggio' | 'block'
@@ -26,8 +26,28 @@ export interface ProgressionOptions {
   onBeat?: (beat: number) => void
 }
 
+const SAMPLE_TIMEOUT_MS = 15000
+
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error('timeout')), ms)
+    promise.then(
+      (value) => {
+        clearTimeout(timer)
+        resolve(value)
+      },
+      (error) => {
+        clearTimeout(timer)
+        reject(error)
+      },
+    )
+  })
+}
+
 class AudioEngine {
   private started = false
+  private startPromise: Promise<void> | null = null
+  private timbreLoads = new Map<TimbreId, Promise<boolean>>()
   private input: Tone.Gain | null = null
   private master: Tone.Gain | null = null
   private samplers = new Map<TimbreId, { left: Tone.Sampler; right: Tone.Sampler }>()
@@ -91,7 +111,18 @@ class AudioEngine {
   }
 
   async start(): Promise<void> {
-    if (this.started) return
+    if (this.started) {
+      if (Tone.getContext().state !== 'running') await Tone.getContext().resume()
+      return
+    }
+    this.startPromise ??= this.boot().catch((error) => {
+      this.startPromise = null
+      throw error
+    })
+    return this.startPromise
+  }
+
+  private async boot(): Promise<void> {
     await Tone.start()
     if (Tone.getContext().state !== 'running') {
       await Tone.getContext().resume()
@@ -136,33 +167,48 @@ class AudioEngine {
     if (this.started) await this.loadTimbre(id)
   }
 
-  private async loadTimbre(id: TimbreId): Promise<boolean> {
-    if (this.samplers.has(id)) return true
-    if (!this.input) return false
+  private loadTimbre(id: TimbreId): Promise<boolean> {
+    if (this.samplers.has(id)) return Promise.resolve(true)
+    if (!this.input) return Promise.resolve(false)
+    const pending = this.timbreLoads.get(id)
+    if (pending) return pending
+    const load = this.createSamplers(id, this.input).finally(() => {
+      this.timbreLoads.delete(id)
+      const next = this.timbreLoads.keys().next()
+      this.loadingTimbre = next.done ? null : next.value
+      this.onLoadingChange?.(this.loadingTimbre)
+    })
+    this.timbreLoads.set(id, load)
     this.loadingTimbre = id
     this.onLoadingChange?.(id)
+    return load
+  }
+
+  private async createSamplers(id: TimbreId, input: Tone.Gain): Promise<boolean> {
+    const nodes: Tone.ToneAudioNode[] = []
     try {
       const urls = SAMPLE_FILES[id] ?? {}
       if (Object.keys(urls).length === 0) throw new Error(`no samples for ${id}`)
 
-      const left = new Tone.Sampler({ urls, attack: 0.002, release: 1.2 }).connect(
-        new Tone.Panner(-0.28).connect(this.input),
-      )
-      const right = new Tone.Sampler({ urls, attack: 0.002, release: 1.2 }).connect(
-        new Tone.Panner(0.28).connect(this.input),
-      )
-      await Tone.loaded()
+      const leftPan = new Tone.Panner(-0.28).connect(input)
+      const rightPan = new Tone.Panner(0.28).connect(input)
+      const left = new Tone.Sampler({ urls, attack: 0.002, release: 1.2 }).connect(leftPan)
+      const right = new Tone.Sampler({ urls, attack: 0.002, release: 1.2 }).connect(rightPan)
+      nodes.push(leftPan, rightPan, left, right)
+      await withTimeout(Tone.loaded(), SAMPLE_TIMEOUT_MS)
       const loaded = [left, right].every(
         (sampler) => (sampler as unknown as { loaded?: boolean }).loaded !== false,
       )
-      if (loaded) this.loadedTimbres.add(id)
+      if (!loaded) throw new Error(`samples for ${id} did not load`)
+      this.loadedTimbres.add(id)
       this.samplers.set(id, { left, right })
-      this.loadingTimbre = null
-      this.onLoadingChange?.(null)
+      if (this.failed) {
+        this.failed = false
+        this.onFallback?.(false)
+      }
       return true
     } catch {
-      this.loadingTimbre = null
-      this.onLoadingChange?.(null)
+      for (const node of nodes) node.dispose()
       this.failed = true
       this.onFallback?.(true)
       this.ensureFallback()
@@ -309,7 +355,7 @@ class AudioEngine {
     transport.timeSignature = 4
     transport.loop = options.stepCount === 0 ? true : options.loop
     transport.loopStart = 0
-    transport.loopEnd = `${Math.max(1, options.stepCount)}m`
+    transport.loopEnd = options.stepCount === 0 ? '1m' : `${progressionTicks(options.stepCount, options.beatsPerChord, transport.PPQ)}i`
     this.cursor = 0
     this.options = options
     if (options.metronome) this.startMetronomeLoop()
@@ -328,15 +374,25 @@ class AudioEngine {
     }, beatsToNotation(options.beatsPerChord))
 
     this.loopEvent.start(0)
-
-    if (!options.loop && options.stepCount > 0) {
-      this.endEvent = transport.scheduleOnce((time) => {
-        Tone.getDraw().schedule(() => this.options?.onEnd?.(), time)
-        this.stopProgression()
-      }, `${Math.max(1, options.stepCount)}m`)
-    }
-
+    this.scheduleEnd()
     transport.start()
+  }
+
+  private scheduleEnd(): void {
+    const transport = Tone.getTransport()
+    if (this.endEvent !== null) {
+      transport.clear(this.endEvent)
+      this.endEvent = null
+    }
+    const options = this.options
+    if (!options || options.loop || options.stepCount === 0) return
+    const endTicks = progressionTicks(options.stepCount, options.beatsPerChord, transport.PPQ)
+    const at = Math.max(endTicks - 1, transport.ticks + 1)
+    this.endEvent = transport.scheduleOnce((time) => {
+      const onEnd = this.options?.onEnd
+      this.stopProgression()
+      if (onEnd) Tone.getDraw().schedule(onEnd, time)
+    }, `${at}i`)
   }
 
   updateProgression(patch: Partial<ProgressionOptions>): void {
@@ -344,17 +400,19 @@ class AudioEngine {
     this.options = { ...this.options, ...patch }
     const transport = Tone.getTransport()
     if (patch.tempo !== undefined) transport.bpm.rampTo(patch.tempo, 0.06)
-    if (patch.loop !== undefined) transport.loop = patch.loop
     if (patch.metronome !== undefined) {
       if (patch.metronome) this.startMetronomeLoop()
       else this.stopMetronomeLoop()
     }
-    if (this.options.stepCount > 0) {
-      transport.loopEnd = `${this.options.stepCount}m`
-      if (this.cursor >= this.options.stepCount) this.cursor = 0
-    }
+    const { stepCount, beatsPerChord, loop } = this.options
+    transport.loop = stepCount === 0 ? true : loop
+    transport.loopEnd = stepCount === 0 ? '1m' : `${progressionTicks(stepCount, beatsPerChord, transport.PPQ)}i`
+    if (stepCount > 0 && this.cursor >= stepCount) this.cursor = 0
     if (patch.beatsPerChord !== undefined && this.loopEvent) {
       this.loopEvent.interval = beatsToNotation(patch.beatsPerChord)
+    }
+    if (patch.loop !== undefined || patch.stepCount !== undefined || patch.beatsPerChord !== undefined) {
+      this.scheduleEnd()
     }
   }
 
@@ -381,6 +439,6 @@ class AudioEngine {
 
 export const audioEngine = new AudioEngine()
 
-if (import.meta.env.DEV) {
+if (import.meta.env.DEV && typeof window !== 'undefined') {
   ;(window as unknown as { __serendipia?: unknown }).__serendipia = { audioEngine }
 }

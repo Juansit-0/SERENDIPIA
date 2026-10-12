@@ -436,8 +436,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!playing) return
-    audioEngine.updateProgression({ tempo, loop, beatsPerChord, metronome })
-  }, [tempo, loop, beatsPerChord, metronome, playing])
+    audioEngine.updateProgression({ tempo, loop, beatsPerChord, metronome, tuning: soundingTuning })
+  }, [tempo, loop, beatsPerChord, metronome, soundingTuning, playing])
 
   useEffect(() => {
     if (!playing) return

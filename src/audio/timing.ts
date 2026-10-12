@@ -11,6 +11,10 @@ export function beatsToNotation(beats: number): string {
   return '1m'
 }
 
+export function progressionTicks(stepCount: number, beatsPerChord: number, ppq: number): number {
+  return Math.max(1, stepCount) * Math.max(1, beatsPerChord) * ppq
+}
+
 export function stepDurationSeconds(tempo: number, beatsPerChord: number): number {
   return (60 / tempo) * beatsPerChord
 }

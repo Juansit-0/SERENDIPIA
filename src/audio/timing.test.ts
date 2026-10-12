@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { beatsToNotation, isAccentBeat, stepDurationSeconds } from './timing'
+import { beatsToNotation, isAccentBeat, progressionTicks, stepDurationSeconds } from './timing'
 
 describe('beatsToNotation', () => {
   it('maps beats per chord to transport notation', () => {
@@ -32,5 +32,17 @@ describe('stepDurationSeconds', () => {
     expect(stepDurationSeconds(60, 4)).toBeCloseTo(4)
     expect(stepDurationSeconds(120, 4)).toBeCloseTo(2)
     expect(stepDurationSeconds(92, 2)).toBeCloseTo(1.3043, 3)
+  })
+})
+
+describe('progressionTicks', () => {
+  it('counts every beat of every chord', () => {
+    expect(progressionTicks(4, 4, 192)).toBe(3072)
+    expect(progressionTicks(4, 8, 192)).toBe(6144)
+    expect(progressionTicks(3, 1, 192)).toBe(576)
+  })
+
+  it('never returns an empty cycle', () => {
+    expect(progressionTicks(0, 4, 192)).toBe(768)
   })
 })

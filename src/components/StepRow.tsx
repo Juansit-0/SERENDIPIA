@@ -1,4 +1,4 @@
-import { useMemo, useState, type DragEvent, type KeyboardEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, type DragEvent, type KeyboardEvent } from 'react'
 import { chordTones, qualityById } from '../music/chords'
 import { chordAccidental, pitchName } from '../music/notes'
 import { diatonicChords, type HarmonicFunction } from '../music/scales'
@@ -27,6 +27,7 @@ export function StepRow() {
     notation,
     keyRootPc,
     keyMode,
+    lang,
     t,
   } = useStore()
 
@@ -35,7 +36,23 @@ export function StepRow() {
   const [dragIndex, setDragIndex] = useState<number | null>(null)
   const [dropIndex, setDropIndex] = useState<number | null>(null)
   const [announcement, setAnnouncement] = useState('')
+  const focusStepId = useRef<string | null>(null)
   const diatonic = useMemo(() => diatonicChords(keyRootPc, keyMode), [keyRootPc, keyMode])
+
+  // After a move, keep keyboard focus on the moved step at its new position.
+  useEffect(() => {
+    if (!focusStepId.current) return
+    const index = progression.findIndex((step) => step.id === focusStepId.current)
+    focusStepId.current = null
+    if (index !== -1) document.querySelector<HTMLElement>(`[data-step-index="${index}"]`)?.focus()
+  }, [progression])
+
+  const announceMove = (from: number, to: number) => {
+    const step = progression[from]
+    const name = notation === 'latin' ? step.latin : step.anglo
+    // Alternate a trailing invisible char so identical messages are still re-announced.
+    setAnnouncement((previous) => `${name}: ${t('a11y.stepMoved')} ${to + 1}${previous.endsWith('\u200b') ? '' : '\u200b'}`)
+  }
 
   const resetDrag = () => {
     setDragIndex(null)
@@ -60,17 +77,18 @@ export function StepRow() {
     const target = Math.max(0, Math.min(raw > from ? raw - 1 : raw, progression.length - 1))
     if (target === from) return
     moveStep(from, target)
-    setAnnouncement(`${t('a11y.stepMoved')} ${target + 1}`)
+    announceMove(from, target)
   }
 
   const handleMoveKey = (event: KeyboardEvent<HTMLElement>, index: number) => {
-    if (playing || !(event.ctrlKey || event.metaKey)) return
+    if (playing || !(event.altKey || event.ctrlKey || event.metaKey)) return
     if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return
     event.preventDefault()
     const target = event.key === 'ArrowLeft' ? index - 1 : index + 1
     if (target < 0 || target >= progression.length) return
     moveStep(index, target)
-    setAnnouncement(`${t('a11y.stepMoved')} ${target + 1}`)
+    announceMove(index, target)
+    focusStepId.current = progression[index].id
   }
 
   const pcsOf = (rootPc: number, qualityId: Parameters<typeof qualityById>[0]) =>
@@ -86,7 +104,9 @@ export function StepRow() {
           <h2 className="label-ink text-blue-ink">{t('progression.title')}</h2>
           <span className="label-ink sm:hidden">{t('progression.swipe')}</span>
           {progression.length > 1 && (
-            <span className="readout hidden text-[10px] text-ink-faint lg:inline">{t('progression.reorderHint')}</span>
+            <span id="step-reorder-hint" className="readout sr-only text-[10px] text-ink-faint lg:not-sr-only">
+              {t('progression.reorderHint')}
+            </span>
           )}
         </div>
         <div className="flex items-center gap-3">
@@ -101,7 +121,7 @@ export function StepRow() {
         </div>
       </div>
 
-      <div className="min-w-0 overflow-x-auto pb-2">
+      <div className="-mx-1 min-w-0 overflow-x-auto px-1 pt-1 pb-2">
         <div
           className="grid min-w-[760px] snap-x snap-mandatory gap-1.5 sm:min-w-0"
           style={{ gridTemplateColumns: `repeat(${SLOTS}, minmax(0, 1fr))` }}
@@ -127,6 +147,7 @@ export function StepRow() {
                   active ? 'wipe-in border-ink' : ''
                 } ${dragging ? 'border-dashed opacity-40' : ''}`}
                 data-step-index={index}
+                aria-describedby={progression.length > 1 ? 'step-reorder-hint' : undefined}
                 draggable={!playing}
                 onDragStart={(event) => {
                   setDragIndex(index)
@@ -206,7 +227,7 @@ export function StepRow() {
               onClick={() => addSuggestion(suggestion)}
               onDragOver={(event) => handleDragOver(event, progression.length + ghostIndex)}
               onDrop={handleDrop}
-              title={`${t('suggestions.title')}: ${suggestion.reasonEs}`}
+              title={`${t('suggestions.title')}: ${lang === 'es' ? suggestion.reasonEs : suggestion.reasonEn}`}
             >
               <span className="font-mono text-[8px]">+</span>
               <span className="fv-ui text-[clamp(9px,0.72vw,13px)] font-semibold leading-tight">
@@ -242,6 +263,8 @@ export function StepRow() {
             <StepVoicingPicker
               step={progression[pickerIndex]}
               index={pickerIndex}
+              count={progression.length}
+              onMove={(to) => announceMove(pickerIndex, to)}
               onClose={() => {
                 const anchor = document.querySelector<HTMLButtonElement>(`[data-step-index="${pickerIndex}"]`)
                 setPickerStepId(null)

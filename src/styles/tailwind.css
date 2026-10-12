@@ -35,6 +35,7 @@
   --color-yellow: #ffe800;
   --color-turquoise: #40e0d0;
   --color-red: #d8452f;
+  --color-red-ink: #b83522;
   --color-ink-deep: #0b0b0b;
 
   --font-display: 'Archivo Variable', Archivo, system-ui, -apple-system, sans-serif;
@@ -181,10 +182,12 @@
     transition: transform 0.18s var(--ease-print), box-shadow 0.18s var(--ease-print), border-color 0.18s var(--ease-print);
   }
 
-  .sheet:hover {
-    transform: translateY(-2px) rotate(0deg);
-    box-shadow: var(--shadow-lift);
-    border-color: var(--color-ink);
+  @media (hover: hover) {
+    .sheet:hover {
+      transform: translateY(-2px) rotate(0deg);
+      box-shadow: var(--shadow-lift);
+      border-color: var(--color-ink);
+    }
   }
 
   .fv-name {
@@ -218,15 +221,25 @@
     transition: background 0.15s var(--ease-print), color 0.15s var(--ease-print), box-shadow 0.15s var(--ease-print);
   }
 
-  .stamp:hover {
-    background: rgba(26, 26, 26, 0.08);
+  @media (hover: hover) {
+    .stamp:hover {
+      background: rgba(26, 26, 26, 0.08);
+    }
+  }
+
+  @media (pointer: coarse) {
+    .stamp {
+      min-height: 44px;
+      min-width: 44px;
+    }
   }
 
   .stamp:active {
     box-shadow: var(--shadow-press);
   }
 
-  .stamp[aria-pressed='true'] {
+  .stamp[aria-pressed='true'],
+  .stamp[aria-current='page'] {
     background: var(--color-ink);
     color: var(--color-paper);
   }
@@ -236,8 +249,10 @@
     color: var(--color-paper);
   }
 
-  .stamp--ink:hover {
-    background: var(--color-ink-deep);
+  @media (hover: hover) {
+    .stamp--ink:hover {
+      background: var(--color-ink-deep);
+    }
   }
 
   .stamp--live {
@@ -304,6 +319,10 @@
     border-bottom-color: var(--color-blue);
   }
 
+  .field:focus-visible {
+    box-shadow: 0 2px 0 0 var(--color-blue);
+  }
+
   .field--error {
     border-bottom-color: var(--color-red);
   }
@@ -319,9 +338,11 @@
     transition: background 0.14s var(--ease-print), border-color 0.14s var(--ease-print);
   }
 
-  .cell:hover {
-    border-color: var(--color-ink-soft);
-    background: rgba(26, 26, 26, 0.05);
+  @media (hover: hover) {
+    .cell:hover {
+      border-color: var(--color-ink-soft);
+      background: rgba(26, 26, 26, 0.05);
+    }
   }
 
   .cell--lit {

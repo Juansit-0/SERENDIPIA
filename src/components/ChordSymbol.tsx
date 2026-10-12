@@ -3,7 +3,7 @@ import { chordToneSpelling } from '../music/chords'
 import { keyCandidates, sameKey } from '../music/keyDetection'
 import { voicingLabel } from '../music/stepVoicing'
 import { intervalName } from '../music/notes'
-import { useMemo } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { useStore } from '../state/store'
 import { OffsetPlate } from './OffsetPlate'
 import type { TKey } from '../i18n'
@@ -27,6 +27,12 @@ export function ChordSymbol() {
     setKeyMode,
   } = useStore()
   const voicing = voicings[selectedVoicing]
+  const inputRef = useRef<HTMLInputElement | null>(null)
+
+  // Autofocus only with a precise pointer: on phones it would pop the keyboard on load.
+  useEffect(() => {
+    if (window.matchMedia?.('(pointer: fine)').matches) inputRef.current?.focus()
+  }, [])
   const sounding = soundingChord(chord, capo)
   const keySuggestions = useMemo(
     () => keyCandidates({ rootPc: chord.rootPc, qualityId: chord.quality.id }, 2),
@@ -42,15 +48,21 @@ export function ChordSymbol() {
       </label>
       <input
         id="chord-input"
+        ref={inputRef}
+        aria-invalid={chordError}
+        aria-describedby={chordError ? 'chord-input-error' : undefined}
         className={`field ${chordError ? 'field--error' : ''}`}
         value={chordInput}
         onChange={(event) => setChordInput(event.target.value)}
         placeholder={t('chord.input.placeholder')}
         spellCheck={false}
         autoComplete="off"
-        autoFocus
       />
-      {chordError && <p className="font-mono text-[11px] text-red">{t('chord.invalid')}</p>}
+      {chordError && (
+        <p id="chord-input-error" className="font-mono text-[11px] text-red-ink" role="alert">
+          {t('chord.invalid')}
+        </p>
+      )}
 
       {shownKeys.length > 0 && (
         <p className="flex flex-wrap items-center gap-2">
@@ -153,7 +165,7 @@ export function ChordSymbol() {
         <h2 className="label-ink text-blue-ink">{t('legend.title')}</h2>
         <ul className="flex flex-col gap-1.5">
           {[
-            { mark: '●', ink: 'text-turquoise', label: t('legend.pressed') },
+            { mark: '●', ink: 'text-turquoise [-webkit-text-stroke:1px_var(--color-ink)]', label: t('legend.pressed') },
             { mark: '○', ink: 'text-ink', label: t('legend.open') },
             { mark: '×', ink: 'text-red', label: t('legend.muted') },
             { mark: '·', ink: 'text-ink-faint', label: t('legend.empty') },

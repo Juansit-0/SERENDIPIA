@@ -1,3 +1,4 @@
+import { useRef, useState, type KeyboardEvent } from 'react'
 import { pitchName, type Accidental } from '../music/notes'
 import { useStore } from '../state/store'
 
@@ -40,10 +41,42 @@ export function StepGrid({
   const absolute = (fret: number | null) => (fret === null ? null : fret + capo)
   const capoVisible = capo > 0 && capo >= windowStart && capo < windowStart + windowSize
 
+  // Roving tabindex: the whole fretboard is one tab stop; arrows move between cells.
+  // Columns: 0 = string label, 1 = open string, 2.. = frets in the window.
+  const gridRef = useRef<HTMLDivElement | null>(null)
+  const [cursor, setCursor] = useState({ row: 0, col: 1 })
+  const lastCol = windowSize + 1
+  const lastRow = frets.length - 1
+  const row = Math.min(cursor.row, lastRow)
+  const col = Math.min(cursor.col, lastCol)
+  const roving = (r: number, c: number) => ({
+    'data-cell': `${r}-${c}`,
+    tabIndex: r === row && c === col ? 0 : -1,
+    onFocus: () => setCursor({ row: r, col: c }),
+  })
+
+  const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    const moves: Record<string, [number, number]> = {
+      ArrowUp: [Math.max(0, row - 1), col],
+      ArrowDown: [Math.min(lastRow, row + 1), col],
+      ArrowLeft: [row, Math.max(0, col - 1)],
+      ArrowRight: [row, Math.min(lastCol, col + 1)],
+      Home: [row, 0],
+      End: [row, lastCol],
+    }
+    const target = moves[event.key]
+    if (!target) return
+    event.preventDefault()
+    setCursor({ row: target[0], col: target[1] })
+    gridRef.current?.querySelector<HTMLElement>(`[data-cell="${target[0]}-${target[1]}"]`)?.focus()
+  }
+
   return (
     <div
+      ref={gridRef}
       role="group"
       aria-label={label ?? t('a11y.grid')}
+      onKeyDown={onKeyDown}
       className="grid items-center gap-[3px]"
       style={{ gridTemplateColumns: `24px 34px repeat(${windowSize}, minmax(0, 1fr))` }}
     >
@@ -70,7 +103,7 @@ export function StepGrid({
         aria-hidden="true"
       />
 
-      {rowOrder.map((stringIndex) => {
+      {rowOrder.map((stringIndex, rowIndex) => {
         const fretValue = frets[stringIndex]
         const open = fretValue === 0
         const muted = fretValue === null
@@ -83,18 +116,27 @@ export function StepGrid({
           <div key={`row-${stringIndex}`} className="contents">
             <button
               type="button"
-              className="label-ink text-right"
+              {...roving(rowIndex, 0)}
+              className="label-ink min-h-[30px] text-right"
               onClick={() => {
                 if (!interactive) return
                 onToggle?.(stringIndex, muted ? 0 : -1)
               }}
-              aria-label={`${stringLabel} ${muted ? t('a11y.stringMuted') : t('a11y.stringOpen')}`}
+              aria-label={`${stringLabel} ${
+                muted
+                  ? t('a11y.stringMuted')
+                  : open
+                    ? t('a11y.stringOpen')
+                    : `${t('a11y.stringFretted')} ${absolute(fretValue)}`
+              }${interactive ? ` · ${t('a11y.stringToggle')}` : ''}`}
             >
               {stringLabel}
             </button>
 
             <button
               type="button"
+              {...roving(rowIndex, 1)}
+              aria-pressed={interactive ? open : undefined}
               className={`cell h-[30px] ${open ? 'border-ink' : ''}`}
               onClick={() => {
                 if (!interactive) {
@@ -113,13 +155,14 @@ export function StepGrid({
               )}
             </button>
 
-            {fretColumns.map((fret) => {
+            {fretColumns.map((fret, fretIndex) => {
               const lit = fretValue !== null && fretValue > 0 && absolute(fretValue) === fret
               const isCapo = capoVisible && fret === capo
               return (
                 <button
                   key={`cell-${stringIndex}-${fret}`}
                   type="button"
+                  {...roving(rowIndex, fretIndex + 2)}
                   className={`cell h-[30px] ${isCapo ? 'cell--capo' : ''} ${lit ? 'cell--lit' : ''}`}
                   aria-pressed={interactive ? lit : undefined}
                   aria-disabled={isCapo || undefined}

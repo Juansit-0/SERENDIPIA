@@ -10,7 +10,7 @@ function Shell() {
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.code !== 'Space' || event.repeat) return
+      if (event.code !== 'Space' || event.repeat || event.defaultPrevented) return
       const target = event.target as HTMLElement | null
       const tag = target?.tagName
       if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA' || target?.isContentEditable) return
@@ -26,9 +26,11 @@ function Shell() {
     <div className="grain min-h-screen bg-paper text-ink">
       <div className="mx-auto flex max-w-[1560px] flex-col gap-4 px-3 py-3 sm:px-5 sm:py-4">
         <TransportStrip />
-        {view === 'dictionary' && <DictionaryView />}
-        {view === 'detector' && <DetectorView />}
-        {view === 'theory' && <TheoryView />}
+        <main className="contents">
+          {view === 'dictionary' && <DictionaryView />}
+          {view === 'detector' && <DetectorView />}
+          {view === 'theory' && <TheoryView />}
+        </main>
       </div>
     </div>
   )

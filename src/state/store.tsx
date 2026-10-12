@@ -156,6 +156,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const t = useCallback((key: TKey) => translate(lang, key), [lang])
 
+  useEffect(() => {
+    document.documentElement.lang = lang
+    document.title = translate(lang, 'app.title')
+  }, [lang])
+
   const setView = useCallback((next: ViewId) => {
     setViewState(next)
     if (typeof window !== 'undefined') {

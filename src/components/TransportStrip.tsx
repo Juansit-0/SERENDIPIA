@@ -53,14 +53,14 @@ export function TransportStrip() {
       <RegMark className="bottom-1.5 right-1.5" />
 
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-        <span className="fv-display text-[1.0625rem] tracking-[0.24em]">SERENDIPIA</span>
+        <h1 className="fv-display text-[1.0625rem] tracking-[0.24em]">SERENDIPIA</h1>
         <nav className="flex flex-wrap gap-1.5" aria-label={t('a11y.views')}>
           {VIEWS.map((item) => (
             <button
               key={item}
               type="button"
               className="stamp"
-              aria-pressed={view === item}
+              aria-current={view === item ? 'page' : undefined}
               onClick={() => setView(item)}
             >
               {t(`tabs.${item}` as const)}
@@ -90,7 +90,10 @@ export function TransportStrip() {
             >
               −
             </button>
-            <span className="ink-block font-mono text-[1.05rem] font-semibold tabular-nums">{tempo}</span>
+            <span className="ink-block font-mono text-[1.05rem] font-semibold tabular-nums" aria-live="polite" aria-atomic="true">
+              <span className="sr-only">{t('transport.tempo')} </span>
+              {tempo}
+            </span>
             <button
               type="button"
               className="stamp px-2 py-0.5"
@@ -140,6 +143,7 @@ export function TransportStrip() {
           <select
             className="stamp min-w-0 max-w-[9rem] flex-1 cursor-pointer appearance-none px-2 py-0.5 sm:flex-none"
             value={timbre}
+            aria-label={t('transport.timbre')}
             onChange={(event) => setTimbre(event.target.value as TimbreId)}
           >
             {TIMBRES.map((item) => (
@@ -162,7 +166,10 @@ export function TransportStrip() {
             >
               −
             </button>
-            <span className="ink-block font-mono text-[0.9375rem] font-semibold tabular-nums">{capo}</span>
+            <span className="ink-block font-mono text-[0.9375rem] font-semibold tabular-nums" aria-live="polite" aria-atomic="true">
+              <span className="sr-only">{t('transport.capo')} </span>
+              {capo}
+            </span>
             <button
               type="button"
               className="stamp px-2 py-0.5"
@@ -180,6 +187,7 @@ export function TransportStrip() {
           <select
             className="stamp min-w-0 max-w-[9rem] flex-1 cursor-pointer appearance-none px-2 py-0.5 sm:flex-none"
             value={keyRootPc}
+            aria-label={t('transport.key')}
             onChange={(event) => setKeyRootPc(Number(event.target.value))}
           >
             {PITCH_SHARP.map((name, index) => (

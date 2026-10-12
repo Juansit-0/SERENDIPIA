@@ -57,7 +57,7 @@ export function VoicingPads() {
               {isMarked && markedVoicing && (
                 <button
                   type="button"
-                  className="absolute -right-1.5 -top-1.5 z-10 grid h-5 w-5 place-items-center rounded-full border border-ink bg-paper font-mono text-[10px] leading-none hover:bg-turquoise"
+                  className="absolute -right-1.5 -top-1.5 z-10 grid h-5 w-5 place-items-center rounded-full border border-ink bg-paper font-mono text-[10px] leading-none after:absolute after:-inset-3 after:content-[''] hover:bg-turquoise"
                   onClick={() => setMarkedVoicing(null)}
                   aria-label={t('voicing.clear')}
                   title={t('voicing.clear')}

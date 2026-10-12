@@ -8,13 +8,21 @@ import { MiniPlate } from './MiniPlate'
 export function StepVoicingPicker({
   step,
   index,
+  count,
+  onMove,
   onClose,
 }: {
   step: ProgressionStep
   index: number
+  count: number
+  onMove: (to: number) => void
   onClose: () => void
 }) {
-  const { tuning, capo, setStepVoicing, removeFromProgression, notation, t } = useStore()
+  const { tuning, capo, setStepVoicing, removeFromProgression, moveStep, notation, t } = useStore()
+  const move = (to: number) => {
+    moveStep(index, to)
+    onMove(to)
+  }
   const container = useRef<HTMLDivElement | null>(null)
 
   const bassPc = step.bassPc ?? null
@@ -157,7 +165,29 @@ export function StepVoicingPicker({
         })}
       </div>
 
-      <div className="flex items-center justify-between gap-3 border-t border-rule pt-2">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-rule pt-2">
+        {count > 1 && (
+          <div className="flex gap-1.5">
+            <button
+              type="button"
+              className="stamp"
+              onClick={() => move(index - 1)}
+              disabled={index === 0}
+              aria-label={t('voicing.moveLeftLabel')}
+            >
+              {t('voicing.moveLeft')}
+            </button>
+            <button
+              type="button"
+              className="stamp"
+              onClick={() => move(index + 1)}
+              disabled={index >= count - 1}
+              aria-label={t('voicing.moveRightLabel')}
+            >
+              {t('voicing.moveRight')}
+            </button>
+          </div>
+        )}
         <button
           type="button"
           className="stamp"

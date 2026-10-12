@@ -44,7 +44,7 @@ export const es = {
   'progression.clear': 'Limpiar',
   'progression.step': 'Paso',
   'progression.swipe': 'Desliza →',
-  'progression.reorderHint': 'Arrastra para reordenar · Ctrl+←/→',
+  'progression.reorderHint': 'Arrastra o toca un paso para moverlo · Alt+←/→',
   'suggestions.title': 'Puede seguir',
   'suggestions.empty': 'Sin sugerencias todavía',
   'detector.title': 'Detector de posiciones',
@@ -111,6 +111,13 @@ export const es = {
   'a11y.stringOpen': 'al aire',
   'a11y.stringMuted': 'apagada',
   'a11y.fret': 'traste',
+  'a11y.stringFretted': 'pisada en el traste',
+  'a11y.stringToggle': 'pulsa para apagar o activar',
+  'app.title': 'SERENDIPIA — acordes, posiciones y progresiones',
+  'voicing.moveLeft': '← Mover',
+  'voicing.moveRight': 'Mover →',
+  'voicing.moveLeftLabel': 'Mover el paso a la izquierda',
+  'voicing.moveRightLabel': 'Mover el paso a la derecha',
 }
 
 export type Dictionary = typeof es

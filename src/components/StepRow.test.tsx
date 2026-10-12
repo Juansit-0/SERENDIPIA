@@ -40,3 +40,36 @@ describe('document language', () => {
     expect(document.title).toMatch(/chords/)
   })
 })
+
+describe('progression analysis', () => {
+  it('marks each change and explains the latest one', () => {
+    renderApp()
+    const marks = screen.getAllByRole('button', { name: /^Cambio \d–\d:/ })
+    expect(marks.map((mark) => mark.getAttribute('aria-label'))).toEqual([
+      'Cambio 1–2: Semicadencia',
+      'Cambio 2–3: Cadencia rota',
+      'Cambio 3–4: Cambio suave',
+    ])
+    expect(screen.getByText(/^Am → F: comparten 2 notas/)).toBeTruthy()
+    expect(screen.getByText('C mayor')).toBeTruthy()
+    expect(screen.getByText('detectada')).toBeTruthy()
+  })
+
+  it('shows the picked change and roman numerals per step', () => {
+    renderApp()
+    fireEvent.click(screen.getByRole('button', { name: 'Cambio 2–3: Cadencia rota' }))
+    expect(screen.getByText(/^G → Am: se espera la tónica/)).toBeTruthy()
+    const romans = Array.from(document.querySelectorAll('[data-step-index]')).map(
+      (step) => step.querySelector('.font-mono span')?.textContent,
+    )
+    expect(romans).toEqual(['I', 'V', 'vi', 'IV'])
+  })
+
+  it('suggests the next chord from the last chords of the progression', () => {
+    renderApp()
+    fireEvent.click(document.querySelector('[data-step-index="3"]')!)
+    fireEvent.click(screen.getByRole('button', { name: 'Quitar paso' }))
+    const firstGhost = document.querySelector('.cutline')
+    expect(firstGhost?.textContent).toContain('F')
+  })
+})

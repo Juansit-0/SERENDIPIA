@@ -21,6 +21,15 @@ import {
   Suggestion,
 } from '../music/progressions'
 import { Mode } from '../music/scales'
+import {
+  analyzeChord,
+  analyzeTransition,
+  detectProgressionKey,
+  suggestNextChords,
+  type ChordAnalysis,
+  type DetectedKey,
+  type TransitionAnalysis,
+} from '../music/analysis'
 import { clampCapo, withCapo } from '../music/capo'
 import { resolveStepFrets, type StepVoicingRef, type StepVoicingSource } from '../music/stepVoicing'
 import { STANDARD_TUNING, TUNINGS, Voicing, voicingFromFrets, voicingsFor } from '../music/voicings'
@@ -81,6 +90,13 @@ interface StoreValue {
   setKeyRootPc: (pc: number) => void
   keyMode: Mode
   setKeyMode: (mode: Mode) => void
+  /** When true the key follows the progression (once it has two or more chords). */
+  keyAuto: boolean
+  setKeyAuto: (auto: boolean) => void
+  detectedKey: DetectedKey | null
+  analysis: ProgressionAnalysis
+  /** Next-chord ideas from the last chords of the progression (or the selected chord when empty). */
+  nextSteps: Suggestion[]
   chord: ParsedChord
   chordInput: string
   chordError: boolean
@@ -113,6 +129,11 @@ interface StoreValue {
   toggleDetectorString: (stringIndex: number, fret: number) => void
 }
 
+export interface ProgressionAnalysis {
+  chords: ChordAnalysis[]
+  transitions: TransitionAnalysis[]
+}
+
 const StoreContext = createContext<StoreValue | null>(null)
 
 export function StoreProvider({ children }: { children: ReactNode }) {
@@ -132,8 +153,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [beatsPerChord, setBeatsPerChord] = useState(initial.beatsPerChord)
   const [timbre, setTimbreState] = useState<TimbreId>(initial.timbre)
   const [capo, setCapoState] = useState(initial.capo)
-  const [keyRootPc, setKeyRootPc] = useState(initial.keyRootPc)
-  const [keyMode, setKeyMode] = useState<Mode>(initial.keyMode)
+  const [manualKeyRootPc, setManualKeyRootPc] = useState(initial.keyRootPc)
+  const [manualKeyMode, setManualKeyMode] = useState<Mode>(initial.keyMode)
+  const [keyAuto, setKeyAuto] = useState(initial.keyAuto)
   const [chordInput, setChordInputState] = useState('Am7')
   const [chord, setChordState] = useState<ParsedChord>(() => parseChord('Am7')!)
   const [chordError, setChordError] = useState(false)
@@ -188,8 +210,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       tuningId,
       tempo,
       volume,
-      keyRootPc,
-      keyMode,
+      keyRootPc: manualKeyRootPc,
+      keyMode: manualKeyMode,
+      keyAuto,
       loop,
       metronome,
       beatsPerChord,
@@ -197,7 +220,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       capo,
     }
     saveSettings(payload)
-  }, [lang, notation, tuningId, tempo, volume, keyRootPc, keyMode, loop, metronome, beatsPerChord, timbre, capo])
+  }, [lang, notation, tuningId, tempo, volume, manualKeyRootPc, manualKeyMode, keyAuto, loop, metronome, beatsPerChord, timbre, capo])
 
   useEffect(() => {
     volumeRef.current = volume
@@ -430,9 +453,48 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [addToProgression],
   )
 
+  const detectedKey = useMemo(
+    () => (progression.length >= 2 ? detectProgressionKey(progression) : null),
+    [progression],
+  )
+  const keyRootPc = keyAuto && detectedKey ? detectedKey.rootPc : manualKeyRootPc
+  const keyMode = keyAuto && detectedKey ? detectedKey.mode : manualKeyMode
+
+  const setKeyRootPc = useCallback(
+    (pc: number) => {
+      setManualKeyRootPc(pc)
+      setManualKeyMode(keyMode)
+      setKeyAuto(false)
+    },
+    [keyMode],
+  )
+  const setKeyMode = useCallback(
+    (mode: Mode) => {
+      setManualKeyRootPc(keyRootPc)
+      setManualKeyMode(mode)
+      setKeyAuto(false)
+    },
+    [keyRootPc],
+  )
+
+  const analysis = useMemo<ProgressionAnalysis>(() => {
+    const key = { rootPc: keyRootPc, mode: keyMode }
+    // Explanations name the chords in the notation the player reads.
+    const named = progression.map((step) => (notation === 'latin' ? { ...step, anglo: step.latin } : step))
+    return {
+      chords: named.map((step) => analyzeChord(step, key)),
+      transitions: named.slice(1).map((step, index) => analyzeTransition(named[index], step, key)),
+    }
+  }, [progression, keyRootPc, keyMode, notation])
+
   const suggestions = useMemo(
     () => nextChordSuggestions(chord.rootPc, keyRootPc, keyMode),
     [chord.rootPc, keyRootPc, keyMode],
+  )
+
+  const nextSteps = useMemo(
+    () => (progression.length > 0 ? suggestNextChords(progression, { rootPc: keyRootPc, mode: keyMode }) : suggestions),
+    [progression, keyRootPc, keyMode, suggestions],
   )
 
   const value = useMemo<StoreValue>(() => ({
@@ -465,6 +527,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setKeyRootPc,
     keyMode,
     setKeyMode,
+    keyAuto,
+    setKeyAuto,
+    detectedKey,
+    analysis,
+    nextSteps,
     chord,
     chordInput,
     chordError,
@@ -497,7 +564,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     toggleDetectorString,
   }), [
     t, lang, notation, view, setView, tuningId, setTuningId, tuning, soundingTuning, capo, setCapo, tempo, volume, loop,
-    metronome, setMetronome, beatsPerChord, timbre, setTimbre, keyRootPc, keyMode, chord, chordInput, chordError, setChordInput,
+    metronome, setMetronome, beatsPerChord, timbre, setTimbre, keyRootPc, setKeyRootPc, keyMode, setKeyMode, keyAuto,
+    detectedKey, analysis, nextSteps, chord, chordInput, chordError, setChordInput,
     setChord, voicings, selectedVoicing, selectVoicing, playVoicing, playFrets, progression, loadProgression,
     addToProgression, moveStep, setStepVoicing, removeFromProgression, markedVoicing, setMarkedVoicing,
     clearProgression, playing, togglePlay, audioReady, audioLoading, audioFallback, enableAudio, suggestions,

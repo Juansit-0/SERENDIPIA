@@ -43,6 +43,8 @@ export function TransportStrip() {
     setKeyRootPc,
     keyMode,
     setKeyMode,
+    keyAuto,
+    setKeyAuto,
   } = useStore()
 
   return (
@@ -204,6 +206,16 @@ export function TransportStrip() {
             aria-label={t('a11y.mode')}
           >
             {keyMode === 'major' ? t('theory.mode.major') : t('theory.mode.minor')}
+          </button>
+          <button
+            type="button"
+            className="stamp px-1.5 py-0.5"
+            aria-pressed={keyAuto}
+            onClick={() => setKeyAuto(!keyAuto)}
+            aria-label={t('a11y.keyAuto')}
+            title={t('a11y.keyAuto')}
+          >
+            {t('key.auto')}
           </button>
         </div>
 

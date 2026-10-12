@@ -4,6 +4,17 @@ Sistema de Encuentro y Recomendación de Escalas, Notación, Detección e Identi
 
 A personal guitar practice instrument: type a chord and see every playable position, mark a fretboard position and get the chord's name (with honest ambiguity), read the theory at whatever depth you choose, and build a progression that plays itself and reorders by drag. A metronome click runs over the progression or standalone. Bilingual ES/EN, Anglo notation with Latin alongside.
 
+## Progression analysis
+
+As you build a progression, SERENDIPIA reads it with music-theory rules (no AI, works offline):
+
+- **Key detection** from all the chords (the **Auto** stamp in the transport; pick a key by hand to turn it off).
+- **Roman numerals** on every step, with secondary dominants (`V7/V`), borrowed chords (`iv`, `♭VII`) and out-of-key chords set apart in color.
+- **A mark between each pair of chords** (✓ resolves, ↗ tension, ↪ deceptive, ◐ borrowed color, ⚡ out of key, → / ~ smooth motion). Tap one to read the change explained, with its common tones; by default the latest change is shown.
+- **Next-chord ideas from the last two or three chords**, recognising classic progressions (`C G Am` → "completes Pop I–V–vi–IV") and cadences (`Dm G` → `C`).
+
+The logic lives in `src/music/analysis.ts`.
+
 ## Run it
 
 ```bash

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type DragEvent, type KeyboardEvent } from 'react'
+import { keyName, type ChordStatus, type TransitionAnalysis, type TransitionTone } from '../music/analysis'
 import { chordTones, qualityById } from '../music/chords'
-import { chordAccidental, pitchName } from '../music/notes'
+import { chordAccidental, keyAccidental, pitchName } from '../music/notes'
 import { diatonicChords, type HarmonicFunction } from '../music/scales'
 import { usePlayheadStep } from '../state/playhead'
 import { useStore } from '../state/store'
@@ -8,6 +9,23 @@ import { OffsetPlate } from './OffsetPlate'
 import { StepVoicingPicker } from './StepVoicingPicker'
 
 const SLOTS = 16
+
+const MARK_INK: Record<TransitionTone, string> = {
+  resolve: 'border-ink bg-turquoise text-ink',
+  tension: 'border-blue-ink bg-paper text-blue-ink',
+  surprise: 'border-red-ink bg-paper text-red-ink',
+  color: 'border-ink bg-paper-deep text-ink',
+  smooth: 'border-rule-strong bg-paper text-ink-soft',
+  neutral: 'border-rule-strong bg-paper text-ink-soft',
+  repeat: 'border-rule-strong bg-paper text-ink-faint',
+}
+
+const STATUS_INK: Record<ChordStatus, string> = {
+  diatonic: 'text-ink-faint',
+  secondary: 'text-blue-ink font-semibold',
+  borrowed: 'text-blue-ink font-semibold',
+  chromatic: 'text-red-ink font-semibold',
+}
 
 const FUNCTION_INK: Record<HarmonicFunction, string> = {
   tonic: 'ink-rule--tonic',
@@ -22,8 +40,11 @@ export function StepRow() {
     removeFromProgression,
     moveStep,
     clearProgression,
-    suggestions,
+    nextSteps,
     addSuggestion,
+    analysis,
+    keyAuto,
+    detectedKey,
     notation,
     keyRootPc,
     keyMode,
@@ -36,6 +57,13 @@ export function StepRow() {
   const [dragIndex, setDragIndex] = useState<number | null>(null)
   const [dropIndex, setDropIndex] = useState<number | null>(null)
   const [announcement, setAnnouncement] = useState('')
+  const [pickedTransition, setPickedTransition] = useState<number | null>(null)
+  // Show the picked change, or by default the most recent one (the chords just added).
+  const transitionIndex =
+    pickedTransition !== null && pickedTransition < analysis.transitions.length
+      ? pickedTransition
+      : analysis.transitions.length - 1
+  const shownTransition: TransitionAnalysis | undefined = analysis.transitions[transitionIndex]
   const focusStepId = useRef<string | null>(null)
   const diatonic = useMemo(() => diatonicChords(keyRootPc, keyMode), [keyRootPc, keyMode])
 
@@ -94,7 +122,7 @@ export function StepRow() {
   const pcsOf = (rootPc: number, qualityId: Parameters<typeof qualityById>[0]) =>
     chordTones(rootPc, qualityById(qualityId))
 
-  const ghosts = suggestions.slice(0, Math.max(0, SLOTS - progression.length))
+  const ghosts = nextSteps.slice(0, Math.max(0, SLOTS - progression.length))
   const emptySlots = Math.max(0, SLOTS - progression.length - ghosts.length)
 
   return (
@@ -121,7 +149,7 @@ export function StepRow() {
         </div>
       </div>
 
-      <div className="-mx-1 min-w-0 overflow-x-auto px-1 pt-1 pb-2">
+      <div className="-mx-1 min-w-0 overflow-x-auto px-1 pt-3 pb-2">
         <div
           className="grid min-w-[760px] snap-x snap-mandatory gap-1.5 sm:min-w-0"
           style={{ gridTemplateColumns: `repeat(${SLOTS}, minmax(0, 1fr))` }}
@@ -167,7 +195,14 @@ export function StepRow() {
                 title={playing ? t('transport.stop') : `${t('voicing.pick')}: ${step.anglo}`}
               >
                 <span className={`h-[3px] w-full ${fn ? FUNCTION_INK[fn] : 'bg-rule-strong'}`} aria-hidden="true" />
-                <span className="font-mono text-[8px] text-ink-faint">{index + 1}</span>
+                <span className="flex items-baseline gap-1 font-mono text-[8px] text-ink-faint">
+                  {index + 1}
+                  {analysis.chords[index] && (
+                    <span className={`truncate ${STATUS_INK[analysis.chords[index].status]}`}>
+                      {analysis.chords[index].roman}
+                    </span>
+                  )}
+                </span>
                 <span className="fv-ui text-[clamp(9px,0.72vw,13px)] font-bold leading-tight">
                   {notation === 'latin' ? step.latin : step.anglo}
                 </span>
@@ -215,6 +250,21 @@ export function StepRow() {
                   />
                 )}
                 {active ? <OffsetPlate>{sheet}</OffsetPlate> : sheet}
+                {analysis.transitions[index] && (
+                  <button
+                    type="button"
+                    className={`absolute -right-[11px] top-0 z-20 grid h-[18px] w-[18px] -translate-y-1/2 place-items-center rounded-full border font-mono text-[10px] leading-none after:absolute after:-inset-2 after:content-[''] ${
+                      MARK_INK[analysis.transitions[index].tone]
+                    } ${transitionIndex === index ? 'ring-2 ring-ink ring-offset-1 ring-offset-paper' : ''}`}
+                    aria-pressed={transitionIndex === index}
+                    aria-label={`${t('analysis.change')} ${index + 1}–${index + 2}: ${
+                      lang === 'es' ? analysis.transitions[index].titleEs : analysis.transitions[index].titleEn
+                    }`}
+                    onClick={() => setPickedTransition(index)}
+                  >
+                    {analysis.transitions[index].mark}
+                  </button>
+                )}
               </div>
             )
           })}
@@ -250,6 +300,44 @@ export function StepRow() {
       </div>
 
       {progression.length === 0 && <p className="readout text-[11px] text-ink-faint">{t('progression.empty')}</p>}
+
+      {progression.length > 0 && (
+        <div className="flex flex-col gap-1 border-t border-rule pt-2" aria-live="polite">
+          <p className="flex flex-wrap items-baseline gap-x-2">
+            <span className="label-ink text-blue-ink">{t('analysis.key')}</span>
+            <span className="fv-ui text-[13px] font-semibold">
+              {keyName({ rootPc: keyRootPc, mode: keyMode }, lang)}
+            </span>
+            {keyAuto && detectedKey && <span className="readout text-[10px] text-ink-faint">{t('analysis.auto')}</span>}
+          </p>
+          {shownTransition ? (
+            <p className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+              <span
+                className={`grid h-[18px] w-[18px] shrink-0 place-items-center self-center rounded-full border font-mono text-[10px] leading-none ${
+                  MARK_INK[shownTransition.tone]
+                }`}
+                aria-hidden="true"
+              >
+                {shownTransition.mark}
+              </span>
+              <span className="fv-ui text-[13px] font-semibold">
+                {lang === 'es' ? shownTransition.titleEs : shownTransition.titleEn}
+              </span>
+              <span className="text-[12px] leading-snug text-ink-soft">
+                {lang === 'es' ? shownTransition.detailEs : shownTransition.detailEn}
+              </span>
+              {shownTransition.commonTones.length > 0 && (
+                <span className="readout text-[10px] text-ink-faint">
+                  {t('analysis.common')}:{' '}
+                  {shownTransition.commonTones.map((pc) => pitchName(pc, keyAccidental(keyRootPc, keyMode))).join(' ')}
+                </span>
+              )}
+            </p>
+          ) : (
+            <p className="text-[12px] text-ink-soft">{t('analysis.addMore')}</p>
+          )}
+        </div>
+      )}
 
       <p className="sr-only" role="status" aria-live="polite">
         {announcement}

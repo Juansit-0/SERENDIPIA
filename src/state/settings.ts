@@ -14,6 +14,7 @@ export interface PersistedSettings {
   volume: number
   keyRootPc: number
   keyMode: Mode
+  keyAuto: boolean
   loop: boolean
   metronome: boolean
   beatsPerChord: number
@@ -36,6 +37,7 @@ export const DEFAULT_SETTINGS: PersistedSettings = {
   volume: 0.8,
   keyRootPc: 0,
   keyMode: 'major',
+  keyAuto: true,
   loop: true,
   metronome: false,
   beatsPerChord: 4,
@@ -62,6 +64,7 @@ export function sanitizeSettings(raw: unknown): PersistedSettings {
     volume: typeof input.volume === 'number' && input.volume >= 0 && input.volume <= 1 ? input.volume : d.volume,
     keyRootPc: intIn(input.keyRootPc, 0, 11, d.keyRootPc),
     keyMode: oneOf(input.keyMode, ['major', 'minor'] as Mode[], d.keyMode),
+    keyAuto: typeof input.keyAuto === 'boolean' ? input.keyAuto : d.keyAuto,
     loop: typeof input.loop === 'boolean' ? input.loop : d.loop,
     metronome: typeof input.metronome === 'boolean' ? input.metronome : d.metronome,
     beatsPerChord: oneOf(input.beatsPerChord, BEAT_OPTIONS, d.beatsPerChord),

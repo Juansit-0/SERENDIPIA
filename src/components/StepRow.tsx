@@ -2,6 +2,7 @@ import { useMemo, useState, type DragEvent, type KeyboardEvent } from 'react'
 import { chordTones, qualityById } from '../music/chords'
 import { chordAccidental, pitchName } from '../music/notes'
 import { diatonicChords, type HarmonicFunction } from '../music/scales'
+import { usePlayheadStep } from '../state/playhead'
 import { useStore } from '../state/store'
 import { OffsetPlate } from './OffsetPlate'
 import { StepVoicingPicker } from './StepVoicingPicker'
@@ -18,7 +19,6 @@ export function StepRow() {
   const {
     progression,
     playing,
-    activeStep,
     removeFromProgression,
     moveStep,
     clearProgression,
@@ -30,6 +30,7 @@ export function StepRow() {
     t,
   } = useStore()
 
+  const activeStep = usePlayheadStep()
   const [pickerStepId, setPickerStepId] = useState<string | null>(null)
   const [dragIndex, setDragIndex] = useState<number | null>(null)
   const [dropIndex, setDropIndex] = useState<number | null>(null)

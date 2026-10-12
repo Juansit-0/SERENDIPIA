@@ -8,7 +8,8 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import { audioEngine, type PlayPattern, type TimbreId } from '../audio/engine'
+import { loadAudioEngine, loadedAudioEngine, prefetchAudioEngine } from '../audio/loader'
+import type { PlayPattern, TimbreId } from '../audio/types'
 import { translate, type Lang, type TKey } from '../i18n'
 import { QualityId } from '../music/chords'
 import { ParsedChord, parseChord } from '../music/parseChord'
@@ -23,8 +24,11 @@ import { Mode } from '../music/scales'
 import { clampCapo, withCapo } from '../music/capo'
 import { resolveStepFrets, type StepVoicingRef, type StepVoicingSource } from '../music/stepVoicing'
 import { STANDARD_TUNING, TUNINGS, Voicing, voicingFromFrets, voicingsFor } from '../music/voicings'
+import { playhead } from './playhead'
+import { appendStep, applyStepVoicing, MAX_STEPS, removeStep, stepId, toggleDetectorFret } from './progressionOps'
+import { loadSettings, saveSettings, type Notation, type PersistedSettings } from './settings'
 
-export type Notation = 'anglo' | 'latin' | 'both'
+export type { Notation } from './settings'
 export type ViewId = 'dictionary' | 'detector' | 'theory'
 
 export interface ProgressionStep {
@@ -97,8 +101,6 @@ interface StoreValue {
   setMarkedVoicing: (voicing: MarkedVoicing | null) => void
   clearProgression: () => void
   playing: boolean
-  activeStep: number
-  activeBeat: number
   togglePlay: () => void
   audioReady: boolean
   audioLoading: TimbreId | null
@@ -113,74 +115,31 @@ interface StoreValue {
 
 const StoreContext = createContext<StoreValue | null>(null)
 
-const STORAGE_KEY = 'serendipia.settings.v2'
-
-interface PersistedSettings {
-  lang: Lang
-  notation: Notation
-  tuningId: string
-  tempo: number
-  volume: number
-  keyRootPc: number
-  keyMode: Mode
-  loop: boolean
-  metronome: boolean
-  beatsPerChord: number
-  timbre: TimbreId
-  capo: number
-}
-
-const DEFAULTS: PersistedSettings = {
-  lang: 'es',
-  notation: 'both',
-  tuningId: 'standard',
-  tempo: 92,
-  volume: 0.8,
-  keyRootPc: 0,
-  keyMode: 'major',
-  loop: true,
-  metronome: false,
-  beatsPerChord: 4,
-  timbre: 'nylon',
-  capo: 0,
-}
-
-function loadSettings(): PersistedSettings {
-  if (typeof localStorage === 'undefined') return DEFAULTS
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY) ?? localStorage.getItem('serendipia.settings.v1')
-    if (!raw) return DEFAULTS
-    return { ...DEFAULTS, ...(JSON.parse(raw) as Partial<PersistedSettings>) }
-  } catch {
-    return DEFAULTS
-  }
-}
-
 export function StoreProvider({ children }: { children: ReactNode }) {
-  const initial = useRef(loadSettings())
-  const [lang, setLang] = useState<Lang>(initial.current.lang)
-  const [notation, setNotation] = useState<Notation>(initial.current.notation)
+  const [initial] = useState(loadSettings)
+  const [lang, setLang] = useState<Lang>(initial.lang)
+  const [notation, setNotation] = useState<Notation>(initial.notation)
   const [view, setViewState] = useState<ViewId>(() => {
     if (typeof window === 'undefined') return 'dictionary'
     const hash = window.location.hash.replace('#', '')
     return hash === 'detector' || hash === 'theory' ? hash : 'dictionary'
   })
-  const [tuningId, setTuningId] = useState(initial.current.tuningId)
-  const [tempo, setTempo] = useState(initial.current.tempo)
-  const [volume, setVolume] = useState(initial.current.volume)
-  const [loop, setLoop] = useState(initial.current.loop)
-  const [metronome, setMetronome] = useState(initial.current.metronome)
-  const [beatsPerChord, setBeatsPerChord] = useState(initial.current.beatsPerChord)
-  const [timbre, setTimbreState] = useState<TimbreId>(initial.current.timbre)
-  const [capo, setCapoState] = useState(initial.current.capo)
-  const [keyRootPc, setKeyRootPc] = useState(initial.current.keyRootPc)
-  const [keyMode, setKeyMode] = useState<Mode>(initial.current.keyMode)
+  const [tuningId, setTuningIdState] = useState(initial.tuningId)
+  const [tempo, setTempo] = useState(initial.tempo)
+  const [volume, setVolume] = useState(initial.volume)
+  const [loop, setLoop] = useState(initial.loop)
+  const [metronome, setMetronomeState] = useState(initial.metronome)
+  const [beatsPerChord, setBeatsPerChord] = useState(initial.beatsPerChord)
+  const [timbre, setTimbreState] = useState<TimbreId>(initial.timbre)
+  const [capo, setCapoState] = useState(initial.capo)
+  const [keyRootPc, setKeyRootPc] = useState(initial.keyRootPc)
+  const [keyMode, setKeyMode] = useState<Mode>(initial.keyMode)
   const [chordInput, setChordInputState] = useState('Am7')
   const [chord, setChordState] = useState<ParsedChord>(() => parseChord('Am7')!)
   const [chordError, setChordError] = useState(false)
   const [selectedVoicing, setSelectedVoicing] = useState(0)
   const [progression, setProgression] = useState<ProgressionStep[]>(() =>
-    resolveProgression(PROGRESSIONS[0], initial.current.keyRootPc).map((step, index) => ({
+    resolveProgression(PROGRESSIONS[0], initial.keyRootPc).map((step, index) => ({
       rootPc: step.rootPc,
       qualityId: step.qualityId,
       anglo: step.anglo,
@@ -189,8 +148,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     })),
   )
   const [playing, setPlaying] = useState(false)
-  const [activeStep, setActiveStep] = useState(-1)
-  const [activeBeat, setActiveBeat] = useState(-1)
   const [detectorFrets, setDetectorFrets] = useState<(number | null)[]>([0, 0, 0, 0, 0, 0])
   const [markedVoicing, setMarkedVoicingState] = useState<MarkedVoicing | null>(null)
   const [audioReady, setAudioReady] = useState(false)
@@ -206,12 +163,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
+  const volumeRef = useRef(volume)
+
   useEffect(() => {
-    audioEngine.onLoadingChange = (value) => setAudioLoading(value)
-    audioEngine.onFallback = (value) => setAudioFallback(value)
+    prefetchAudioEngine()
     return () => {
-      audioEngine.onLoadingChange = null
-      audioEngine.onFallback = null
+      const engine = loadedAudioEngine()
+      if (engine) {
+        engine.onLoadingChange = null
+        engine.onFallback = null
+      }
     }
   }, [])
 
@@ -230,15 +191,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       timbre,
       capo,
     }
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
-    } catch {
-      return
-    }
+    saveSettings(payload)
   }, [lang, notation, tuningId, tempo, volume, keyRootPc, keyMode, loop, metronome, beatsPerChord, timbre, capo])
 
   useEffect(() => {
-    audioEngine.setVolume(volume)
+    volumeRef.current = volume
+    loadedAudioEngine()?.setVolume(volume)
   }, [volume])
 
   const tuning = useMemo(
@@ -264,22 +222,27 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return [shift(marked), ...shapes.filter((voicing) => voicing.signature !== marked.signature).map(shift)]
   }, [chord, tuning, capo, markedVoicing])
 
-  useEffect(() => {
+  const setTuningId = useCallback((id: string) => {
+    setTuningIdState(id)
     setSelectedVoicing(0)
-  }, [chord, tuningId])
+  }, [])
 
   const enableAudio = useCallback(async () => {
     try {
-      await audioEngine.start()
-      setAudioReady(audioEngine.isStarted)
-      await audioEngine.setTimbre(timbre)
+      const engine = await loadAudioEngine()
+      engine.onLoadingChange = setAudioLoading
+      engine.onFallback = setAudioFallback
+      engine.setVolume(volumeRef.current)
+      await engine.start()
+      setAudioReady(engine.isStarted)
+      await engine.setTimbre(timbre)
     } catch {
       setAudioReady(false)
     }
   }, [timbre])
 
   useEffect(() => {
-    if (audioReady) void audioEngine.setTimbre(timbre)
+    if (audioReady) void loadedAudioEngine()?.setTimbre(timbre)
   }, [timbre, audioReady])
 
   const setTimbre = useCallback((next: TimbreId) => {
@@ -291,7 +254,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const target = voicings[index ?? selectedVoicing]
       if (!target) return
       void enableAudio().then(() => {
-        audioEngine.playFrets(target.frets, soundingTuning, pattern)
+        loadedAudioEngine()?.playFrets(target.frets, soundingTuning, pattern)
       })
     },
     [voicings, selectedVoicing, soundingTuning, enableAudio],
@@ -308,7 +271,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const playFrets = useCallback(
     (frets: (number | null)[], pattern: PlayPattern = 'strum-down') => {
       void enableAudio().then(() => {
-        audioEngine.playFrets(frets, soundingTuning, pattern)
+        loadedAudioEngine()?.playFrets(frets, soundingTuning, pattern)
       })
     },
     [enableAudio, soundingTuning],
@@ -319,6 +282,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const parsed = parseChord(value)
     if (parsed) {
       setChordState(parsed)
+      setSelectedVoicing(0)
       setChordError(false)
     } else {
       setChordError(value.trim().length > 0)
@@ -331,59 +295,57 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const setChord = useCallback((next: ParsedChord) => {
     setChordState(next)
+    setSelectedVoicing(0)
     setChordInputState(next.anglo)
     setChordError(false)
   }, [])
 
   const addToProgression = useCallback((step: Omit<ProgressionStep, 'id'>) => {
-    setProgression((current) => {
-      if (current.length >= 16) return current
-      return [...current, { ...step, id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}` }]
-    })
+    setProgression((current) => appendStep(current, step, stepId()))
   }, [])
 
-  const loadProgression = useCallback((steps: Array<Omit<ProgressionStep, 'id'>>) => {
-    audioEngine.stopProgression()
+  const stopPlayback = useCallback(() => {
+    loadedAudioEngine()?.stopProgression()
     setPlaying(false)
-    setActiveStep(-1)
-    setProgression(
-      steps.slice(0, 16).map((step, index) => ({
-        ...step,
-        id: `loaded-${index}-${Math.random().toString(36).slice(2, 7)}`,
-      })),
-    )
+    playhead.reset()
   }, [])
+
+  const loadProgression = useCallback(
+    (steps: Array<Omit<ProgressionStep, 'id'>>) => {
+      stopPlayback()
+      setProgression(steps.slice(0, MAX_STEPS).map((step, index) => ({ ...step, id: stepId(`loaded-${index}`) })))
+    },
+    [stopPlayback],
+  )
 
   const moveStep = useCallback((from: number, to: number) => {
     setProgression((current) => reorderSteps(current, from, to))
   }, [])
 
   const setStepVoicing = useCallback((index: number, voicing: StepVoicingRef | null) => {
-    setProgression((current) =>
-      current.map((step, position) =>
-        position === index
-          ? {
-              ...step,
-              frets: voicing?.frets ?? null,
-              voicingLabel: voicing?.label,
-              voicingSource: voicing?.source,
-            }
-          : step,
-      ),
-    )
+    setProgression((current) => applyStepVoicing(current, index, voicing))
   }, [])
 
-  const removeFromProgression = useCallback((index: number) => {
-    setProgression((current) => current.filter((_, position) => position !== index))
-  }, [])
+  const removeFromProgression = useCallback(
+    (index: number) => {
+      setProgression((current) => removeStep(current, index))
+      if (progression.length <= 1 && !metronome) stopPlayback()
+    },
+    [progression.length, metronome, stopPlayback],
+  )
+
+  const setMetronome = useCallback(
+    (next: boolean) => {
+      setMetronomeState(next)
+      if (!next && progression.length === 0) stopPlayback()
+    },
+    [progression.length, stopPlayback],
+  )
 
   const clearProgression = useCallback(() => {
     setProgression([])
-    audioEngine.stopProgression()
-    setPlaying(false)
-    setActiveStep(-1)
-    setActiveBeat(-1)
-  }, [])
+    stopPlayback()
+  }, [stopPlayback])
 
   const getFretsForStep = useCallback(
     (index: number): (number | null)[] | null => {
@@ -396,15 +358,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const togglePlay = useCallback(() => {
     if (playing) {
-      audioEngine.stopProgression()
-      setPlaying(false)
-      setActiveStep(-1)
-      setActiveBeat(-1)
+      stopPlayback()
       return
     }
     if (progression.length === 0 && !metronome) return
     void enableAudio().then(() => {
-      audioEngine.playProgression({
+      const engine = loadedAudioEngine()
+      if (!engine?.isStarted) return
+      engine.playProgression({
         stepCount: progression.length,
         tempo,
         loop,
@@ -412,18 +373,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         tuning: soundingTuning,
         metronome,
         getFrets: getFretsForStep,
-        onStep: (index) => setActiveStep(index),
-        onBeat: (beat) => setActiveBeat(beat),
+        onStep: playhead.setStep,
+        onBeat: playhead.setBeat,
         onEnd: () => {
           setPlaying(false)
-          setActiveStep(-1)
-          setActiveBeat(-1)
+          playhead.reset()
         },
       })
       setPlaying(true)
     })
   }, [
     playing,
+    stopPlayback,
     progression.length,
     metronome,
     enableAudio,
@@ -435,41 +396,20 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   ])
 
   useEffect(() => {
-    if (!playing) return
-    audioEngine.updateProgression({ tempo, loop, beatsPerChord, metronome, tuning: soundingTuning })
-  }, [tempo, loop, beatsPerChord, metronome, soundingTuning, playing])
-
-  useEffect(() => {
-    if (!playing) return
-    if (progression.length === 0) {
-      if (metronome) {
-        audioEngine.updateProgression({ stepCount: 0, getFrets: getFretsForStep })
-        return
-      }
-      audioEngine.stopProgression()
-      setPlaying(false)
-      setActiveStep(-1)
-      setActiveBeat(-1)
-      return
-    }
-    audioEngine.updateProgression({ stepCount: progression.length, getFrets: getFretsForStep })
-  }, [progression, playing, metronome, getFretsForStep])
-
-  useEffect(() => {
-    if (playing && progression.length === 0 && !metronome) {
-      audioEngine.stopProgression()
-      setPlaying(false)
-      setActiveStep(-1)
-      setActiveBeat(-1)
-    }
-  }, [metronome, playing, progression.length])
+    if (!playing || (progression.length === 0 && !metronome)) return
+    loadedAudioEngine()?.updateProgression({
+      tempo,
+      loop,
+      beatsPerChord,
+      metronome,
+      tuning: soundingTuning,
+      stepCount: progression.length,
+      getFrets: getFretsForStep,
+    })
+  }, [playing, progression.length, metronome, tempo, loop, beatsPerChord, soundingTuning, getFretsForStep])
 
   const toggleDetectorString = useCallback((stringIndex: number, fret: number) => {
-    setDetectorFrets((previous) => {
-      const next = [...previous]
-      next[stringIndex] = fret < 0 ? null : Math.max(0, fret - capo)
-      return next
-    })
+    setDetectorFrets((previous) => toggleDetectorFret(previous, stringIndex, fret, capo))
   }, [capo])
 
   const addSuggestion = useCallback(
@@ -490,7 +430,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [chord.rootPc, keyRootPc, keyMode],
   )
 
-  const value: StoreValue = {
+  const value = useMemo<StoreValue>(() => ({
     t,
     lang,
     setLang,
@@ -540,8 +480,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setMarkedVoicing,
     clearProgression,
     playing,
-    activeStep,
-    activeBeat,
     togglePlay,
     audioReady,
     audioLoading,
@@ -552,7 +490,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     detectorFrets,
     setDetectorFrets,
     toggleDetectorString,
-  }
+  }), [
+    t, lang, notation, view, setView, tuningId, setTuningId, tuning, soundingTuning, capo, setCapo, tempo, volume, loop,
+    metronome, setMetronome, beatsPerChord, timbre, setTimbre, keyRootPc, keyMode, chord, chordInput, chordError, setChordInput,
+    setChord, voicings, selectedVoicing, selectVoicing, playVoicing, playFrets, progression, loadProgression,
+    addToProgression, moveStep, setStepVoicing, removeFromProgression, markedVoicing, setMarkedVoicing,
+    clearProgression, playing, togglePlay, audioReady, audioLoading, audioFallback, enableAudio, suggestions,
+    addSuggestion, detectorFrets, toggleDetectorString,
+  ])
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>
 }

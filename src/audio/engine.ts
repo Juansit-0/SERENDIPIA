@@ -3,28 +3,9 @@ import { midiToFreq } from '../music/notes'
 import { beatsToNotation, isAccentBeat, progressionTicks } from './timing'
 import { SAMPLE_FILES } from '../assets/samples/generated'
 
-export type PlayPattern = 'strum-down' | 'strum-up' | 'arpeggio' | 'block'
-export type TimbreId = 'nylon' | 'steel' | 'electric' | 'jazz'
+import type { PlayPattern, ProgressionOptions, TimbreId } from './types'
 
-export const TIMBRES: Array<{ id: TimbreId; nameEs: string; nameEn: string }> = [
-  { id: 'nylon', nameEs: 'Nylon', nameEn: 'Nylon' },
-  { id: 'steel', nameEs: 'Acero', nameEn: 'Steel' },
-  { id: 'electric', nameEs: 'Eléctrica', nameEn: 'Clean electric' },
-  { id: 'jazz', nameEs: 'Jazz', nameEn: 'Jazz' },
-]
-
-export interface ProgressionOptions {
-  stepCount: number
-  tempo: number
-  loop: boolean
-  beatsPerChord: number
-  tuning: number[]
-  getFrets: (index: number) => (number | null)[] | null
-  onStep: (index: number) => void
-  onEnd?: () => void
-  metronome?: boolean
-  onBeat?: (beat: number) => void
-}
+export type { PlayPattern, ProgressionOptions, TimbreId } from './types'
 
 const SAMPLE_TIMEOUT_MS = 15000
 
@@ -83,17 +64,6 @@ class AudioEngine {
 
   get usingFallback(): boolean {
     return this.failed
-  }
-
-  async measure(): Promise<number> {
-    if (!this.master) return 0
-    const analyser = new Tone.Analyser('waveform', 2048)
-    this.master.connect(analyser)
-    await new Promise((resolve) => setTimeout(resolve, 350))
-    const values = analyser.getValue() as Float32Array
-    analyser.dispose()
-    const sum = values.reduce((total, value) => total + value * value, 0)
-    return Math.sqrt(sum / values.length)
   }
 
   debug(): Record<string, unknown> {
@@ -391,7 +361,9 @@ class AudioEngine {
     this.endEvent = transport.scheduleOnce((time) => {
       const onEnd = this.options?.onEnd
       this.stopProgression()
-      if (onEnd) Tone.getDraw().schedule(onEnd, time)
+      // Not Draw: hidden tabs pause animation frames and Draw drops late events,
+      // which would leave the UI stuck in "playing".
+      if (onEnd) setTimeout(onEnd, Math.max(0, (time - Tone.now()) * 1000))
     }, `${at}i`)
   }
 

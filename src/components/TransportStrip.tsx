@@ -1,12 +1,13 @@
-import { TIMBRES, type TimbreId } from '../audio/engine'
+import { TIMBRES, type TimbreId } from '../audio/types'
 import { MAX_CAPO } from '../music/capo'
 import { LATIN_SHARP, PITCH_SHARP } from '../music/notes'
+import { usePlayheadBeat } from '../state/playhead'
+import { BEAT_OPTIONS, TEMPO_MAX, TEMPO_MIN } from '../state/settings'
 import { useStore, type Notation, type ViewId } from '../state/store'
 import { RegMark } from './RegMark'
 
 const VIEWS: ViewId[] = ['dictionary', 'detector', 'theory']
 const NOTATIONS: Notation[] = ['anglo', 'both', 'latin']
-const BEATS = [1, 2, 4, 8]
 
 export function TransportStrip() {
   const {
@@ -32,7 +33,6 @@ export function TransportStrip() {
     volume,
     setVolume,
     playing,
-    activeBeat,
     togglePlay,
     progression,
     audioReady,
@@ -85,7 +85,7 @@ export function TransportStrip() {
             <button
               type="button"
               className="stamp px-2 py-0.5"
-              onClick={() => setTempo(Math.max(40, tempo - 4))}
+              onClick={() => setTempo(Math.max(TEMPO_MIN, tempo - 4))}
               aria-label={t('a11y.tempoDown')}
             >
               −
@@ -94,7 +94,7 @@ export function TransportStrip() {
             <button
               type="button"
               className="stamp px-2 py-0.5"
-              onClick={() => setTempo(Math.min(208, tempo + 4))}
+              onClick={() => setTempo(Math.min(TEMPO_MAX, tempo + 4))}
               aria-label={t('a11y.tempoUp')}
             >
               +
@@ -104,7 +104,7 @@ export function TransportStrip() {
 
         <div className="flex items-center gap-1" role="group" aria-label={t('a11y.beats')}>
           <span className="label-ink">{t('transport.beats')}</span>
-          {BEATS.map((beats) => (
+          {BEAT_OPTIONS.map((beats) => (
             <button
               key={beats}
               type="button"
@@ -130,18 +130,7 @@ export function TransportStrip() {
           >
             {t('transport.metronome')}
           </button>
-          {playing && activeBeat >= 0 && (
-            <span className="flex items-center gap-[3px]" aria-hidden="true">
-              {[0, 1, 2, 3].map((beat) => (
-                <span
-                  key={beat}
-                  className={`h-[6px] w-[6px] rounded-full ${
-                    activeBeat % 4 === beat ? (beat === 0 ? 'bg-ink' : 'bg-ink-soft') : 'bg-rule'
-                  }`}
-                />
-              ))}
-            </span>
-          )}
+          {playing && <BeatDots />}
         </div>
       </div>
 
@@ -257,5 +246,22 @@ export function TransportStrip() {
         )}
       </div>
     </header>
+  )
+}
+
+function BeatDots() {
+  const activeBeat = usePlayheadBeat()
+  if (activeBeat < 0) return null
+  return (
+    <span className="flex items-center gap-[3px]" aria-hidden="true">
+      {[0, 1, 2, 3].map((beat) => (
+        <span
+          key={beat}
+          className={`h-[6px] w-[6px] rounded-full ${
+            activeBeat % 4 === beat ? (beat === 0 ? 'bg-ink' : 'bg-ink-soft') : 'bg-rule'
+          }`}
+        />
+      ))}
+    </span>
   )
 }

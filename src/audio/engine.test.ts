@@ -200,6 +200,7 @@ describe('audioEngine.playProgression', () => {
     const [end] = [...tone.scheduled.values()]
     expect(end.time).toBe(`${4 * 2 * 192 - 1}i`)
     end.callback(0)
+    await new Promise((resolve) => setTimeout(resolve, 0))
     expect(onEnd).toHaveBeenCalledOnce()
     expect(tone.transport.state).toBe('stopped')
   })

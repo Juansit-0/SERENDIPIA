@@ -96,6 +96,8 @@ export const es = {
   'theory.reason': 'Por qué',
   'theory.degree': 'Grado',
   'theory.roman': 'Grado',
+  'transport.more': 'Ajustes',
+  'a11y.transportMore': 'Mostrar u ocultar los ajustes del transporte',
   'audio.enable': 'Activar sonido',
   'audio.enabled': 'Sonido activo',
   'audio.loading': 'Imprimiendo…',

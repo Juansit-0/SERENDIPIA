@@ -294,6 +294,8 @@ Flat riso spot inks on paper: two papers, three inks in the black-brown family, 
 
 ## Layout
 
+Below `sm` the transport strip folds to the view tabs, Run, tempo and a **Ajustes ▾** stamp (with a one-line readout of beats · loop · click · capo); the stamp reveals the rest of the strip and the choice is remembered per browser. From `sm` up the strip is always fully open.
+
 The app is one paper sheet: `.grain` wraps a centered column of max-width 1560px with 12px padding (20px horizontal, 16px vertical from `sm` up) and 16px gaps between the transport strip and the view. Every view ends with the progression plate spanning all columns.
 
 - **Transport strip** (plate across the top): below 640px it stacks vertically as a flex column; from `sm` up it becomes a wrapping row with 20px column gaps. Left group = wordmark + tab stamps; middle = run, tempo block with −/+, beats, loop, click with its 4-dot beat readout; right group (pushed with auto margin, full-width until `sm`) = timbre select, key select + major/minor, notation stamps, volume slider, ES/EN, audio chips.

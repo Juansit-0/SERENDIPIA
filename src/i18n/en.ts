@@ -98,6 +98,8 @@ export const en: Dictionary = {
   'theory.reason': 'Why',
   'theory.degree': 'Degree',
   'theory.roman': 'Roman',
+  'transport.more': 'Settings',
+  'a11y.transportMore': 'Show or hide the transport settings',
   'audio.enable': 'Enable sound',
   'audio.enabled': 'Sound on',
   'audio.loading': 'Printing…',

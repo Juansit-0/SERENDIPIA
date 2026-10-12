@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { STRUMS, type StrumId } from '../audio/strums'
 import { TIMBRES, type TimbreId } from '../audio/types'
 import { MAX_CAPO } from '../music/capo'
@@ -9,8 +10,31 @@ import { RegMark } from './RegMark'
 
 const VIEWS: ViewId[] = ['dictionary', 'detector', 'theory', 'practice']
 const NOTATIONS: Notation[] = ['anglo', 'both', 'latin']
+const OPEN_KEY = 'serendipia.transportOpen'
+
+// Per-viewer convenience only: whether the phone layout shows every transport setting.
+function readOpen(): boolean {
+  try {
+    return localStorage.getItem(OPEN_KEY) === '1'
+  } catch {
+    return false
+  }
+}
 
 export function TransportStrip() {
+  // Below `sm` the strip folds to: views, Run, tempo and a Settings toggle. From `sm` up it is always open.
+  const [open, setOpen] = useState(readOpen)
+  const toggleOpen = () => {
+    setOpen((current) => {
+      try {
+        localStorage.setItem(OPEN_KEY, current ? '0' : '1')
+      } catch {
+        // storage unavailable: the toggle still works for this visit
+      }
+      return !current
+    })
+  }
+  const foldable = open ? 'contents' : 'hidden sm:contents'
   const {
     t,
     lang,
@@ -83,6 +107,7 @@ export function TransportStrip() {
         >
           {playing ? t('transport.stop') : t('transport.run')}
         </button>
+        {playing && <BeatDots />}
 
         <div className="flex items-center gap-2">
           <span className="label-ink text-blue-ink">{t('transport.tempo')}</span>
@@ -110,39 +135,62 @@ export function TransportStrip() {
           </div>
         </div>
 
-        <div className="flex items-center gap-1" role="group" aria-label={t('a11y.beats')}>
-          <span className="label-ink text-blue-ink">{t('transport.beats')}</span>
-          {BEAT_OPTIONS.map((beats) => (
-            <button
-              key={beats}
-              type="button"
-              className="stamp px-1.5 py-0.5"
-              aria-pressed={beatsPerChord === beats}
-              onClick={() => setBeatsPerChord(beats)}
-            >
-              {beats}
-            </button>
-          ))}
-        </div>
-
-        <button type="button" className="stamp" aria-pressed={loop} onClick={() => setLoop(!loop)}>
-          {t('transport.loop')}
+        <button
+          type="button"
+          className="stamp sm:hidden"
+          aria-expanded={open}
+          aria-controls="transport-rhythm transport-settings"
+          onClick={toggleOpen}
+          title={t('a11y.transportMore')}
+        >
+          {t('transport.more')} <span aria-hidden="true">{open ? '▴' : '▾'}</span>
         </button>
+        {!open && (
+          <span className="readout text-[10px] text-ink-soft sm:hidden" aria-hidden="true">
+            {beatsPerChord}/4{loop ? ' · loop' : ''}
+            {metronome ? ' · click' : ''}
+            {capo > 0 ? ` · capo ${capo}` : ''}
+          </span>
+        )}
 
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            className="stamp"
-            aria-pressed={metronome}
-            onClick={() => setMetronome(!metronome)}
-          >
+        <div id="transport-rhythm" className={foldable}>
+          <div className="flex items-center gap-1" role="group" aria-label={t('a11y.beats')}>
+            <span className="label-ink text-blue-ink">{t('transport.beats')}</span>
+            {BEAT_OPTIONS.map((beats) => (
+              <button
+                key={beats}
+                type="button"
+                className="stamp px-1.5 py-0.5"
+                aria-pressed={beatsPerChord === beats}
+                onClick={() => setBeatsPerChord(beats)}
+              >
+                {beats}
+              </button>
+            ))}
+          </div>
+
+          <button type="button" className="stamp" aria-pressed={loop} onClick={() => setLoop(!loop)}>
+            {t('transport.loop')}
+          </button>
+
+          <button type="button" className="stamp" aria-pressed={metronome} onClick={() => setMetronome(!metronome)}>
             {t('transport.metronome')}
           </button>
-          {playing && <BeatDots />}
         </div>
+
+        {audioLoading && <span className="chip chip--blue">{t('audio.loading')}</span>}
+        {audioFallback && <span className="chip">{t('audio.fallback')}</span>}
+        {!audioReady && !audioLoading && (
+          <button type="button" className="stamp stamp--live" onClick={() => void enableAudio()}>
+            {t('audio.enable')}
+          </button>
+        )}
       </div>
 
-      <div className="ml-auto flex w-full flex-wrap items-center gap-x-4 gap-y-2 sm:w-auto">
+      <div
+        id="transport-settings"
+        className={`ml-auto w-full flex-wrap items-center gap-x-4 gap-y-2 sm:flex sm:w-auto ${open ? 'flex' : 'hidden'}`}
+      >
         <div className="flex flex-wrap items-center gap-2">
           <span className="label-ink text-blue-ink">{t('transport.timbre')}</span>
           <select
@@ -272,14 +320,6 @@ export function TransportStrip() {
         >
           {lang === 'es' ? 'ES' : 'EN'}
         </button>
-
-        {audioLoading && <span className="chip chip--blue">{t('audio.loading')}</span>}
-        {audioFallback && <span className="chip">{t('audio.fallback')}</span>}
-        {!audioReady && !audioLoading && (
-          <button type="button" className="stamp stamp--live" onClick={() => void enableAudio()}>
-            {t('audio.enable')}
-          </button>
-        )}
       </div>
     </header>
   )

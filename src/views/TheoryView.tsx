@@ -1,151 +1,107 @@
 import { useMemo, useState } from 'react'
-import { SuggestionsPanel } from '../components/SuggestionsPanel'
-import { LATIN_SHARP, PITCH_SHARP } from '../music/notes'
+import { useViewsText } from '../i18n/views'
+import { latinName, pitchName, keyAccidental } from '../music/notes'
 import { parseChord } from '../music/parseChord'
 import { PROGRESSIONS, resolveProgression } from '../music/progressions'
-import { diatonicChords, functionLabelKey, type HarmonicFunction } from '../music/scales'
-
-const FUNCTION_INK: Record<HarmonicFunction, string> = {
-  tonic: 'ink-rule--tonic',
-  subdominant: 'ink-rule--subdominant',
-  dominant: 'ink-rule--dominant',
-}
+import { diatonicChords, functionLabelKey } from '../music/scales'
 import { useStore } from '../state/store'
+import { DegreeCard } from './theory/DegreeCard'
+import { Orbit } from './theory/Orbit'
+import '../styles/views.css'
 
 export function TheoryView() {
-  const {
-    keyRootPc,
-    keyMode,
-    setKeyRootPc,
-    setKeyMode,
-    t,
-    lang,
-    notation,
-    chord,
-    setChord,
-    loadProgression,
-  } = useStore()
+  const { keyRootPc, keyMode, t, lang, notation, chord, setChord, addToProgression, loadProgression } = useStore()
+  const v = useViewsText()
   const [sevenths, setSevenths] = useState(false)
 
   const diatonic = useMemo(() => diatonicChords(keyRootPc, keyMode, sevenths), [keyRootPc, keyMode, sevenths])
+  const progressions = useMemo(() => PROGRESSIONS.filter((item) => item.mode === keyMode), [keyMode])
   const isCurrent = (rootPc: number, qualityId: string) =>
     chord.bassPc === null && chord.rootPc === rootPc && chord.quality.id === qualityId
-  const progressions = useMemo(() => PROGRESSIONS.filter((item) => item.mode === keyMode), [keyMode])
+
+  const accidental = keyAccidental(keyRootPc, keyMode)
+  const keyName = `${notation === 'latin' ? latinName(keyRootPc, accidental) : pitchName(keyRootPc, accidental)} ${v(keyMode === 'major' ? 'theory.major' : 'theory.minor')}`
 
   return (
-    <div className="grid items-start gap-4 xl:grid-cols-[minmax(320px,1.1fr)_minmax(320px,1fr)] desk:h-full desk:min-h-0 desk:grid-cols-[minmax(0,1.6fr)_minmax(260px,1fr)] desk:grid-rows-[minmax(0,1fr)] desk:items-stretch desk:gap-2">
-      <section className="plate flex flex-col gap-4 p-4 desk:min-h-0 desk:gap-2 desk:p-3">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="label-ink text-blue-ink">{t('theory.diatonic')}</h2>
-          <div className="flex gap-1.5">
-            <button
-              type="button"
-              className="stamp px-1.5 py-0.5"
-              aria-pressed={keyMode === 'major'}
-              onClick={() => setKeyMode('major')}
-            >
-              {t('theory.mode.major')}
-            </button>
-            <button
-              type="button"
-              className="stamp px-1.5 py-0.5"
-              aria-pressed={keyMode === 'minor'}
-              onClick={() => setKeyMode('minor')}
-            >
-              {t('theory.mode.minor')}
-            </button>
-            <button
-              type="button"
-              className="stamp min-w-7 px-1.5 py-0.5"
-              aria-pressed={sevenths}
-              aria-label={t('a11y.sevenths')}
-              title={t('a11y.sevenths')}
-              onClick={() => setSevenths(!sevenths)}
-            >
-              7
-            </button>
-          </div>
+    <div className="tv flex flex-col gap-3 desk:h-full desk:min-h-0 desk:gap-2">
+      <section className="cc-module tv-head" aria-label={v('theory.key')}>
+        <div className="tv-head__key">
+          <span className="cc-label">{v('theory.key')}</span>
+          <h2 className="tv-head__title" aria-label={`${v('theory.key')}: ${keyName}`}>
+            {keyName}
+          </h2>
         </div>
-
-        <div className="grid grid-cols-6 gap-1.5 desk:grid-cols-12 desk:gap-1">
-          {PITCH_SHARP.map((name, pc) => (
-            <button
-              key={name}
-              type="button"
-              className="stamp flex-col gap-0 px-1 py-1 desk:min-h-[clamp(32px,4.5vh,48px)] desk:py-0.5"
-              aria-pressed={pc === keyRootPc}
-              onClick={() => setKeyRootPc(pc)}
-            >
-              <span className="text-[0.8125rem] font-bold leading-none">{name}</span>
-              <span className="font-mono text-[10px] leading-tight opacity-70">{LATIN_SHARP[pc]}</span>
-            </button>
-          ))}
-        </div>
-
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 desk:grid-cols-7 desk:gap-1.5">
-          {diatonic.map((degree) => (
-            <button
-              key={`${degree.roman}-${degree.rootPc}`}
-              type="button"
-              aria-pressed={isCurrent(degree.rootPc, degree.qualityId)}
-              className={`sheet flex min-w-0 flex-col items-start gap-0.5 overflow-hidden px-3 py-2 text-left desk:h-[clamp(64px,11vh,124px)] desk:justify-between desk:gap-0 desk:px-2 desk:py-1.5 ${
-                isCurrent(degree.rootPc, degree.qualityId) ? 'border-ink bg-paper-deep' : ''
-              }`}
-              onClick={() => {
-                const parsed = parseChord(degree.anglo)
-                if (parsed) setChord(parsed)
-              }}
-            >
-              <span className={`-mx-3 -mt-2 mb-1 h-[3px] w-[calc(100%+1.5rem)] desk:-mx-2 desk:-mt-1.5 desk:w-[calc(100%+1rem)] ${FUNCTION_INK[degree.harmonicFunction]}`} aria-hidden="true" />
-              <span className="font-mono text-[11px] text-blue-ink desk:text-[clamp(11px,1.3vh,14px)]">{degree.roman}</span>
-              <span className="fv-ui max-w-full truncate text-[1rem] font-bold desk:text-[clamp(1rem,2.4vh,1.75rem)] desk:leading-tight">{notation === 'latin' ? degree.latin : degree.anglo}</span>
-              <span className="label-ink max-w-full truncate text-blue-ink desk:tracking-[0.04em]">{t(functionLabelKey(degree.harmonicFunction))}</span>
-            </button>
-          ))}
-        </div>
-
-        <div className="flex flex-col gap-2 border-t border-rule pt-3 desk:min-h-0 desk:flex-1 desk:gap-1.5 desk:pt-2">
-          <h3 className="label-ink text-blue-ink">{t('theory.progressions')}</h3>
-          <div className="flex flex-col gap-2 desk:grid desk:min-h-0 desk:flex-1 desk:auto-rows-[minmax(auto,4.25rem)] desk:content-start desk:grid-cols-2 desk:gap-x-4 desk:gap-y-1.5 desk:overflow-y-auto desk:pr-1">
-            {progressions.map((template) => {
-              const steps = resolveProgression(template, keyRootPc)
-              return (
-                <div className="flex items-center justify-between gap-3" key={template.id}>
-                  <div className="flex min-w-0 flex-col gap-0.5">
-                    <span className="fv-ui truncate text-[0.9375rem] font-semibold desk:text-[clamp(0.875rem,1.6vh,1.0625rem)] desk:leading-tight">
-                      {lang === 'es' ? template.nameEs : template.nameEn}
-                    </span>
-                    <span className="truncate font-mono text-[10px] text-ink-soft desk:line-clamp-2 desk:whitespace-normal desk:text-[clamp(10px,1.15vh,12px)]">
-                      {steps.map((step) => step.anglo).join(' · ')}
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    className="stamp shrink-0 desk:min-h-[28px] desk:py-0.5"
-                    onClick={() =>
-                      loadProgression(
-                        steps.map((step) => ({
-                          rootPc: step.rootPc,
-                          qualityId: step.qualityId,
-                          anglo: step.anglo,
-                          latin: step.latin,
-                        })),
-                      )
-                    }
-                  >
-                    {t('theory.load')}
-                  </button>
-                </div>
-              )
-            })}
-          </div>
+        <p className="tv-head__hint cc-gloss">{v('theory.keyHint')}</p>
+        <div className="cc-seg" role="group" aria-label={v('theory.chordType')}>
+          <button type="button" aria-pressed={!sevenths} onClick={() => setSevenths(false)}>
+            {v('theory.triads')}
+          </button>
+          <button type="button" aria-pressed={sevenths} onClick={() => setSevenths(true)}>
+            {v('theory.sevenths')}
+          </button>
         </div>
       </section>
 
-      <div className="flex min-w-0 flex-col desk:min-h-0 desk:*:min-h-0 desk:*:flex-1">
-        <SuggestionsPanel />
-      </div>
+      <section className="cc-module tv-degrees" aria-label={v('theory.degrees')}>
+        <Orbit />
+        <h3 className="cc-label tv-degrees__label">{t('theory.diatonic')}</h3>
+        <ul className="tv-degrees__grid">
+          {diatonic.map((degree) => {
+            const name = notation === 'latin' ? degree.latin : degree.anglo
+            return (
+              <DegreeCard
+                key={`${degree.roman}-${degree.rootPc}`}
+                degree={degree}
+                name={name}
+                gloss={v(`theory.gloss.${degree.harmonicFunction}` as const)}
+                functionLabel={t(functionLabelKey(degree.harmonicFunction))}
+                current={isCurrent(degree.rootPc, degree.qualityId)}
+                addLabel={v('theory.add', { chord: name })}
+                onSelect={() => {
+                  const parsed = parseChord(degree.anglo)
+                  if (parsed) setChord(parsed)
+                }}
+                onAdd={() =>
+                  addToProgression({ rootPc: degree.rootPc, qualityId: degree.qualityId, anglo: degree.anglo, latin: degree.latin })
+                }
+              />
+            )
+          })}
+        </ul>
+      </section>
 
+      <section className="cc-module tv-classics" aria-label={v('theory.classics')}>
+        <div className="tv-classics__head">
+          <h3 className="cc-label">{v('theory.classics')}</h3>
+          <span className="tv-classics__hint cc-gloss">{v('theory.classicsHint')}</span>
+        </div>
+        <ul className="tv-classics__list">
+          {progressions.map((template) => {
+            const steps = resolveProgression(template, keyRootPc)
+            const name = lang === 'es' ? template.nameEs : template.nameEn
+            return (
+              <li className="tv-classic" key={template.id}>
+                <div className="tv-classic__text">
+                  <span className="tv-classic__name">{name}</span>
+                  <span className="tv-classic__seq">{steps.map((step) => (notation === 'latin' ? step.latin : step.anglo)).join(' · ')}</span>
+                </div>
+                <button
+                  type="button"
+                  className="cc-btn cc-btn--ghost tv-classic__use"
+                  aria-label={v('theory.useAria', { name })}
+                  onClick={() =>
+                    loadProgression(
+                      steps.map((step) => ({ rootPc: step.rootPc, qualityId: step.qualityId, anglo: step.anglo, latin: step.latin })),
+                    )
+                  }
+                >
+                  {v('theory.use')}
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+      </section>
     </div>
   )
 }

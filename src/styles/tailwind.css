@@ -45,7 +45,7 @@
   --color-red-ink: #b83522;
   --color-ink-deep: #0b0b0b;
 
-  --font-display: 'Archivo Variable', Archivo, system-ui, -apple-system, sans-serif;
+  /* --font-display now comes from celeste.css (Carta celeste); the Riso Archivo display face is retired. */
   --font-mono: 'Martian Mono Variable', ui-monospace, 'SF Mono', Menlo, monospace;
 
   --radius-stamp: 2px;

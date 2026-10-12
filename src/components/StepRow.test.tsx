@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, screen } from '@testing-library/react'
+import { cleanup, fireEvent, screen, within } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
 import { renderApp } from '../test/renderApp'
 
@@ -7,7 +7,7 @@ afterEach(cleanup)
 
 const stepNames = () =>
   Array.from(document.querySelectorAll<HTMLElement>('[data-step-index]')).map(
-    (step) => step.querySelector('.fv-ui')?.textContent,
+    (step) => step.querySelector('.strip-name')?.textContent,
   )
 
 describe('progression reordering without drag and drop', () => {
@@ -35,7 +35,8 @@ describe('document language', () => {
   it('follows the interface language', () => {
     renderApp()
     expect(document.documentElement.lang).toBe('es')
-    fireEvent.click(screen.getByRole('button', { name: /idioma/i }))
+    fireEvent.click(screen.getByRole('button', { name: 'Ajustes' }))
+    fireEvent.click(screen.getByRole('button', { name: 'EN' }))
     expect(document.documentElement.lang).toBe('en')
     expect(document.title).toMatch(/chords/)
   })
@@ -51,8 +52,9 @@ describe('progression analysis', () => {
       'Cambio 3–4: Cambio suave',
     ])
     expect(screen.getByText(/^Am → F: comparten 2 notas/)).toBeTruthy()
-    expect(screen.getByText('C mayor')).toBeTruthy()
-    expect(screen.getByText('detectada')).toBeTruthy()
+    const strip = screen.getByRole('region', { name: 'Progresión' })
+    expect(within(strip).getByText('C mayor')).toBeTruthy()
+    expect(within(strip).getByText('detectada')).toBeTruthy()
   })
 
   it('shows the picked change and roman numerals per step', () => {
@@ -60,7 +62,7 @@ describe('progression analysis', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Cambio 2–3: Cadencia rota' }))
     expect(screen.getByText(/^G → Am: se espera la tónica/)).toBeTruthy()
     const romans = Array.from(document.querySelectorAll('[data-step-index]')).map(
-      (step) => step.querySelector('.font-mono span')?.textContent,
+      (step) => step.querySelector('.strip-roman')?.textContent,
     )
     expect(romans).toEqual(['I', 'V', 'vi', 'IV'])
   })
@@ -69,7 +71,7 @@ describe('progression analysis', () => {
     renderApp()
     fireEvent.click(document.querySelector('[data-step-index="3"]')!)
     fireEvent.click(screen.getByRole('button', { name: 'Quitar paso' }))
-    const firstGhost = document.querySelector('.cutline')
+    const firstGhost = document.querySelector('.strip-ghost')
     expect(firstGhost?.textContent).toContain('F')
   })
 })
@@ -79,7 +81,7 @@ describe('playability helpers', () => {
     renderApp()
     const voicingTags = () =>
       Array.from(document.querySelectorAll('[data-step-index]')).map(
-        (step) => step.querySelectorAll('.font-mono')[1]?.textContent,
+        (step) => step.querySelector('.strip-frets')?.textContent,
       )
     expect(voicingTags().every((tag) => tag === 'Auto')).toBe(true)
     fireEvent.click(screen.getByRole('button', { name: /^Encadenar/ }))
@@ -89,10 +91,7 @@ describe('playability helpers', () => {
   })
 
   it('recommends and applies a capo for a barre-heavy progression', () => {
-    renderApp()
-    fireEvent.click(screen.getByRole('button', { name: 'Teoría' }))
-    fireEvent.change(screen.getByRole('combobox', { name: 'Tonalidad' }), { target: { value: '10' } })
-    fireEvent.click(screen.getAllByRole('button', { name: 'Cargar' })[0])
+    renderApp('?p=Bb_F_Gm_Eb')
     expect(stepNames()).toEqual(['Bb', 'F', 'Gm', 'Eb'])
     expect(screen.getByText('Capo recomendado')).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: 'Aplicar' }))

@@ -5,9 +5,11 @@ import { renderApp } from '../test/renderApp'
 
 afterEach(cleanup)
 
+const openMenu = () => fireEvent.click(screen.getByRole('button', { name: 'Acciones de la progresión' }))
+
 const stepNames = () =>
   Array.from(document.querySelectorAll<HTMLElement>('[data-step-index]')).map(
-    (step) => step.querySelector('.fv-ui')?.textContent,
+    (step) => step.querySelector('.strip-name')?.textContent,
   )
 
 function removeStep(index: number) {
@@ -36,20 +38,46 @@ describe('undo and redo', () => {
 describe('library', () => {
   it('saves the progression under a name and loads it back', () => {
     renderApp()
-    fireEvent.click(screen.getByRole('button', { name: 'Guardar' }))
+    openMenu()
+    fireEvent.click(screen.getByRole('button', { name: 'Guardar…' }))
     fireEvent.change(screen.getByLabelText('Nombre de la progresión'), { target: { value: 'Verso' } })
     fireEvent.submit(screen.getByLabelText('Nombre de la progresión').closest('form')!)
-    expect(screen.getByRole('button', { name: 'Biblioteca (1)' })).toBeTruthy()
     expect(screen.getByText('Verso')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Volver al menú' }))
+    expect(screen.getByRole('button', { name: 'Mis progresiones (1)' })).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Mis progresiones (1)' }))
 
     removeStep(0)
     removeStep(0)
     expect(stepNames()).toEqual(['Am', 'F'])
-    fireEvent.click(screen.getByRole('button', { name: 'Cargar' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Abrir' }))
     expect(stepNames()).toEqual(['C', 'G', 'Am', 'F'])
 
     fireEvent.click(screen.getByRole('button', { name: 'Borrar: Verso' }))
-    expect(screen.getByRole('button', { name: 'Biblioteca (0)' })).toBeTruthy()
+    expect(screen.getByText('Aún no guardaste ninguna progresión.')).toBeTruthy()
+  })
+})
+
+describe('progression menu', () => {
+  it('opens from the more button and closes with Escape or a press outside', () => {
+    renderApp()
+    const more = screen.getByRole('button', { name: 'Acciones de la progresión' })
+    expect(more.getAttribute('aria-expanded')).toBe('false')
+    fireEvent.click(more)
+    expect(more.getAttribute('aria-expanded')).toBe('true')
+    expect(screen.getByRole('button', { name: 'Vaciar progresión' })).toBeTruthy()
+    fireEvent.keyDown(window, { key: 'Escape' })
+    expect(screen.queryByRole('button', { name: 'Vaciar progresión' })).toBeNull()
+    fireEvent.click(more)
+    fireEvent.pointerDown(document.body)
+    expect(screen.queryByRole('button', { name: 'Vaciar progresión' })).toBeNull()
+  })
+
+  it('clears the whole progression', () => {
+    renderApp()
+    openMenu()
+    fireEvent.click(screen.getByRole('button', { name: 'Vaciar progresión' }))
+    expect(stepNames()).toEqual([])
   })
 })
 
@@ -58,6 +86,7 @@ describe('share links', () => {
     const writeText = vi.fn<(text: string) => Promise<void>>(async () => undefined)
     Object.assign(navigator, { clipboard: { writeText } })
     renderApp()
+    openMenu()
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: 'Compartir enlace' }))
     })
@@ -70,6 +99,7 @@ describe('share links', () => {
     renderApp('?p=Dm7_G7_Cmaj7:x-3-2-0-0-0&t=120&b=2')
     expect(stepNames()).toEqual(['Dm7', 'G7', 'Cmaj7'])
     expect(screen.getByText('120')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: /^Reproducción/ }))
     expect(screen.getAllByRole('button', { name: '2' }).some((button) => button.getAttribute('aria-pressed') === 'true')).toBe(true)
     // The query is dropped so a reload keeps the player's own edits.
     expect(window.location.search).toBe('')

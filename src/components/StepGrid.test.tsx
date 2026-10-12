@@ -42,7 +42,7 @@ describe('fretboard keyboard navigation', () => {
       .getAllByRole('button')
       .map((button) => button.getAttribute('aria-label') ?? '')
     // Default chord is Am7 (x02010): the B string is fretted at 1.
-    expect(labels).toContain('B pisada en el traste 1')
-    expect(labels).toContain('E apagada')
+    expect(labels.some((l) => l.startsWith('B pisada en el traste 1'))).toBe(true)
+    expect(labels.some((l) => l.startsWith('E apagada'))).toBe(true)
   })
 })

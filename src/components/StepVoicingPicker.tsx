@@ -4,7 +4,8 @@ import { qualityById } from '../music/chords'
 import { absoluteLabel, autoVoicing, voicingLabel, voicingSignature } from '../music/stepVoicing'
 import { voicingsFor, type Voicing } from '../music/voicings'
 import { useStore, type ProgressionStep } from '../state/store'
-import { MiniPlate } from './MiniPlate'
+import { CloseIcon } from './icons'
+import { StripChart } from './strip/StripChart'
 
 // Same query as the `desk:` variant in tailwind.css.
 const DESK_QUERY = '(min-width: 1024px) and (min-height: 640px)'
@@ -116,20 +117,20 @@ export function StepVoicingPicker({
       role="dialog"
       aria-label={`${t('voicing.pick')}: ${step.anglo}`}
       tabIndex={-1}
-      className="plate desk-pop wipe-in mt-2 flex w-fit max-w-full flex-col gap-3 p-4 focus:outline-none desk:bottom-full desk:left-0 desk:mt-0 desk:mb-3 desk:gap-2 desk:overflow-visible desk:p-3"
+      className="cc-pop strip-picker"
     >
       <span
         ref={notch}
-        className="pointer-events-none absolute top-full hidden h-2.5 w-2.5 -translate-x-1/2 -translate-y-[5px] rotate-45 border-r border-b border-ink bg-paper desk:block"
+        className="strip-picker__notch"
         aria-hidden="true"
       />
       <div className="flex items-start justify-between gap-3">
         <div className="flex flex-col gap-0.5">
-          <span className="label-ink text-blue-ink">{t('voicing.pick')}</span>
-          <span className="fv-ui text-[1.05rem] font-bold">
+          <span className="cc-label">{t('voicing.pick')}</span>
+          <span className="strip-picker__name">
             {notation === 'latin' ? step.latin : step.anglo}
           </span>
-          <span className="font-mono text-[10px] text-ink-soft">
+          <span className="strip-picker__meta">
             {step.frets
               ? `${t('voicing.shape')}: ${step.voicingLabel ?? voicingLabel(step.frets)}${
                   capo > 0 ? ` · ${t('voicing.absolute')}: ${absoluteLabel(step.frets, capo)}` : ''
@@ -137,15 +138,15 @@ export function StepVoicingPicker({
               : `${t('voicing.auto')} · ${auto ? voicingLabel(auto.frets) : '—'}`}
           </span>
         </div>
-        <button type="button" className="stamp px-2 py-0.5" onClick={onClose} aria-label={t('voicing.close')}>
-          ×
+        <button type="button" className="cc-btn cc-btn--icon strip__btn" onClick={onClose} aria-label={t('voicing.close')}>
+          <CloseIcon size={16} />
         </button>
       </div>
 
-      <div className="flex flex-wrap items-start gap-2">
+      <div className="strip-picker__grid">
         <button
           type="button"
-          className={`sheet flex w-[84px] flex-col items-center gap-1 p-2 ${currentSignature === null ? 'border-ink' : ''}`}
+          className="strip-voicing"
           aria-pressed={currentSignature === null}
           onClick={() => {
             setStepVoicing(index, null)
@@ -153,14 +154,14 @@ export function StepVoicingPicker({
           }}
         >
           {auto ? (
-            <MiniPlate frets={auto.frets} />
+            <StripChart frets={auto.frets} />
           ) : (
-            <span className="grid h-[46px] w-[40px] place-items-center font-mono text-[11px]">—</span>
+            <span className="grid h-[46px] w-[40px] place-items-center text-[11px]">—</span>
           )}
-          <span className={`label-ink w-full text-center ${currentSignature === null ? 'bg-turquoise text-ink' : ''}`}>
+          <span className="strip-voicing__tag">
             {t('voicing.auto')}
           </span>
-          <span className="font-mono text-[10px] tracking-tight text-ink-soft">
+          <span className="strip-voicing__frets">
             {auto ? voicingLabel(auto.frets) : t('voicing.autoHint')}
           </span>
         </button>
@@ -179,7 +180,7 @@ export function StepVoicingPicker({
             <button
               key={voicing.signature}
               type="button"
-              className={`sheet flex w-[84px] flex-col items-center gap-1 p-2 ${selected ? 'border-ink' : ''}`}
+              className="strip-voicing"
               aria-pressed={selected}
               onClick={() => {
                 setStepVoicing(index, {
@@ -190,11 +191,11 @@ export function StepVoicingPicker({
                 onClose()
               }}
             >
-              <MiniPlate frets={voicing.frets} />
-              <span className={`label-ink w-full text-center ${selected ? 'bg-turquoise text-ink' : ''}`}>
+              <StripChart frets={voicing.frets} />
+              <span className="strip-voicing__tag">
                 {label}
               </span>
-              <span className="font-mono text-[10px] tracking-tight text-ink-soft">
+              <span className="strip-voicing__frets">
                 {voicingLabel(voicing.frets)}
               </span>
             </button>
@@ -202,10 +203,10 @@ export function StepVoicingPicker({
         })}
       </div>
 
-      <label className="flex flex-wrap items-center gap-2">
-        <span className="label-ink text-blue-ink">{t('voicing.strum')}</span>
+      <label className="strip-picker__row">
+        <span className="cc-label">{t('voicing.strum')}</span>
         <select
-          className="stamp cursor-pointer appearance-none px-2 py-0.5"
+          className="cc-btn strip-select"
           value={step.strum ?? ''}
           onChange={(event) => setStepStrum(index, isStrumId(event.target.value) ? event.target.value : null)}
         >
@@ -220,12 +221,12 @@ export function StepVoicingPicker({
         </select>
       </label>
 
-      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-rule pt-2">
+      <div className="strip-picker__foot">
         {count > 1 && (
           <div className="flex gap-1.5">
             <button
               type="button"
-              className="stamp"
+              className="cc-btn strip__btn"
               onClick={() => move(index - 1)}
               disabled={index === 0}
               aria-label={t('voicing.moveLeftLabel')}
@@ -234,7 +235,7 @@ export function StepVoicingPicker({
             </button>
             <button
               type="button"
-              className="stamp"
+              className="cc-btn strip__btn"
               onClick={() => move(index + 1)}
               disabled={index >= count - 1}
               aria-label={t('voicing.moveRightLabel')}
@@ -245,7 +246,7 @@ export function StepVoicingPicker({
         )}
         <button
           type="button"
-          className="stamp"
+          className="cc-btn strip__btn"
           onClick={() => {
             removeFromProgression(index)
             onClose()
@@ -253,7 +254,7 @@ export function StepVoicingPicker({
         >
           {t('voicing.removeStep')}
         </button>
-        <span className="readout text-[10px] text-ink-faint">{t('voicing.removeHint')}</span>
+        <span className="strip__muted">{t('voicing.removeHint')}</span>
       </div>
     </div>
   )

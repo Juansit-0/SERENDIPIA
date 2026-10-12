@@ -1,0 +1,290 @@
+/* Top bar — Carta celeste. One 52px row on desk; folds on phones. */
+
+.cc-top {
+  position: relative;
+  z-index: 30;
+  background: var(--cc-ground);
+  border-bottom: 1px solid var(--cc-line-strong);
+  color: var(--cc-ink);
+  font-family: var(--font-ui);
+}
+
+/* By day the bar is a turquoise band: controls become ink on turquoise. */
+:root[data-theme='day'] .cc-top {
+  --cc-accent: #15131c;
+  --cc-accent-ink: #40e0d0;
+  --cc-accent-deep: #15131c;
+  --cc-accent-soft: rgba(21, 19, 28, 0.14);
+  --cc-ground-3: rgba(255, 255, 255, 0.62);
+  --cc-line: rgba(21, 19, 28, 0.55);
+  --cc-line-strong: rgba(21, 19, 28, 0.75);
+  --cc-ink-soft: #15131c;
+  --cc-focus: #15131c;
+  background: #40e0d0;
+}
+
+/* Popovers keep the regular day palette (they sit on paper, not on the band). */
+:root[data-theme='day'] .cc-top .cc-pop {
+  --cc-accent: #40e0d0;
+  --cc-accent-ink: #0b1716;
+  --cc-accent-deep: #0a6f68;
+  --cc-accent-soft: rgba(64, 224, 208, 0.18);
+  --cc-ground-3: #ffffff;
+  --cc-line: #b5b2c0;
+  --cc-line-strong: #5f5b6c;
+  --cc-ink-soft: #37343f;
+  --cc-focus: #0a6f68;
+}
+
+.cc-top__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 8px;
+  max-width: 1560px;
+  margin: 0 auto;
+  padding: 8px 12px;
+}
+
+.cc-top__sep {
+  width: 1px;
+  align-self: stretch;
+  min-height: 22px;
+  background: var(--cc-line);
+  opacity: 0.7;
+}
+
+.cc-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  letter-spacing: 0.14em;
+  line-height: 1;
+  margin: 0;
+  color: var(--cc-ink);
+  white-space: nowrap;
+}
+
+/* Tempo / capo stepper: a framed group of real buttons around a tabular value. */
+.cc-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--cc-line-strong);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--cc-ground) 70%, transparent);
+}
+
+.cc-stepper .cc-btn {
+  min-height: 28px;
+  width: 28px;
+  min-width: 28px;
+  padding: 0;
+}
+
+.cc-stepper__val {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 5px;
+  min-width: 2.6rem;
+  padding: 0 4px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.cc-stepper__unit {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  color: var(--cc-ink-soft);
+}
+
+.cc-moons {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+}
+
+.cc-moons svg {
+  display: block;
+}
+
+.cc-moons .ring {
+  opacity: 0;
+}
+
+.cc-moons [data-cur='true'] .ring {
+  opacity: 1;
+}
+
+.cc-popwrap {
+  position: relative;
+}
+
+.cc-popwrap > .cc-pop {
+  position: absolute;
+  top: calc(100% + 8px);
+  z-index: 40;
+  min-width: 15rem;
+  padding: 12px;
+}
+
+.cc-popwrap > .cc-pop[data-align='start'] {
+  left: 0;
+}
+
+.cc-popwrap > .cc-pop[data-align='end'] {
+  right: 0;
+}
+
+.cc-pop__title {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.cc-pop__row + .cc-pop__row {
+  margin-top: 12px;
+}
+
+.cc-keygrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.cc-keygrid .cc-btn {
+  flex-direction: column;
+  gap: 2px;
+  min-height: 40px;
+  padding: 0.25rem 0.4rem;
+  border-radius: 8px;
+}
+
+.cc-keygrid .cc-btn small {
+  font-size: 0.6875rem;
+  opacity: 0.85;
+}
+
+.cc-select {
+  appearance: none;
+  min-height: 32px;
+  width: 100%;
+  padding: 0 2rem 0 0.8rem;
+  border-radius: 999px;
+  border: 1px solid var(--cc-line-strong);
+  background-color: var(--cc-ground-3);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='3' stroke-linecap='round'><path d='M6 9l6 6 6-6'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 0.7rem center;
+  color: var(--cc-ink);
+  font: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.cc-statusdot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.9;
+}
+
+.cc-statusdot[data-state='loading'] {
+  background: var(--cc-fn-sub);
+}
+
+.cc-statusdot[data-state='idle'] {
+  background: var(--cc-fn-dom);
+}
+
+.cc-statusdot[data-state='ready'] {
+  background: var(--cc-fn-tonic);
+}
+
+/* Desk: 52px, no wrapping. */
+@media (min-width: 1024px) and (min-height: 640px) {
+  .cc-top {
+    height: 52px;
+  }
+
+  .cc-top__inner {
+    flex-wrap: nowrap;
+    height: 52px;
+    padding: 0 14px;
+    gap: 8px;
+  }
+
+  .cc-top__inner > * {
+    flex-shrink: 0;
+  }
+}
+
+/* Narrow desk: monogram only, tighter buttons. */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .cc-brand__word,
+  .cc-top .cc-btn__label--wide {
+    display: none;
+  }
+
+  .cc-top__inner {
+    gap: 5px;
+    padding: 0 8px;
+  }
+
+  .cc-top .cc-btn {
+    padding-inline: 0.6rem;
+  }
+}
+
+@media (max-width: 639px) {
+  .cc-popwrap {
+    position: static;
+  }
+
+  .cc-popwrap > .cc-pop {
+    left: 12px !important;
+    right: 12px !important;
+    min-width: 0;
+  }
+}
+
+.cc-top .cc-btn {
+  white-space: nowrap;
+}
+
+@media (min-width: 1024px) and (min-height: 640px) {
+  .cc-top .cc-btn {
+    padding-inline: 0.7rem;
+    font-size: 0.8125rem;
+    min-height: 30px;
+  }
+
+  .cc-top .cc-btn--icon,
+  .cc-top .cc-stepper .cc-btn {
+    padding: 0;
+  }
+
+  .cc-brand {
+    font-size: 1.125rem;
+    letter-spacing: 0.12em;
+  }
+
+  .cc-top__inner {
+    gap: 6px;
+  }
+}
+
+@media (min-width: 1024px) and (min-height: 640px) {
+  .cc-top nav .cc-btn {
+    padding-inline: 0.6rem;
+  }
+
+  .cc-moons {
+    gap: 0;
+  }
+}

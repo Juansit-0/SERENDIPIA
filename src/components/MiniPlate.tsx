@@ -1,3 +1,7 @@
+/**
+ * Mini chord diagram. Draws in `currentColor` so it reads on any surface (a framed card,
+ * the selected accent fill, the day strip): lines at low opacity, notes solid.
+ */
 export function MiniPlate({
   frets,
   className = 'h-[46px] w-[40px]',
@@ -16,7 +20,7 @@ export function MiniPlate({
   const fretGap = (height - 10) / rows
 
   return (
-    <svg className={className} viewBox={`0 0 ${width} ${height}`} aria-hidden="true">
+    <svg className={className} viewBox={`0 0 ${width} ${height}`} aria-hidden="true" focusable="false">
       {[0, 1, 2, 3, 4, 5].map((string) => (
         <line
           key={string}
@@ -24,8 +28,9 @@ export function MiniPlate({
           y1={10}
           x2={4 + string * stringGap}
           y2={height - 2}
-          stroke="var(--color-rule-strong)"
-          strokeWidth="0.7"
+          stroke="currentColor"
+          strokeOpacity="0.55"
+          strokeWidth="0.8"
         />
       ))}
       {Array.from({ length: rows + 1 }, (_, row) => (
@@ -35,35 +40,27 @@ export function MiniPlate({
           y1={10 + row * fretGap}
           x2={4 + 5 * stringGap}
           y2={10 + row * fretGap}
-          stroke="var(--color-rule-strong)"
-          strokeWidth="0.7"
+          stroke="currentColor"
+          strokeOpacity={row === 0 && windowStart === 1 ? 0.95 : 0.55}
+          strokeWidth={row === 0 && windowStart === 1 ? 1.6 : 0.8}
         />
       ))}
       {frets.map((fret, string) => {
         const x = 4 + string * stringGap
         if (fret === null) {
           return (
-            <text key={string} x={x} y={7} textAnchor="middle" fontSize="6" fill="var(--color-red)">
-              ×
-            </text>
+            <g key={string} stroke="var(--cc-danger, currentColor)" strokeWidth="1" strokeLinecap="round">
+              <line x1={x - 1.7} y1={3.3} x2={x + 1.7} y2={6.7} />
+              <line x1={x + 1.7} y1={3.3} x2={x - 1.7} y2={6.7} />
+            </g>
           )
         }
         if (fret === 0) {
-          return <circle key={string} cx={x} cy={5} r={1.7} fill="none" stroke="var(--color-ink)" strokeWidth="0.8" />
+          return <circle key={string} cx={x} cy={5} r={1.9} fill="none" stroke="currentColor" strokeWidth="1" />
         }
         const row = fret - windowStart
         if (row < 0 || row >= rows) return null
-        return (
-          <circle
-            key={string}
-            cx={x}
-            cy={10 + row * fretGap + fretGap / 2}
-            r={2.2}
-            fill="var(--color-turquoise)"
-            stroke="var(--color-ink)"
-            strokeWidth="0.6"
-          />
-        )
+        return <circle key={string} cx={x} cy={10 + row * fretGap + fretGap / 2} r={2.5} fill="currentColor" />
       })}
     </svg>
   )

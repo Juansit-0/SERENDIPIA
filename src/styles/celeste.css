@@ -28,7 +28,10 @@
   --color-fn-borrowed-fill: var(--cc-fn-borrowed-fill);
   --color-danger: var(--cc-danger);
   --color-focus: var(--cc-focus);
+}
 
+/* Fonts live in a regular @theme block so the variables are emitted (inline ones are not). */
+@theme {
   --font-display: 'IM Fell English', 'Iowan Old Style', Georgia, serif;
   --font-serif: 'EB Garamond', 'Iowan Old Style', Georgia, serif;
   --font-ui: 'Jost Variable', 'Avenir Next', system-ui, sans-serif;

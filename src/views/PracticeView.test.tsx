@@ -25,13 +25,13 @@ describe('change trainer', () => {
     openPractice()
     fireEvent.change(screen.getByLabelText('Acorde B'), { target: { value: 'Hzz' } })
     expect(screen.getAllByRole('alert').map((alert) => alert.textContent)).toContain('Acorde no reconocido')
-    expect(screen.getByRole('button', { name: 'Empezar' })).toHaveProperty('disabled', true)
+    expect(screen.getByRole('button', { name: 'Empezar ronda' })).toHaveProperty('disabled', true)
   })
 
   it('counts taps for one minute and keeps the record', () => {
     vi.useFakeTimers()
     openPractice()
-    fireEvent.click(screen.getByRole('button', { name: 'Empezar' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Empezar ronda' }))
     const tap = screen.getByRole('button', { name: '¡Cambio!' })
     for (let index = 0; index < 5; index += 1) fireEvent.click(tap)
     fireEvent.keyDown(window, { code: 'Space' })
@@ -40,6 +40,6 @@ describe('change trainer', () => {
     })
     expect(screen.getByText(/6 cambios por minuto/)).toBeTruthy()
     expect(screen.getByText('¡Nuevo récord!')).toBeTruthy()
-    expect(screen.getByRole('button', { name: 'Empezar' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Empezar ronda' })).toBeTruthy()
   })
 })

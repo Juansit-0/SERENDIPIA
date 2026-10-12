@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { loadedAudioEngine } from '../audio/loader'
-import { MiniPlate } from '../components/MiniPlate'
+import { ArrowRightIcon, MinusIcon, PlayIcon, PlusIcon, StopIcon } from '../components/icons'
+import { useViewsText } from '../i18n/views'
 import { parseChord } from '../music/parseChord'
 import { chainVoicings } from '../music/playability'
 import {
@@ -12,9 +13,10 @@ import {
   saveRecord,
   type PracticeRecord,
 } from '../music/practice'
-import { voicingLabel } from '../music/stepVoicing'
 import { TEMPO_MAX, TEMPO_MIN } from '../state/settings'
 import { useStore } from '../state/store'
+import { ChordSlot } from './practice/ChordSlot'
+import '../styles/views.css'
 
 type Mode = 'minute' | 'metronome'
 
@@ -22,7 +24,8 @@ const MINUTE_MS = 60000
 const BEAT_CHOICES = [4, 2, 1]
 
 export function PracticeView() {
-  const { t, notation, progression, tuning, soundingTuning, enableAudio, stopPlayback, playing } = useStore()
+  const { t, notation, progression, tuning, soundingTuning, enableAudio, stopPlayback, playing, tempo: globalTempo } = useStore()
+  const v = useViewsText()
 
   const [inputA, setInputA] = useState(progression[0]?.anglo ?? 'C')
   const [inputB, setInputB] = useState(progression[1]?.anglo ?? 'G')
@@ -50,11 +53,13 @@ export function PracticeView() {
   const countRef = useRef(0)
 
   // Metronome mode
-  const [startTempo, setStartTempo] = useState(DEFAULT_RAMP.start)
+  // The practice tempo is its own: it starts from the top bar tempo when the view opens and never flows back.
+  const [startTempo, setStartTempo] = useState(() => Math.min(TEMPO_MAX, Math.max(TEMPO_MIN, globalTempo)))
   const [beats, setBeats] = useState(4)
   const [ramp, setRamp] = useState(true)
-  const [tempo, setTempo] = useState(DEFAULT_RAMP.start)
-  const session = useRef({ changes: 0, base: DEFAULT_RAMP.start, tempo: DEFAULT_RAMP.start, top: 0, steps: 0 })
+  const [tempo, setTempo] = useState(startTempo)
+  const session = useRef({ changes: 0, base: startTempo, tempo: startTempo, top: 0, steps: 0 })
+  const tapRef = useRef<HTMLButtonElement>(null)
 
   const finish = useCallback(
     (score: number, recordKey: string | null) => {
@@ -85,6 +90,11 @@ export function PracticeView() {
     },
     [],
   )
+
+  // Focus the big button so Space taps it instead of re-pressing Empezar/Terminar.
+  useEffect(() => {
+    if (live && mode === 'minute') tapRef.current?.focus()
+  }, [live, mode])
 
   useEffect(() => {
     if (!running || mode !== 'minute') return
@@ -183,167 +193,159 @@ export function PracticeView() {
 
   const nameOf = (chord: NonNullable<typeof chordA>) => (notation === 'latin' ? chord.latin : chord.anglo)
   const best = key ? records[mode === 'minute' ? key : `${key}@tempo`]?.best : undefined
+  const slots = [
+    [inputA, setInputA, chordA, shapes[0], 'practice.chordA', 'practice-a'],
+    [inputB, setInputB, chordB, shapes[1], 'practice.chordB', 'practice-b'],
+  ] as const
+
+  const readouts: Array<[string, string | number, boolean]> = [
+    mode === 'minute'
+      ? [t('practice.left'), `${live ? remaining : 60}${t('practice.seconds')}`, false]
+      : [v('practice.ownTempo'), live ? tempo : startTempo, false],
+    [t('practice.changes'), count, false],
+    [mode === 'minute' ? t('practice.best') : t('practice.bestTempo'), best ?? '—', true],
+  ]
 
   return (
-    <div className="grid items-start gap-4 xl:grid-cols-[minmax(320px,1fr)_minmax(320px,1fr)] desk:h-full desk:min-h-0 desk:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] desk:grid-rows-[minmax(0,1fr)] desk:items-stretch desk:gap-2">
-      <section className="plate flex flex-col gap-4 p-4 desk:min-h-0 desk:gap-3 desk:overflow-y-auto desk:p-3">
-        <div className="flex flex-col gap-1">
-          <h2 className="label-ink text-blue-ink">{t('practice.title')}</h2>
-          <p className="text-[12px] leading-snug text-ink-soft">{t('practice.intro')}</p>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          {(
-            [
-              [inputA, setInputA, chordA, shapes[0], 'practice.chordA', 'practice-a'],
-              [inputB, setInputB, chordB, shapes[1], 'practice.chordB', 'practice-b'],
-            ] as const
-          ).map(([value, setValue, chord, frets, label, id], index) => (
-            <div
-              key={id}
-              className={`sheet flex flex-col items-center gap-2 p-3 desk:gap-1.5 desk:p-2.5 ${live && active === index ? 'border-ink bg-paper-deep' : ''}`}
-            >
-              <label className="label-ink self-start text-blue-ink" htmlFor={id}>
-                {t(label)}
-              </label>
-              <input
-                id={id}
-                className={`field text-center ${chord ? '' : 'field--error'}`}
-                value={value}
-                onChange={(event) => setValue(event.target.value)}
-                disabled={live}
-                spellCheck={false}
-                autoComplete="off"
-                aria-invalid={!chord}
-              />
-              {chord && frets ? (
-                <>
-                  <MiniPlate frets={frets} className="h-[92px] w-[80px] desk:h-auto desk:w-[clamp(5rem,min(18vw,30vh),22rem)] desk:aspect-[80/92]" />
-                  <span className="fv-ui text-[1.25rem] font-bold desk:text-[clamp(1.5rem,3vh,2.25rem)] desk:leading-none">{nameOf(chord)}</span>
-                  <span className="readout text-[10px] text-ink-soft">{voicingLabel(frets)}</span>
-                </>
-              ) : (
-                <span className="font-mono text-[11px] text-red-ink" role="alert">
-                  {t('practice.invalid')}
-                </span>
-              )}
-            </div>
-          ))}
-        </div>
-
-        <div className="flex flex-wrap gap-1.5" role="group" aria-label={t('practice.title')}>
-          {(['minute', 'metronome'] as const).map((item) => (
-            <button
-              key={item}
-              type="button"
-              className="stamp"
-              aria-pressed={mode === item}
-              disabled={live}
-              onClick={() => {
-                setMode(item)
-                setResult(null)
-              }}
-            >
-              {t(item === 'minute' ? 'practice.minute' : 'practice.metronome')}
-            </button>
-          ))}
-        </div>
-
-        {mode === 'metronome' && (
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-            <div className="flex items-center gap-1">
-              <span className="label-ink text-blue-ink">{t('practice.startTempo')}</span>
-              <button type="button" className="stamp px-2 py-0.5" disabled={live} onClick={() => setStartTempo((v) => Math.max(TEMPO_MIN, v - 4))} aria-label={t('a11y.tempoDown')}>
-                −
-              </button>
-              <span className="ink-block font-mono text-[1rem] font-semibold tabular-nums" aria-live="polite">
-                {startTempo}
+    <div className="pv flex flex-col gap-3 desk:h-full desk:min-h-0 desk:gap-2">
+      <div className="pv-top">
+        {slots.map(([value, setValue, chord, frets, label, id], index) => (
+          <Fragment key={id}>
+            {index === 1 && (
+              <span className="pv-link" aria-hidden="true">
+                <ArrowRightIcon size={20} />
               </span>
-              <button type="button" className="stamp px-2 py-0.5" disabled={live} onClick={() => setStartTempo((v) => Math.min(TEMPO_MAX, v + 4))} aria-label={t('a11y.tempoUp')}>
-                +
+            )}
+            <ChordSlot
+              id={id}
+              label={t(label)}
+              value={value}
+              onChange={setValue}
+              name={chord ? nameOf(chord) : null}
+              frets={frets}
+              disabled={live}
+              playing={live && active === index}
+              playingLabel={v('practice.playing')}
+              invalidLabel={t('practice.invalid')}
+            />
+          </Fragment>
+        ))}
+
+        <section className="cc-module pv-setup" aria-label={v('practice.setup')}>
+          <h2 className="cc-label">{t('practice.title')}</h2>
+          <div className="cc-seg pv-setup__modes" role="group" aria-label={v('practice.mode')}>
+            {(['minute', 'metronome'] as const).map((item) => (
+              <button
+                key={item}
+                type="button"
+                aria-pressed={mode === item}
+                disabled={live}
+                onClick={() => {
+                  setMode(item)
+                  setResult(null)
+                }}
+              >
+                {t(item === 'minute' ? 'practice.minute' : 'practice.metronome')}
+              </button>
+            ))}
+          </div>
+          {mode === 'metronome' ? (
+            <div className="pv-setup__row">
+              <div className="pv-stepper" role="group" aria-label={v('practice.ownTempo')} title={v('practice.ownTempoHint')}>
+                <span className="pv-stepper__label">{v('practice.ownTempo')}</span>
+                <button type="button" className="cc-btn cc-btn--icon" disabled={live} onClick={() => setStartTempo((n) => Math.max(TEMPO_MIN, n - 4))} aria-label={t('a11y.tempoDown')}>
+                  <MinusIcon size={16} />
+                </button>
+                <span className="pv-stepper__value cc-num" aria-live="polite">
+                  {startTempo}
+                </span>
+                <button type="button" className="cc-btn cc-btn--icon" disabled={live} onClick={() => setStartTempo((n) => Math.min(TEMPO_MAX, n + 4))} aria-label={t('a11y.tempoUp')}>
+                  <PlusIcon size={16} />
+                </button>
+              </div>
+              <div className="pv-stepper" role="group" aria-label={t('a11y.beats')}>
+                <span className="pv-stepper__label">{t('transport.beats')}</span>
+                <div className="cc-seg">
+                  {BEAT_CHOICES.map((choice) => (
+                    <button key={choice} type="button" aria-pressed={beats === choice} disabled={live} onClick={() => setBeats(choice)}>
+                      {choice}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <button type="button" className="cc-btn" aria-pressed={ramp} disabled={live} onClick={() => setRamp(!ramp)} title={t('practice.rampHint')}>
+                {t('practice.ramp')}
               </button>
             </div>
-            <div className="flex items-center gap-1" role="group" aria-label={t('a11y.beats')}>
-              <span className="label-ink text-blue-ink">{t('transport.beats')}</span>
-              {BEAT_CHOICES.map((choice) => (
-                <button key={choice} type="button" className="stamp px-1.5 py-0.5" aria-pressed={beats === choice} disabled={live} onClick={() => setBeats(choice)}>
-                  {choice}
-                </button>
-              ))}
+          ) : null}
+          <p className="pv-setup__hint cc-gloss">{mode === 'minute' ? t('practice.tapHint') : t('practice.metronomeHint')}</p>
+        </section>
+      </div>
+
+      <section className="cc-module pv-stats" aria-label={v('practice.round')} aria-live="polite">
+        <dl className="pv-stats__grid">
+          {readouts.map(([label, value, soft]) => (
+            <div className="pv-stat" key={label}>
+              <dt className="cc-label">{label}</dt>
+              <dd className={`pv-stat__value cc-num ${soft ? 'is-soft' : ''}`}>{value}</dd>
             </div>
-            <button type="button" className="stamp" aria-pressed={ramp} disabled={live} onClick={() => setRamp(!ramp)} title={t('practice.rampHint')}>
-              {t('practice.ramp')}
-            </button>
-          </div>
-        )}
-
-        <p className="text-[12px] leading-snug text-ink-soft">
-          {mode === 'minute' ? t('practice.tapHint') : t('practice.metronomeHint')}
-        </p>
-
-        <div className="flex flex-wrap items-center gap-2">
-          {live ? (
-            <button type="button" className="stamp stamp--live min-w-[110px]" onClick={stop}>
-              {t('practice.stop')}
-            </button>
-          ) : (
-            <button type="button" className="stamp stamp--ink min-w-[110px]" onClick={() => void start()} disabled={!ready}>
-              {t('practice.start')}
+          ))}
+        </dl>
+        <div className="pv-stats__actions">
+          {live && mode === 'metronome' && (
+            <button type="button" className="cc-btn" onClick={slower}>
+              {t('practice.slower')}
             </button>
           )}
-          {live && mode === 'metronome' && (
-            <button type="button" className="stamp" onClick={slower}>
-              {t('practice.slower')}
+          {live ? (
+            <button type="button" className="cc-btn cc-btn--lg pv-end" onClick={stop}>
+              <StopIcon size={18} />
+              {v('practice.endRound')}
+            </button>
+          ) : (
+            <button type="button" className="cc-btn cc-btn--lg cc-btn--primary" onClick={() => void start()} disabled={!ready}>
+              <PlayIcon size={18} />
+              {v('practice.startRound')}
             </button>
           )}
         </div>
       </section>
 
-      <section className="plate flex flex-col gap-4 p-4 desk:min-h-0 desk:gap-3 desk:p-3" aria-live="polite">
-        <div className="flex flex-wrap items-end gap-6">
-          {mode === 'minute' && (
-            <div className="flex flex-col">
-              <span className="label-ink text-blue-ink">{t('practice.left')}</span>
-              <span className="font-mono text-[2.5rem] font-semibold leading-none tabular-nums desk:text-[clamp(3.25rem,7vh,5rem)]">
-                {live ? remaining : 60}
-                <span className="text-[1rem]">{t('practice.seconds')}</span>
-              </span>
-            </div>
-          )}
-          {mode === 'metronome' && (
-            <div className="flex flex-col">
-              <span className="label-ink text-blue-ink">{t('practice.tempo')}</span>
-              <span className="font-mono text-[2.5rem] font-semibold leading-none tabular-nums desk:text-[clamp(3.25rem,7vh,5rem)]">{live ? tempo : startTempo}</span>
-            </div>
-          )}
-          <div className="flex flex-col">
-            <span className="label-ink text-blue-ink">{t('practice.changes')}</span>
-            <span className="font-mono text-[2.5rem] font-semibold leading-none tabular-nums desk:text-[clamp(3.25rem,7vh,5rem)]">{count}</span>
+      <section className="cc-module pv-stage" data-mode={mode}>
+        {mode === 'minute' ? (
+          <>
+            <button type="button" ref={tapRef} className="pv-tap" onClick={tap} disabled={!live}>
+              <svg className="pv-tap__rings" viewBox="0 0 400 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+                <g fill="none" stroke="currentColor" strokeWidth="1" vectorEffect="non-scaling-stroke">
+                  <circle cx="200" cy="100" r="50" />
+                  <circle cx="200" cy="100" r="90" />
+                  <circle cx="200" cy="100" r="140" />
+                  <circle cx="200" cy="100" r="200" />
+                </g>
+              </svg>
+              <span className="pv-tap__label">{t('practice.tap')}</span>
+            </button>
+            <span className="pv-stage__key cc-label">{v('practice.space')}</span>
+          </>
+        ) : (
+          <div className="pv-follow" aria-hidden="true">
+            <svg className="pv-tap__rings" viewBox="0 0 400 200" preserveAspectRatio="xMidYMid slice" focusable="false">
+              <g fill="none" stroke="currentColor" strokeWidth="1" vectorEffect="non-scaling-stroke">
+                <circle cx="200" cy="100" r="50" />
+                <circle cx="200" cy="100" r="90" />
+                <circle cx="200" cy="100" r="140" />
+              </g>
+            </svg>
+            <span className="pv-follow__chord">{live && (active === 0 ? chordA : chordB) ? nameOf((active === 0 ? chordA : chordB)!) : '·'}</span>
           </div>
-          <div className="flex flex-col">
-            <span className="label-ink text-blue-ink">{mode === 'minute' ? t('practice.best') : t('practice.bestTempo')}</span>
-            <span className="font-mono text-[2.5rem] font-semibold leading-none tabular-nums desk:text-[clamp(3.25rem,7vh,5rem)] text-ink-soft">{best ?? '—'}</span>
-          </div>
-        </div>
-
-        {mode === 'minute' && (
-          <button
-            type="button"
-            className="sheet grid min-h-[120px] place-items-center text-[1.75rem] font-bold disabled:opacity-40 desk:max-h-[50vh] desk:min-h-[140px] desk:flex-1 desk:text-[clamp(2.5rem,6vh,4.5rem)]"
-            onClick={tap}
-            disabled={!live}
-          >
-            <span className="fv-display tracking-[0.08em]">{t('practice.tap')}</span>
-          </button>
         )}
-
         {result && (
-          <p className="flex flex-wrap items-baseline gap-x-2">
-            <span className="label-ink text-blue-ink">{t('practice.result')}</span>
-            <span className="fv-ui text-[1.1rem] font-bold">
+          <p className="pv-result" role="status">
+            <span className="cc-label">{t('practice.result')}</span>
+            <span className="pv-result__score cc-num">
               {result.score} {mode === 'minute' ? t('practice.perMinute') : 'bpm'}
             </span>
-            {result.newBest && <span className="chip bg-turquoise text-ink">{t('practice.newBest')}</span>}
+            {result.newBest && <span className="cc-chip pv-result__best">{t('practice.newBest')}</span>}
           </p>
         )}
       </section>

@@ -6,6 +6,7 @@ import type { Mode } from '../music/scales'
 import { TUNINGS } from '../music/voicings'
 
 export type Notation = 'anglo' | 'latin' | 'both'
+export type SuggestFrom = 'progression' | 'chord'
 
 export interface PersistedSettings {
   lang: Lang
@@ -21,6 +22,7 @@ export interface PersistedSettings {
   beatsPerChord: number
   timbre: TimbreId
   strum: StrumId
+  suggestFrom: SuggestFrom
   capo: number
 }
 
@@ -45,6 +47,7 @@ export const DEFAULT_SETTINGS: PersistedSettings = {
   beatsPerChord: 4,
   timbre: 'nylon',
   strum: 'single',
+  suggestFrom: 'progression',
   capo: 0,
 }
 
@@ -73,6 +76,7 @@ export function sanitizeSettings(raw: unknown): PersistedSettings {
     beatsPerChord: oneOf(input.beatsPerChord, BEAT_OPTIONS, d.beatsPerChord),
     timbre: oneOf(input.timbre, TIMBRES.map((timbre) => timbre.id), d.timbre),
     strum: isStrumId(input.strum) ? input.strum : d.strum,
+    suggestFrom: oneOf(input.suggestFrom, ['progression', 'chord'] as SuggestFrom[], d.suggestFrom),
     capo: intIn(input.capo, 0, MAX_CAPO, d.capo),
   }
 }

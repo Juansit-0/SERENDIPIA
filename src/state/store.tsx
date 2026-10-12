@@ -41,7 +41,7 @@ import { appendStep, applyStepVoicing, MAX_STEPS, removeStep, stepId, toggleDete
 import { createHistory, pushHistory, redoHistory, undoHistory, type History } from './history'
 import { loadLibrary, removeFromLibrary, saveToLibrary as storeInLibrary, type LibraryEntry } from './library'
 import { decodeShare, shareUrl, type SharedProgression } from './share'
-import { loadSettings, saveSettings, type Notation, type PersistedSettings } from './settings'
+import { loadSettings, saveSettings, type Notation, type PersistedSettings, type SuggestFrom } from './settings'
 
 export type { Notation } from './settings'
 export type ViewId = 'dictionary' | 'detector' | 'theory' | 'practice'
@@ -109,6 +109,12 @@ interface StoreValue {
   analysis: ProgressionAnalysis
   /** Next-chord ideas from the last chords of the progression (or the selected chord when empty). */
   nextSteps: Suggestion[]
+  /** What the "Puede seguir" panels follow: the progression's last chords or the selected chord. */
+  suggestFrom: SuggestFrom
+  setSuggestFrom: (from: SuggestFrom) => void
+  /** Suggestions for the panels, honouring `suggestFrom` (falls back to the chord with no progression). */
+  panelSuggestions: Suggestion[]
+  panelFollowsProgression: boolean
   undo: () => void
   redo: () => void
   canUndo: boolean
@@ -181,6 +187,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [beatsPerChord, setBeatsPerChord] = useState(shared?.beatsPerChord ?? initial.beatsPerChord)
   const [timbre, setTimbreState] = useState<TimbreId>(initial.timbre)
   const [strum, setStrum] = useState<StrumId>(shared?.strum ?? initial.strum)
+  const [suggestFrom, setSuggestFrom] = useState<SuggestFrom>(initial.suggestFrom)
   const [capo, setCapoState] = useState(shared?.capo ?? initial.capo)
   const [manualKeyRootPc, setManualKeyRootPc] = useState(initial.keyRootPc)
   const [manualKeyMode, setManualKeyMode] = useState<Mode>(initial.keyMode)
@@ -267,10 +274,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       beatsPerChord,
       timbre,
       strum,
+      suggestFrom,
       capo,
     }
     saveSettings(payload)
-  }, [lang, notation, tuningId, tempo, volume, manualKeyRootPc, manualKeyMode, keyAuto, loop, metronome, beatsPerChord, timbre, strum, capo])
+  }, [lang, notation, tuningId, tempo, volume, manualKeyRootPc, manualKeyMode, keyAuto, loop, metronome, beatsPerChord, timbre, strum, suggestFrom, capo])
 
   useEffect(() => {
     volumeRef.current = volume
@@ -615,6 +623,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [progression, keyRootPc, keyMode, suggestions],
   )
 
+  const panelFollowsProgression = suggestFrom === 'progression' && progression.length > 0
+  const panelSuggestions = panelFollowsProgression ? nextSteps : suggestions
+
   const value = useMemo<StoreValue>(() => ({
     t,
     lang,
@@ -654,6 +665,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     detectedKey,
     analysis,
     nextSteps,
+    suggestFrom,
+    setSuggestFrom,
+    panelSuggestions,
+    panelFollowsProgression,
     undo,
     redo,
     canUndo: history.past.length > 0,
@@ -699,7 +714,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }), [
     t, lang, notation, view, setView, tuningId, setTuningId, tuning, soundingTuning, capo, setCapo, tempo, volume, loop,
     metronome, setMetronome, beatsPerChord, timbre, setTimbre, strum, setStepStrum, stopPlayback, keyRootPc, setKeyRootPc, keyMode, setKeyMode, keyAuto,
-    detectedKey, analysis, nextSteps, undo, redo, history.past.length, history.future.length, shareLink, library,
+    detectedKey, analysis, nextSteps, suggestFrom, panelSuggestions, panelFollowsProgression, undo, redo, history.past.length, history.future.length, shareLink, library,
     saveProgressionToLibrary, loadFromLibrary, deleteFromLibrary, chainProgression, capoSuggestion, applyCapoSuggestion, chord, chordInput, chordError, setChordInput,
     setChord, voicings, selectedVoicing, selectVoicing, playVoicing, playFrets, progression, loadProgression,
     addToProgression, moveStep, setStepVoicing, removeFromProgression, markedVoicing, setMarkedVoicing,

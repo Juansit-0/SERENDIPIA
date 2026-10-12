@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { StepRow } from '../components/StepRow'
+import { SuggestionsPanel } from '../components/SuggestionsPanel'
 import { LATIN_SHARP, PITCH_SHARP } from '../music/notes'
 import { parseChord } from '../music/parseChord'
 import { PROGRESSIONS, resolveProgression } from '../music/progressions'
@@ -24,8 +25,6 @@ export function TheoryView() {
     chord,
     setChord,
     loadProgression,
-    suggestions,
-    addSuggestion,
   } = useStore()
   const [sevenths, setSevenths] = useState(false)
 
@@ -144,42 +143,7 @@ export function TheoryView() {
         </div>
       </section>
 
-      <section className="plate flex flex-col gap-3 p-4">
-        <h2 className="label-ink text-blue-ink">{t('suggestions.title')}</h2>
-        <div className="flex flex-col gap-2">
-          {suggestions.map((suggestion) => (
-            <div className="flex items-stretch gap-2" key={suggestion.anglo}>
-              <button
-                type="button"
-                aria-pressed={isCurrent(suggestion.rootPc, suggestion.qualityId)}
-                className={`sheet flex flex-1 flex-col items-start gap-0.5 px-3 py-2 text-left ${
-                  isCurrent(suggestion.rootPc, suggestion.qualityId) ? 'border-ink bg-paper-deep' : ''
-                }`}
-                onClick={() => {
-                  const parsed = parseChord(suggestion.anglo)
-                  if (parsed) setChord(parsed)
-                }}
-              >
-                <span className="fv-ui text-[1rem] font-bold">
-                  {suggestion.roman ? `${suggestion.roman} · ` : ''}
-                  {notation === 'latin' ? suggestion.latin : suggestion.anglo}
-                </span>
-                <span className="text-[10px] leading-snug text-ink-soft">
-                  {lang === 'es' ? suggestion.reasonEs : suggestion.reasonEn}
-                </span>
-              </button>
-              <button
-                type="button"
-                className="stamp px-2"
-                onClick={() => addSuggestion(suggestion)}
-                aria-label={t('progression.add')}
-              >
-                +
-              </button>
-            </div>
-          ))}
-        </div>
-      </section>
+      <SuggestionsPanel />
 
       <div className="min-w-0 xl:col-span-2">
         <StepRow />

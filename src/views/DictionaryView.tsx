@@ -3,6 +3,7 @@ import { ChordSymbol } from '../components/ChordSymbol'
 import { RegMark } from '../components/RegMark'
 import { StepGrid } from '../components/StepGrid'
 import { StepRow } from '../components/StepRow'
+import { SuggestionsPanel } from '../components/SuggestionsPanel'
 import { VoicingPads } from '../components/VoicingPads'
 import { chordToneSpelling, QUALITY_LIST, QualityId, qualityById } from '../music/chords'
 import { soundingChord } from '../music/capo'
@@ -19,9 +20,6 @@ export function DictionaryView() {
     t,
     lang,
     setChord,
-    suggestions,
-    addSuggestion,
-    notation,
     playFrets,
     capo,
     soundingTuning,
@@ -128,39 +126,7 @@ export function DictionaryView() {
           </select>
         </section>
 
-        <section className="plate flex flex-col gap-3 p-4">
-          <h2 className="label-ink text-blue-ink">{t('suggestions.title')}</h2>
-          {suggestions.length === 0 && <p className="readout text-[11px] text-ink-faint">{t('suggestions.empty')}</p>}
-          <div className="flex flex-col gap-2">
-            {suggestions.map((suggestion) => (
-              <div className="flex items-stretch gap-2" key={suggestion.anglo}>
-                <button
-                  type="button"
-                  className="sheet flex flex-1 flex-col items-start gap-0.5 px-3 py-2 text-left"
-                  onClick={() => {
-                    const parsed = parseChord(suggestion.anglo)
-                    if (parsed) setChord(parsed)
-                  }}
-                >
-                  <span className="fv-ui text-[1rem] font-bold">
-                    {notation === 'latin' ? suggestion.latin : suggestion.anglo}
-                  </span>
-                  <span className="text-[10px] leading-snug text-ink-soft">
-                    {lang === 'es' ? suggestion.reasonEs : suggestion.reasonEn}
-                  </span>
-                </button>
-                <button
-                  type="button"
-                  className="stamp px-2"
-                  onClick={() => addSuggestion(suggestion)}
-                  aria-label={t('progression.add')}
-                >
-                  +
-                </button>
-              </div>
-            ))}
-          </div>
-        </section>
+        <SuggestionsPanel />
       </aside>
 
       <div className="min-w-0 xl:col-span-3">

@@ -11,7 +11,7 @@ As you build a progression, SERENDIPIA reads it with music-theory rules (no AI, 
 - **Key detection** from all the chords (the **Auto** stamp in the transport; pick a key by hand to turn it off).
 - **Roman numerals** on every step, with secondary dominants (`V7/V`), borrowed chords (`iv`, `♭VII`) and out-of-key chords set apart in color.
 - **A mark between each pair of chords** (✓ resolves, ↗ tension, ↪ deceptive, ◐ borrowed color, ⚡ out of key, → / ~ smooth motion). Tap one to read the change explained, with its common tones; by default the latest change is shown.
-- **Next-chord ideas from the last two or three chords**, recognising classic progressions (`C G Am` → "completes Pop I–V–vi–IV") and cadences (`Dm G` → `C`).
+- **Next-chord ideas from the last two or three chords**, recognising classic progressions (`C G Am` → "completes Pop I–V–vi–IV") and cadences (`Dm G` → `C`). They fill the ghost slots of the strip and the **Puede seguir** panel in Dictionary and Theory, which reads "After G → Am → F"; its **This chord** toggle switches the panel back to ideas after the selected chord.
 
 The logic lives in `src/music/analysis.ts`.
 

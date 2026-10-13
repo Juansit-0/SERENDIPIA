@@ -7,12 +7,14 @@ import { BEAT_OPTIONS, TEMPO_MAX, TEMPO_MIN } from '../state/settings'
 import { useStore, type Notation, type ViewId } from '../state/store'
 import { useTheme } from '../state/theme'
 import { openWelcome } from '../welcome/state'
+import { tunerText } from '../i18n/tuner'
+import { Tuner } from './topbar/Tuner'
 import { topbarText } from '../i18n/topbar'
 import '../styles/topbar.css'
 import { BeatMoons } from './topbar/BeatMoons'
 import { BrandMark } from './topbar/Brand'
 import { Popover } from './topbar/Popover'
-import { ChevronDownIcon, LoopIcon, MinusIcon, MoonIcon, PlayIcon, PlusIcon, SettingsIcon, SoundIcon, StopIcon, SunIcon } from './icons'
+import { ChevronDownIcon, LoopIcon, MinusIcon, MoonIcon, PlayIcon, PlusIcon, SettingsIcon, SoundIcon, StopIcon, SunIcon, TunerIcon } from './icons'
 
 const VIEWS: ViewId[] = ['chord', 'theory', 'practice']
 const NOTATIONS: Notation[] = ['anglo', 'both', 'latin']
@@ -360,6 +362,18 @@ export function TopBar() {
                 </div>
               </div>
             )}
+          </Popover>
+
+          <Popover
+            label={tunerText[lang].title}
+            trigger={
+              <>
+                <TunerIcon size={15} />
+                <span className="cc-btn__label--wide">{tunerText[lang].title}</span>
+              </>
+            }
+          >
+            {() => <Tuner />}
           </Popover>
 
           <Popover

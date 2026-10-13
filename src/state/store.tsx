@@ -154,6 +154,8 @@ interface StoreValue {
   selectVoicing: (index: number, play?: boolean) => void
   playVoicing: (index?: number, pattern?: PlayPattern) => void
   playFrets: (frets: (number | null)[], pattern?: PlayPattern) => void
+  /** The open string's target pitch in the chosen tuning (no capo): the tuner's reference tone. */
+  playOpenString: (stringIndex: number) => void
   progression: ProgressionStep[]
   loadProgression: (steps: Array<Omit<ProgressionStep, 'id'>>) => void
   addToProgression: (step: Omit<ProgressionStep, 'id'>) => void
@@ -398,6 +400,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       })
     },
     [enableAudio, soundingTuning],
+  )
+
+  const playOpenString = useCallback(
+    (stringIndex: number) => {
+      void enableAudio().then(() => loadedAudioEngine()?.playString(stringIndex, tuning[stringIndex]))
+    },
+    [enableAudio, tuning],
   )
 
   const setChordInput = useCallback((value: string) => {
@@ -798,6 +807,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     selectVoicing,
     playVoicing,
     playFrets,
+    playOpenString,
     progression,
     loadProgression,
     addToProgression,
@@ -830,7 +840,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     metronome, setMetronome, beatsPerChord, timbre, setTimbre, strum, setStepStrum, stopPlayback, keyRootPc, setKeyRootPc, keyMode, setKeyMode, keyAuto,
     detectedKey, analysis, nextSteps, suggestFrom, panelSuggestions, panelFollowsProgression, undo, redo, history.past.length, history.future.length, shareLink, library,
     saveProgressionToLibrary, importLibrary, loadFromLibrary, deleteFromLibrary, chainProgression, capoSuggestion, applyCapoSuggestion, chord, chordInput, chordError, setChordInput,
-    setChord, voicings, selectedVoicing, selectVoicing, playVoicing, playFrets, progression, loadProgression,
+    setChord, voicings, selectedVoicing, selectVoicing, playVoicing, playFrets, playOpenString, progression, loadProgression,
     addToProgression, moveStep, setStepVoicing, removeFromProgression, markedVoicing, setMarkedVoicing,
     clearProgression, playing, togglePlay, audioReady, audioLoading, audioFallback, enableAudio, suggestions,
     addSuggestion, detectorFrets, toggleDetectorString, chartSource, chartFrets, detection, toggleChartFret,

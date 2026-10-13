@@ -233,8 +233,8 @@
   }
 }
 
-/* Narrow desk: monogram only, tighter buttons. */
-@media (min-width: 1024px) and (max-width: 1279px) {
+/* Narrow desk (up to 1499px, where the full row no longer fits): monogram only, icon buttons, tighter gaps. */
+@media (min-width: 1024px) and (max-width: 1499px) {
   .cc-brand__word,
   .cc-top .cc-btn__label--wide {
     display: none;
@@ -333,4 +333,136 @@
   color: var(--cc-accent-deep);
   text-decoration: underline;
   text-underline-offset: 2px;
+}
+
+/* ---------- tuner ---------- */
+.cc-tuner__dial {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.cc-tuner__dial svg {
+  width: 100%;
+  max-width: 15rem;
+  overflow: visible;
+}
+
+.cc-tuner__zone {
+  fill: var(--cc-accent-soft);
+  stroke: var(--cc-accent-deep);
+  stroke-width: 0.8;
+}
+
+.cc-tuner__tick {
+  stroke: var(--cc-line-strong);
+  stroke-width: 1.2;
+  stroke-linecap: round;
+}
+
+.cc-tuner__tick--zero {
+  stroke: var(--cc-accent-deep);
+  stroke-width: 2.2;
+}
+
+.cc-tuner__scale {
+  fill: var(--cc-ink-soft);
+  font-size: 14px;
+  font-family: var(--font-ui);
+}
+
+.cc-tuner__needle line {
+  stroke: var(--cc-ink);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.cc-tuner__needle {
+  transform-box: view-box;
+  transform-origin: 100px 104px;
+}
+
+.cc-tuner__needle path,
+.cc-tuner__hub {
+  fill: var(--cc-ink);
+}
+
+.cc-tuner[data-advice='in-tune'] .cc-tuner__needle line {
+  stroke: var(--cc-accent-deep);
+}
+
+.cc-tuner[data-advice='in-tune'] .cc-tuner__needle path {
+  fill: var(--cc-accent);
+  stroke: var(--cc-accent-deep);
+  stroke-width: 1.4;
+}
+
+.cc-tuner__readout {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.cc-tuner__note {
+  font-family: var(--font-display);
+  font-size: 2.25rem;
+  line-height: 1;
+}
+
+.cc-tuner__cents {
+  min-width: 4.5em;
+  font-variant-numeric: lining-nums tabular-nums;
+  font-size: 0.875rem;
+  color: var(--cc-ink-soft);
+}
+
+.cc-tuner__advice {
+  margin: 0;
+  min-height: 1.4em;
+  font-family: var(--font-serif);
+  font-size: 1.0625rem;
+  color: var(--cc-ink-soft);
+}
+
+.cc-tuner[data-advice='in-tune'] .cc-tuner__advice {
+  color: var(--cc-accent-deep);
+  font-weight: 600;
+}
+
+.cc-tuner__strings {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.cc-tuner__strings .cc-btn {
+  flex-direction: column;
+  gap: 0;
+  min-height: 44px;
+  padding: 2px 0;
+  font-weight: 600;
+}
+
+.cc-tuner__strings small {
+  font-size: 0.625rem;
+  font-weight: 500;
+  color: var(--cc-ink-faint);
+}
+
+.cc-tuner__strings .cc-btn[data-near='true'] {
+  border-color: var(--cc-accent-deep);
+  box-shadow: inset 0 0 0 1px var(--cc-accent-deep);
+}
+
+.cc-tuner__message {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--cc-ink-soft);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .cc-tuner__needle {
+    transition: transform 120ms linear, opacity 200ms ease;
+  }
 }

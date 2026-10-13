@@ -191,3 +191,11 @@ export const RepeatIcon = (p: IconProps) => (
     <path d="M6 9.5h12M6 14.5h12" />
   </Icon>
 )
+
+export const TunerIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M8.5 3v7a3.5 3.5 0 0 0 7 0V3" />
+    <path d="M12 13.5V21" />
+    <path d="M10 21h4" />
+  </Icon>
+)

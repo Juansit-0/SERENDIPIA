@@ -281,7 +281,9 @@ Motion (only with motion allowed): a new chord lands as a star turning into plac
 First visit only (not when arriving by a shared link); Ajustes ⚙ → «Ver la bienvenida» shows it again. A full-screen three.js sky (`src/welcome/scene.ts`, lazy chunk) where ~1700 stars gather into one figure per step: the brand mark, an Am chord chart, the C–G–Am–F constellation in function colors, and the same constellation with dotted hallazgos and shooting stars. Night: additive light; day: printed ink dots, chord stars with an ink ring. Text sits left of the sky (≥640px wide and ≥5:4) or under it, in IM Fell English / EB Garamond. Reduced motion: figures appear without travel, no drift or shooting stars. Without WebGL the text stands alone, centred. Skip, Escape, ←/→ and the diamond step marks all work.
 
 ### Top bar
-One row, 52px: views, Correr plus moon-phase beat and tempo, capo, key popover, Reproducción, Sonido, theme toggle, settings. The beat is shown as moon phases advancing per beat.
+One row, 52px: views, Correr plus moon-phase beat and tempo, capo, key popover, Reproducción, Sonido, Afinador, settings, theme toggle. Below 1500px wide the popover triggers show icons only, so the row never overflows.
+
+The Afinador popover holds the tuning choice (it sets the tuning for the whole app), a ±50-cent gauge whose needle carries a star (turquoise/lilac when within ±5 cents), the note in IM Fell English, the peg advice (tensa/afloja) and six string buttons: tapping one fixes it as the target and plays its reference note. The microphone opens only on «Activar micrófono» and closes with the popover. The beat is shown as moon phases advancing per beat.
 
 ### Eclipse (theme switch)
 View Transitions reveal: the new theme grows as a circle (clip-path, 700ms, cubic-bezier(0.65, 0, 0.35, 1)) out of the toggle's center. With reduced motion or no API the switch is instant. `.cc-twinkle` pulses opacity between 0.55 and 1 over 3.2s, only when motion is allowed.

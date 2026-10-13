@@ -1,6 +1,30 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="4" fill="#f4f1ea"/>
-  <rect x="6" y="5" width="20" height="22" fill="none" stroke="#1a1a1a" stroke-width="2"/>
-  <path d="M6 12h20M6 19h20M13 5v22M19 5v22" stroke="#1a1a1a" stroke-width="1.2"/>
-  <circle cx="16" cy="15.5" r="3.4" fill="#40e0d0" stroke="#1a1a1a" stroke-width="1.2"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-16 -16 32 32">
+  <!-- Carta celeste brand mark: compass-star in a ring. Night: moon on violet-black; day: sun on silver. -->
+  <style>
+    .ground { fill: #14111d; }
+    .ink { fill: #c7b3e8; }
+    .ring { fill: none; stroke: #c7b3e8; stroke-opacity: .75; }
+    .core { fill: #14111d; }
+    .moon { fill: #ece5f8; }
+    .sun { display: none; }
+    @media (prefers-color-scheme: light) {
+      .ground { fill: #e8e7ec; }
+      .ink { fill: #15131c; }
+      .ring { stroke: #15131c; stroke-opacity: .7; }
+      .core { fill: #40e0d0; stroke: #15131c; stroke-width: 1.1; }
+      .moon { display: none; }
+      .sun { display: inline; }
+    }
+  </style>
+  <circle class="ground" r="16" />
+  <circle class="ring" r="13.6" stroke-width="1.4" />
+  <path class="ink" d="M0,-12.5 Q1.6,-1.6 12.5,0 Q1.6,1.6 0,12.5 Q-1.6,1.6 -12.5,0 Q-1.6,-1.6 0,-12.5Z" />
+  <circle class="core" r="4.6" />
+  <path class="moon" d="M1.3,-3.7 A3.9,3.9 0 1 0 1.3,3.7 A3.1,3.1 0 0 1 1.3,-3.7Z" />
+  <g class="sun" stroke="#15131c" stroke-width="1.2" stroke-linecap="round">
+    <line x1="0" y1="-6.2" x2="0" y2="-7.6" />
+    <line x1="0" y1="6.2" x2="0" y2="7.6" />
+    <line x1="-6.2" y1="0" x2="-7.6" y2="0" />
+    <line x1="6.2" y1="0" x2="7.6" y2="0" />
+  </g>
 </svg>

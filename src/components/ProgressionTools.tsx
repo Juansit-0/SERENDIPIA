@@ -4,6 +4,7 @@ import { exportLibrary } from '../state/library'
 import { shortestShift } from '../state/progressionOps'
 import { useStore } from '../state/store'
 import { ArrowRightIcon, CloseIcon, MinusIcon, MoreIcon, PlusIcon } from './icons'
+import { PrintSheet } from './print/PrintSheet'
 import { useStrip } from './strip/useStrip'
 
 type Panel = 'closed' | 'menu' | 'save' | 'library' | 'share' | 'transpose'
@@ -34,6 +35,25 @@ export function ProgressionTools({ onAnnounce }: { onAnnounce: (message: string)
   const [confirmId, setConfirmId] = useState<string | null>(null)
   const [libraryNote, setLibraryNote] = useState('')
   const fileInput = useRef<HTMLInputElement | null>(null)
+  // The sheet exists only while the print dialog is up (paper or «Guardar como PDF»).
+  const [printing, setPrinting] = useState(false)
+
+  useEffect(() => {
+    if (!printing) return
+    const done = () => setPrinting(false)
+    window.addEventListener('afterprint', done)
+    const frame = requestAnimationFrame(() => {
+      try {
+        window.print()
+      } catch {
+        done()
+      }
+    })
+    return () => {
+      cancelAnimationFrame(frame)
+      window.removeEventListener('afterprint', done)
+    }
+  }, [printing])
 
   const root = useRef<HTMLDivElement | null>(null)
   const trigger = useRef<HTMLButtonElement | null>(null)
@@ -130,6 +150,8 @@ export function ProgressionTools({ onAnnounce }: { onAnnounce: (message: string)
         <MoreIcon size={18} />
       </button>
 
+      {printing && <PrintSheet />}
+
       {panel !== 'closed' && (
         <div className="cc-pop strip-menu" role="group" aria-label={s('more')}>
           {panel === 'menu' && (
@@ -164,6 +186,18 @@ export function ProgressionTools({ onAnnounce }: { onAnnounce: (message: string)
               </button>
               <button type="button" className="cc-btn strip-menu__item" disabled={empty} onClick={() => void share()}>
                 {s('share')}
+              </button>
+              <button
+                type="button"
+                className="cc-btn strip-menu__item"
+                disabled={empty}
+                title={s('printHint')}
+                onClick={() => {
+                  close(true)
+                  setPrinting(true)
+                }}
+              >
+                {s('print')}
               </button>
             </div>
           )}

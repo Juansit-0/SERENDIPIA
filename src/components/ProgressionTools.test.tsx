@@ -148,3 +148,28 @@ describe('transpose', () => {
     expect(stepNames()).toEqual(['Db', 'Ab', 'Bbm', 'Gb'])
   })
 })
+
+describe('print sheet', () => {
+  it('prints a sheet with the sequence, one diagram per chord and the comments between chords', () => {
+    const print = vi.fn()
+    window.print = print
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+      callback(0)
+      return 0
+    })
+    renderApp()
+    openMenu()
+    fireEvent.click(screen.getByRole('button', { name: 'Imprimir hoja' }))
+    expect(print).toHaveBeenCalledTimes(1)
+    const sheet = document.querySelector('.print-sheet')!
+    expect(sheet.querySelector('h1')?.textContent).toBe('Hoja de progresión')
+    expect(sheet.querySelectorAll('.print-sheet__chord')).toHaveLength(4)
+    expect(sheet.querySelectorAll('.sheet-diagram')).toHaveLength(4)
+    expect(sheet.querySelectorAll('.print-sheet__changes li')).toHaveLength(3)
+    act(() => {
+      window.dispatchEvent(new Event('afterprint'))
+    })
+    expect(document.querySelector('.print-sheet')).toBeNull()
+    vi.restoreAllMocks()
+  })
+})

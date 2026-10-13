@@ -1,0 +1,224 @@
+/* Printable progression sheet: only exists while printing; always ink on paper whatever the theme. */
+.print-sheet {
+  display: none;
+}
+
+@media print {
+  @page {
+    margin: 14mm;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+  }
+
+  body > *:not(.print-sheet) {
+    display: none !important;
+  }
+
+  .print-sheet {
+    display: block;
+    color: #15131c;
+    font-family: var(--font-ui);
+    font-size: 10.5pt;
+    line-height: 1.4;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .print-sheet__head {
+    border-bottom: 1.5pt solid #15131c;
+    padding-bottom: 8pt;
+    margin-bottom: 12pt;
+  }
+
+  .print-sheet__brand {
+    margin: 0;
+    font-size: 8pt;
+    font-weight: 600;
+    letter-spacing: 0.24em;
+    color: #4a4656;
+  }
+
+  .print-sheet h1 {
+    margin: 2pt 0 6pt;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 26pt;
+    line-height: 1.05;
+  }
+
+  .print-sheet__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4pt 18pt;
+    margin: 0;
+  }
+
+  .print-sheet__meta div {
+    display: flex;
+    gap: 4pt;
+  }
+
+  .print-sheet__meta dt {
+    color: #4a4656;
+  }
+
+  .print-sheet__meta dt::after {
+    content: ':';
+  }
+
+  .print-sheet__meta dd {
+    margin: 0;
+    font-weight: 600;
+  }
+
+  .print-sheet__sequence {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6pt 0;
+    margin: 0 0 14pt;
+    padding: 0;
+    list-style: none;
+  }
+
+  .print-sheet__sequence li {
+    display: flex;
+    align-items: flex-start;
+  }
+
+  .print-sheet__arrow {
+    padding: 4pt 8pt 0;
+    color: #7e7a8c;
+  }
+
+  .print-sheet__seq {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .print-sheet__seqname {
+    font-family: var(--font-display);
+    font-size: 17pt;
+    line-height: 1.1;
+  }
+
+  .print-sheet__roman {
+    font-family: var(--font-serif);
+    font-size: 10pt;
+    color: #4a4656;
+  }
+
+  .print-sheet__chords {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10pt;
+    margin: 0 0 14pt;
+    padding: 0;
+    list-style: none;
+  }
+
+  .print-sheet__chord {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8pt 6pt 6pt;
+    border: 1pt solid #7e7a8c;
+    border-top: 3pt solid var(--sheet-fn, #7e7a8c);
+    break-inside: avoid;
+  }
+
+  .print-sheet__chord[data-fn='tonic'] {
+    --sheet-fn: #5d43a3;
+  }
+
+  .print-sheet__chord[data-fn='subdominant'] {
+    --sheet-fn: #0a6f68;
+  }
+
+  .print-sheet__chord[data-fn='dominant'] {
+    --sheet-fn: #8a5d0c;
+  }
+
+  .print-sheet__chord[data-fn='borrowed'] {
+    --sheet-fn: #9c3f66;
+  }
+
+  .print-sheet__num {
+    position: absolute;
+    top: 4pt;
+    left: 6pt;
+    font-size: 8pt;
+    color: #7e7a8c;
+  }
+
+  .print-sheet__name {
+    font-family: var(--font-display);
+    font-size: 16pt;
+    line-height: 1.1;
+    text-align: center;
+  }
+
+  .print-sheet__fn {
+    font-size: 8pt;
+    color: var(--sheet-fn);
+    margin-bottom: 4pt;
+  }
+
+  .sheet-diagram {
+    width: 92pt;
+    height: auto;
+    stroke: #15131c;
+    fill: none;
+    overflow: visible;
+  }
+
+  .sheet-diagram__dot {
+    fill: #15131c;
+    stroke: none;
+  }
+
+  .sheet-diagram__base {
+    fill: #15131c;
+    stroke: none;
+    font-size: 9px;
+    font-family: var(--font-ui);
+  }
+
+  .print-sheet__changes {
+    break-inside: avoid-page;
+  }
+
+  .print-sheet__changes h2 {
+    margin: 0 0 4pt;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 15pt;
+  }
+
+  .print-sheet__changes ol {
+    margin: 0;
+    padding-left: 14pt;
+    font-family: var(--font-serif);
+    font-size: 10.5pt;
+  }
+
+  .print-sheet__changes li + li {
+    margin-top: 3pt;
+  }
+
+  .print-sheet__foot {
+    display: flex;
+    justify-content: space-between;
+    gap: 12pt;
+    margin-top: 16pt;
+    padding-top: 6pt;
+    border-top: 0.75pt solid #7e7a8c;
+    font-size: 7.5pt;
+    color: #4a4656;
+    overflow-wrap: anywhere;
+  }
+}

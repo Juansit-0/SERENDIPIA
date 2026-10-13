@@ -665,6 +665,101 @@
   margin-top: 10px;
 }
 
+/* ---------- songs ---------- */
+.strip__song {
+  max-width: 20rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+
+.songs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.songs .strip-menu__library li {
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
+}
+
+.songs__sections {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 15rem;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  list-style: none;
+  counter-reset: section;
+}
+
+.songs__sections li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px;
+  border: 1px solid var(--cc-line);
+  border-radius: 6px;
+  background: var(--cc-ground);
+}
+
+.songs__row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.songs__label {
+  flex: 1;
+  min-width: 0;
+}
+
+.songs__repeats {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.songs__repeats .cc-num {
+  min-width: 2.2em;
+  text-align: center;
+  font-weight: 600;
+}
+
+.songs__chords {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.75rem;
+  color: var(--cc-ink-soft);
+}
+
+.songs__add {
+  display: flex;
+  gap: 6px;
+}
+
+.songs__add .cc-select {
+  flex: 1;
+  min-width: 0;
+}
+
+.songs__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.songs__new {
+  align-self: flex-start;
+}
+
 /* ---------- step picker ---------- */
 .strip-picker {
   display: flex;
@@ -831,9 +926,12 @@
     white-space: nowrap;
   }
 
+  /* Opens upward from the strip; long panels (a song editor) scroll inside instead of leaving the screen. */
   .strip-menu {
     top: auto;
     bottom: calc(100% + 8px);
+    max-height: calc(100dvh - 230px);
+    overflow-y: auto;
   }
 
   .strip-picker {

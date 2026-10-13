@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { keyName, type TransitionAnalysis } from '../music/analysis'
 import { keyAccidental, pitchName } from '../music/notes'
+import { songsText } from '../i18n/songs'
 import { useStore } from '../state/store'
 import '../styles/strip.css'
 import { RedoIcon, UndoIcon } from './icons'
@@ -15,6 +16,7 @@ export function StepRow() {
   const {
     progression,
     playing,
+    songPlay,
     analysis,
     keyAuto,
     detectedKey,
@@ -67,6 +69,7 @@ export function StepRow() {
         <h2 className="strip__title" title={t('progression.reorderHint')}>
           {t('progression.title')} <span className="cc-num strip__count" aria-label={`${progression.length} / ${SLOTS}`}>{progression.length}/{SLOTS}</span>
         </h2>
+        {playing && songPlay && <SongBadge />}
         {progression.length > 1 && (
           <span id="step-reorder-hint" className="sr-only">
             {t('progression.reorderHint')}
@@ -193,5 +196,20 @@ export function StepRow() {
           )
         })()}
     </section>
+  )
+}
+
+/** While a song plays: which song, section and repeat is under the playhead. */
+function SongBadge() {
+  const { songs, songPlay, lang } = useStore()
+  const song = songs.find((item) => item.id === songPlay?.songId)
+  const section = song && songPlay ? song.sections[songPlay.section] : null
+  if (!song || !section || !songPlay) return null
+  const x = songsText[lang]
+  return (
+    <span className="cc-chip strip__song" role="status">
+      ♪ {song.name} · {x.labels[section.label]}
+      {section.repeats > 1 ? ` ${songPlay.pass + 1}/${section.repeats}` : ''}
+    </span>
   )
 }

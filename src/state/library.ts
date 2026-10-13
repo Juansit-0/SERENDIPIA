@@ -1,4 +1,5 @@
 import { decodeShare, encodeShare, type SharedProgression } from './share'
+import { encodeSong, mergeSongs, type Song } from './songs'
 
 export interface LibraryEntry {
   id: string
@@ -92,13 +93,14 @@ export function removeFromLibrary(id: string): LibraryEntry[] {
 
 const BACKUP_APP = 'serendipia'
 
-/** A backup file with every saved progression, to move them to another browser or keep them safe. */
-export function exportLibrary(entries: LibraryEntry[], now = new Date()): string {
+/** A backup file with every saved progression (and song), to move them to another browser or keep them safe. */
+export function exportLibrary(entries: LibraryEntry[], songs: Song[] = [], now = new Date()): string {
   const backup = {
     app: BACKUP_APP,
     version: 1,
     exportedAt: now.toISOString(),
     entries: entries.map((entry) => ({ name: entry.name, savedAt: entry.savedAt, data: encodeShare(entry.progression) })),
+    songs: songs.map(encodeSong),
   }
   return JSON.stringify(backup, null, 2)
 }
@@ -108,14 +110,17 @@ export function exportLibrary(entries: LibraryEntry[], now = new Date()): string
  * An identical progression under the same name is skipped; a different one with a taken name gets « (2)».
  * Returns null when the file is not a SERENDIPIA backup.
  */
-export function importLibrary(text: string, now = new Date()): { entries: LibraryEntry[]; added: number; skipped: number } | null {
+export function importLibrary(
+  text: string,
+  now = new Date(),
+): { entries: LibraryEntry[]; added: number; skipped: number; songs: Song[] | null; songsAdded: number } | null {
   let parsed: unknown
   try {
     parsed = JSON.parse(text)
   } catch {
     return null
   }
-  const backup = parsed as { app?: unknown; entries?: unknown } | null
+  const backup = parsed as { app?: unknown; entries?: unknown; songs?: unknown } | null
   if (!backup || backup.app !== BACKUP_APP || !Array.isArray(backup.entries)) return null
 
   const entries = loadLibrary()
@@ -146,5 +151,6 @@ export function importLibrary(text: string, now = new Date()): { entries: Librar
     added += 1
   }
   if (added > 0) persist(entries)
-  return { entries, added, skipped }
+  const merged = Array.isArray(backup.songs) ? mergeSongs(backup.songs, now) : null
+  return { entries, added, skipped, songs: merged?.songs ?? null, songsAdded: merged?.added ?? 0 }
 }

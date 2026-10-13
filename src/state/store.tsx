@@ -50,6 +50,7 @@ import {
 } from './library'
 import { loadSessionSteps, saveSessionSteps } from './session'
 import { decodeShare, shareUrl, type SharedProgression } from './share'
+import { flattenSong, loadSongs, removeSong, saveSong as storeSong, type Song, type SongStep } from './songs'
 import { loadSettings, saveSettings, type Notation, type PersistedSettings, type SuggestFrom } from './settings'
 
 export type { Notation } from './settings'
@@ -134,10 +135,17 @@ interface StoreValue {
   /** A link that opens this progression (with tempo, beats, capo and strum). */
   shareLink: () => string
   library: LibraryEntry[]
+  songs: Song[]
+  saveSong: (song: Song) => void
+  deleteSong: (id: string) => void
+  /** Plays a song section after section (the strip shows the section playing); stopping restores the progression. */
+  playSong: (song: Song) => void
+  /** Which song, section and repeat is playing; null when no song is. */
+  songPlay: { songId: string; section: number; pass: number } | null
   /** False when the library is full and `name` is new. */
   saveToLibrary: (name: string) => boolean
   /** Merges a backup file; null when it is not one. */
-  importLibrary: (text: string) => { added: number; skipped: number } | null
+  importLibrary: (text: string) => { added: number; skipped: number; songsAdded: number } | null
   loadFromLibrary: (entry: LibraryEntry) => void
   deleteFromLibrary: (id: string) => void
   /** Re-voice every step to minimise hand movement across the progression. */
@@ -251,6 +259,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setHistory((current) => pushHistory(current, typeof next === 'function' ? next(current.present) : next)),
     [],
   )
+  // While a song plays, the strip shows its current section; the player's own progression waits here.
+  const songRef = useRef<{ flat: SongStep[]; saved: ProgressionStep[] } | null>(null)
+  const [songPlay, setSongPlay] = useState<{ songId: string; section: number; pass: number } | null>(null)
   const undo = useCallback(() => setHistory(undoHistory), [])
   const redo = useCallback(() => setHistory(redoHistory), [])
 
@@ -260,9 +271,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [shared])
 
   const [library, setLibrary] = useState<LibraryEntry[]>(loadLibrary)
+  const [songs, setSongs] = useState<Song[]>(loadSongs)
 
   // Keep the progression being worked on, so a reload (or a crash) never loses it.
-  useEffect(() => saveSessionSteps(progression.map(({ id: _id, ...step }) => step)), [progression])
+  useEffect(() => {
+    if (!songRef.current) saveSessionSteps(progression.map(({ id: _id, ...step }) => step))
+  }, [progression])
   const [playing, setPlaying] = useState(false)
   const [detectorFrets, setDetectorFrets] = useState<(number | null)[]>([0, 0, 0, 0, 0, 0])
   const [chartSource, setChartSource] = useState<ChartSource>('voicing')
@@ -449,11 +463,21 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setProgression((current) => appendStep(current, step, stepId()))
   }, [setProgression])
 
+  /** Back from a song to the player's own progression (outside the undo history: the song never edited it). */
+  const endSong = useCallback(() => {
+    const song = songRef.current
+    if (!song) return
+    songRef.current = null
+    setSongPlay(null)
+    setHistory((current) => ({ ...current, present: song.saved }))
+  }, [])
+
   const stopPlayback = useCallback(() => {
     loadedAudioEngine()?.stopProgression()
     setPlaying(false)
     playhead.reset()
-  }, [])
+    endSong()
+  }, [endSong])
 
   const loadProgression = useCallback(
     (steps: Array<Omit<ProgressionStep, 'id'>>) => {
@@ -551,6 +575,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   ])
 
   useEffect(() => {
+    if (playing && songRef.current) {
+      // A song keeps its own steps; only the shared settings follow along.
+      loadedAudioEngine()?.updateProgression({ tempo, loop, beatsPerChord, metronome })
+      return
+    }
     if (!playing || (progression.length === 0 && !metronome)) return
     loadedAudioEngine()?.updateProgression({
       tempo,
@@ -694,7 +723,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const importLibrary = useCallback((text: string) => {
     const result = mergeBackup(text)
     if (result) setLibrary(result.entries)
-    return result ? { added: result.added, skipped: result.skipped } : null
+    if (result?.songs) setSongs(result.songs)
+    return result ? { added: result.added, skipped: result.skipped, songsAdded: result.songsAdded } : null
   }, [])
 
   const loadFromLibrary = useCallback(
@@ -711,6 +741,60 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   )
 
   const deleteFromLibrary = useCallback((id: string) => setLibrary(removeFromLibrary(id)), [])
+
+  const saveSongToList = useCallback((song: Song) => setSongs(storeSong(song)), [])
+  const deleteSong = useCallback((id: string) => setSongs(removeSong(id)), [])
+
+  const playSong = useCallback(
+    (song: Song) => {
+      // Switching songs: the player's progression is the one the first song set aside.
+      const saved = songRef.current?.saved ?? progression
+      stopPlayback()
+      const flat = flattenSong(song)
+      if (flat.length === 0) return
+      const showSection = (index: number) =>
+        setHistory((current) => ({
+          ...current,
+          present: song.sections[index].progression.steps.map((step, position) => ({ ...step, id: `song-${index}-${position}` })),
+        }))
+      void enableAudio().then(() => {
+        const engine = loadedAudioEngine()
+        if (!engine?.isStarted) return
+        songRef.current = { flat, saved }
+        showSection(0)
+        setSongPlay({ songId: song.id, section: 0, pass: 0 })
+        let shown = 0
+        engine.playProgression({
+          stepCount: flat.length,
+          tempo,
+          loop,
+          beatsPerChord,
+          tuning: soundingTuning,
+          metronome,
+          getFrets: (index) => (flat[index] ? resolveStepFrets(flat[index].step, tuning) : null),
+          getStrum: (index) => flat[index]?.step.strum ?? strum,
+          onStep: (index) => {
+            const item = flat[index]
+            if (!item || !songRef.current) return
+            if (item.section !== shown) {
+              shown = item.section
+              showSection(item.section)
+            }
+            setSongPlay({ songId: song.id, section: item.section, pass: item.pass })
+            playhead.setStep(item.local)
+          },
+          onBeat: playhead.setBeat,
+          onEnd: () => {
+            setPlaying(false)
+            playhead.reset()
+            endSong()
+          },
+        })
+        setPlaying(true)
+      })
+    },
+    [stopPlayback, progression, enableAudio, tempo, loop, beatsPerChord, soundingTuning, metronome, tuning, strum, endSong],
+  )
 
   const chainProgression = useCallback(() => {
     setProgression((current) => {
@@ -801,6 +885,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     canRedo: history.future.length > 0,
     shareLink,
     library,
+    songs,
+    saveSong: saveSongToList,
+    deleteSong,
+    playSong,
+    songPlay,
     saveToLibrary: saveProgressionToLibrary,
     importLibrary,
     loadFromLibrary,
@@ -851,7 +940,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     t, lang, notation, view, setView, tuningId, setTuningId, tuning, soundingTuning, capo, setCapo, tempo, volume, loop,
     metronome, setMetronome, beatsPerChord, timbre, setTimbre, strum, setStepStrum, stopPlayback, keyRootPc, setKeyRootPc, keyMode, setKeyMode, keyAuto,
     detectedKey, analysis, nextSteps, suggestFrom, panelSuggestions, panelFollowsProgression, undo, redo, history.past.length, history.future.length, shareLink, library,
-    saveProgressionToLibrary, importLibrary, loadFromLibrary, deleteFromLibrary, chainProgression, capoSuggestion, applyCapoSuggestion, chord, chordInput, chordError, setChordInput,
+    saveProgressionToLibrary, importLibrary, songs, saveSongToList, deleteSong, playSong, songPlay, loadFromLibrary, deleteFromLibrary, chainProgression, capoSuggestion, applyCapoSuggestion, chord, chordInput, chordError, setChordInput,
     setChord, voicings, selectedVoicing, selectVoicing, playVoicing, playFrets, playOpenString, transposeProgression, progression, loadProgression,
     addToProgression, moveStep, setStepVoicing, removeFromProgression, markedVoicing, setMarkedVoicing,
     clearProgression, playing, togglePlay, audioReady, audioLoading, audioFallback, enableAudio, suggestions,

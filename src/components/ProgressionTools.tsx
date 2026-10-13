@@ -4,16 +4,20 @@ import { exportLibrary } from '../state/library'
 import { shortestShift } from '../state/progressionOps'
 import { useStore } from '../state/store'
 import { ArrowRightIcon, CloseIcon, MinusIcon, MoreIcon, PlusIcon } from './icons'
+import { songsText } from '../i18n/songs'
 import { PrintSheet } from './print/PrintSheet'
+import { SongsPanel } from './SongsPanel'
 import { useStrip } from './strip/useStrip'
 
-type Panel = 'closed' | 'menu' | 'save' | 'library' | 'share' | 'transpose'
+type Panel = 'closed' | 'menu' | 'save' | 'library' | 'share' | 'transpose' | 'songs'
 
 /** The ⋯ menu of the progression strip: clear, save, my progressions, share link. */
 export function ProgressionTools({ onAnnounce }: { onAnnounce: (message: string) => void }) {
   const {
     progression,
     library,
+    songs,
+    lang,
     saveToLibrary,
     importLibrary,
     loadFromLibrary,
@@ -100,7 +104,7 @@ export function ProgressionTools({ onAnnounce }: { onAnnounce: (message: string)
   }
 
   const downloadBackup = () => {
-    const blob = new Blob([exportLibrary(library)], { type: 'application/json' })
+    const blob = new Blob([exportLibrary(library, songs)], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
     const anchor = document.createElement('a')
     anchor.href = url
@@ -114,9 +118,9 @@ export function ProgressionTools({ onAnnounce }: { onAnnounce: (message: string)
     const result = importLibrary(await file.text())
     const note = !result
       ? s('backupInvalid')
-      : result.added === 0
+      : result.added === 0 && result.songsAdded === 0
         ? s('backupNothing')
-        : `${s('backupAdded')}: ${result.added}`
+        : `${s('backupAdded')}: ${result.added}${result.songsAdded ? ` · ${songsText[lang].title}: ${result.songsAdded}` : ''}`
     setLibraryNote(note)
     onAnnounce(note)
   }
@@ -184,6 +188,9 @@ export function ProgressionTools({ onAnnounce }: { onAnnounce: (message: string)
               >
                 {s('mine')} ({library.length})
               </button>
+              <button type="button" className="cc-btn strip-menu__item" onClick={() => setPanel('songs')}>
+                {songsText[lang].title} ({songs.length})
+              </button>
               <button type="button" className="cc-btn strip-menu__item" disabled={empty} onClick={() => void share()}>
                 {s('share')}
               </button>
@@ -239,6 +246,13 @@ export function ProgressionTools({ onAnnounce }: { onAnnounce: (message: string)
                   {t('library.save')}
                 </button>
               </form>
+            </>
+          )}
+
+          {panel === 'songs' && (
+            <>
+              {heading(songsText[lang].title)}
+              <SongsPanel onAnnounce={onAnnounce} />
             </>
           )}
 

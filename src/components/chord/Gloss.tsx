@@ -85,7 +85,6 @@ export function GlossPulse() {
         <span>{tempo} bpm</span>
         <span>4/4</span>
       </p>
-      <span className="cc-hatch" aria-hidden="true" />
     </section>
   )
 }

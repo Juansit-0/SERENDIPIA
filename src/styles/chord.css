@@ -1360,3 +1360,20 @@
   min-width: 0;
   max-width: 100%;
 }
+
+/* Below desk the chord input, its quality and the likely key stack up: one block with dividers, not three cards. */
+@media (max-width: 1023px), (max-height: 639px) {
+  .cv-info {
+    gap: 0;
+  }
+
+  .cv-info > .cc-module + .cc-module {
+    border-top: 1px dashed var(--cc-line);
+    margin-top: -1px;
+  }
+
+  .cv-info > .cc-module:not(:first-child)::before,
+  .cv-info > .cc-module:not(:last-child)::after {
+    display: none;
+  }
+}

@@ -22,7 +22,6 @@ export function Fretboard({ m, onToggle }: { m: ChordModel; onToggle: (stringInd
     <section className="cc-module cv-chart" aria-label={c.chartLabel}>
       <header className="cv-chart-head">
         <h2 className="cc-label">{c.chartLabel}</h2>
-        <span className="cc-hatch cv-chart-hatch" aria-hidden="true" />
         <span className="cv-chart-cap">
           {m.capo > 0 && <b>{`${c.capo} ${m.capo} · `}</b>}
           {m.capo > 0 ? c.absoluteCapo : c.absolute}

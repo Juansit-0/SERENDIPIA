@@ -744,3 +744,37 @@
   font-weight: 400;
   padding-top: 0.5rem;
 }
+
+/* Phones: the seven degree cards stay compact (the add button moves up beside the numeral) and the orbit
+   ornament, which only reads across a wide row, is left out. */
+@media (max-width: 639px) {
+  .tv-orbit {
+    display: none;
+  }
+
+  .tv-card {
+    min-height: 0;
+  }
+
+  .tv-card__main {
+    padding-bottom: 0.6rem;
+  }
+
+  .tv-card__gloss {
+    display: none;
+  }
+
+  .tv-card__add {
+    top: 0.35rem;
+    bottom: auto;
+  }
+}
+
+/* Practice: the chord slots read as text fields to type into, not as buttons. */
+.pv-field {
+  text-align: left;
+  font-size: 1.125rem;
+  font-weight: 600;
+  background: var(--cc-ground-3);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.18);
+}

@@ -169,6 +169,8 @@ interface StoreValue {
   playFrets: (frets: (number | null)[], pattern?: PlayPattern) => void
   /** The open string's target pitch in the chosen tuning (no capo): the tuner's reference tone. */
   playOpenString: (stringIndex: number) => void
+  /** Plays any notes (ear training): together, or one after another. */
+  playNotes: (midi: number[], arpeggio?: boolean) => void
   /** Moves the whole progression (and a fixed key) by semitones; one undo step. */
   transposeProgression: (semitones: number) => void
   progression: ProgressionStep[]
@@ -432,6 +434,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (!keyAuto) setManualKeyRootPc((current) => (((current + semitones) % 12) + 12) % 12)
     },
     [setProgression, keyAuto],
+  )
+
+  const playNotes = useCallback(
+    (midi: number[], arpeggio = false) => {
+      void enableAudio().then(() => loadedAudioEngine()?.playNotes(midi, arpeggio))
+    },
+    [enableAudio],
   )
 
   const playOpenString = useCallback(
@@ -935,6 +944,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     playVoicing,
     playFrets,
     playOpenString,
+    playNotes,
     transposeProgression,
     progression,
     loadProgression,
@@ -968,7 +978,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     metronome, setMetronome, beatsPerChord, timbre, setTimbre, strum, setStepStrum, stopPlayback, keyRootPc, setKeyRootPc, keyMode, setKeyMode, keyAuto,
     detectedKey, analysis, nextSteps, suggestFrom, panelSuggestions, panelFollowsProgression, undo, redo, history.past.length, history.future.length, shareLink, library,
     saveProgressionToLibrary, importLibrary, songs, saveSongToList, deleteSong, playSong, songPlay, loadFromLibrary, deleteFromLibrary, chainProgression, capoSuggestion, applyCapoSuggestion, chord, chordInput, chordError, setChordInput,
-    setChord, stepCursor, moveStepCursor, voicings, selectedVoicing, selectVoicing, playVoicing, playFrets, playOpenString, transposeProgression, progression, loadProgression,
+    setChord, stepCursor, moveStepCursor, voicings, selectedVoicing, selectVoicing, playVoicing, playFrets, playOpenString, playNotes, transposeProgression, progression, loadProgression,
     addToProgression, moveStep, setStepVoicing, removeFromProgression, markedVoicing, setMarkedVoicing,
     clearProgression, playing, togglePlay, audioReady, audioLoading, audioFallback, enableAudio, suggestions,
     addSuggestion, detectorFrets, toggleDetectorString, chartSource, chartFrets, detection, toggleChartFret,

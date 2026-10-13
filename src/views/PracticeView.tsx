@@ -16,6 +16,8 @@ import {
 import { TEMPO_MAX, TEMPO_MIN } from '../state/settings'
 import { useStore } from '../state/store'
 import { ChordSlot } from './practice/ChordSlot'
+import { EarTrainer } from './practice/EarTrainer'
+import { earText } from '../i18n/ear'
 import '../styles/views.css'
 
 type Mode = 'minute' | 'metronome'
@@ -23,7 +25,27 @@ type Mode = 'minute' | 'metronome'
 const MINUTE_MS = 60000
 const BEAT_CHOICES = [4, 2, 1]
 
+/** Práctica: the chord-change trainer and ear training, one at a time. */
 export function PracticeView() {
+  const { lang } = useStore()
+  const x = earText[lang]
+  const [section, setSection] = useState<'changes' | 'ear'>('changes')
+  return (
+    <div className="pv flex flex-col gap-3 desk:h-full desk:min-h-0 desk:gap-2">
+      <div className="cc-seg pv-sections" role="group" aria-label={x.sections}>
+        <button type="button" aria-pressed={section === 'changes'} onClick={() => setSection('changes')}>
+          {x.changes}
+        </button>
+        <button type="button" aria-pressed={section === 'ear'} onClick={() => setSection('ear')}>
+          {x.ear}
+        </button>
+      </div>
+      {section === 'changes' ? <ChangeTrainer /> : <EarTrainer />}
+    </div>
+  )
+}
+
+function ChangeTrainer() {
   const { t, notation, progression, tuning, soundingTuning, enableAudio, stopPlayback, playing, tempo: globalTempo } = useStore()
   const v = useViewsText()
 
@@ -207,7 +229,7 @@ export function PracticeView() {
   ]
 
   return (
-    <div className="pv flex flex-col gap-3 desk:h-full desk:min-h-0 desk:gap-2">
+    <div className="flex flex-col gap-3 desk:min-h-0 desk:flex-1 desk:gap-2">
       <div className="pv-top">
         {slots.map(([value, setValue, chord, frets, label, id], index) => (
           <Fragment key={id}>

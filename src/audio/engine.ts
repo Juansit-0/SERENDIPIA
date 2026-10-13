@@ -277,6 +277,17 @@ class AudioEngine {
     )
   }
 
+  /** Any notes, low to high: together (a soft strum) or one after another. For ear training. */
+  playNotes(midi: number[], arpeggio = false): void {
+    if (!this.started) return
+    const start = Tone.now() + 0.03
+    const sorted = [...midi].sort((a, b) => a - b)
+    sorted.forEach((note, order) => {
+      const stringIndex = Math.min(5, Math.round((order * 5) / Math.max(1, sorted.length - 1)))
+      this.triggerNote(stringIndex, note, start + order * (arpeggio ? 0.55 : 0.03), 0.8, arpeggio ? 2.4 : 2)
+    })
+  }
+
   playString(stringIndex: number, midi: number): void {
     if (!this.started) return
     this.triggerNote(stringIndex, midi, Tone.now() + 0.03, 1, 1.8)

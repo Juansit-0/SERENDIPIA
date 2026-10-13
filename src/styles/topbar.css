@@ -288,3 +288,26 @@
     gap: 0;
   }
 }
+
+@media (min-width: 1600px) {
+  .cc-top__inner {
+    max-width: 1840px;
+    padding-inline: 32px;
+  }
+}
+
+@media (max-width: 639px) {
+  .cc-top__inner {
+    padding-inline: 10px;
+    gap: 6px;
+  }
+
+  .cc-top__inner > *,
+  #topbar-more > * {
+    max-width: 100%;
+  }
+
+  .cc-top {
+    overflow-x: clip;
+  }
+}

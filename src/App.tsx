@@ -48,7 +48,7 @@ function Shell() {
       <DistressFilter />
       {/* On `desk` screens the shell is exactly one viewport tall: top bar (52px), the view (fills the rest), strip. */}
       <TopBar />
-      <div className="mx-auto flex w-full max-w-[1560px] flex-col gap-4 px-3 py-3 sm:px-5 sm:py-4 desk:min-h-0 desk:flex-1 desk:gap-2 desk:py-2">
+      <div className="mx-auto flex w-full max-w-[1560px] min-[1600px]:max-w-[1840px] min-[1600px]:px-8 flex-col gap-4 px-3 py-3 sm:px-5 sm:py-4 desk:min-h-0 desk:flex-1 desk:gap-2 desk:py-2">
         <main className="flex min-w-0 flex-col desk:min-h-0 desk:flex-1">
           {view === 'chord' && <ChordView />}
           {view === 'theory' && <TheoryView />}

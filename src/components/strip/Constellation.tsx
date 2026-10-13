@@ -10,12 +10,11 @@ import { Star, type StarFn } from './Star'
 export const SLOTS = 16
 const MAX_GHOSTS = 3
 // Vertical rhythm of one slot (px): roman, star, name, label. Offsets bend the line gently.
-const ROMAN_H = 13
+const ROMAN_H = 14
 const STAR_H = 26
-const NAME_H = 15
-const LABEL_H = 12
-const BEND = 6
-export const TRACK_H = BEND + ROMAN_H + STAR_H + NAME_H + LABEL_H
+const BEND = 4
+// The lines layer only spans roman + star; the framed tile below them grows with the type size.
+export const LINES_H = BEND + ROMAN_H + STAR_H
 
 const offsetOf = (index: number) => Math.round(BEND * (1 - Math.sin((Math.PI * index) / (SLOTS - 1))))
 const starY = (index: number) => offsetOf(index) + ROMAN_H + STAR_H / 2
@@ -120,8 +119,8 @@ export function Constellation({
 
   return (
     <div className="strip-sky" tabIndex={-1}>
-      <div className="strip-track" style={{ height: TRACK_H }} role="group" aria-label={t('a11y.stepRow')}>
-        <svg className="strip-lines" viewBox={`0 0 ${SLOTS} ${TRACK_H}`} preserveAspectRatio="none" aria-hidden="true" focusable="false">
+      <div className="strip-track" role="group" aria-label={t('a11y.stepRow')}>
+        <svg className="strip-lines" viewBox={`0 0 ${SLOTS} ${LINES_H}`} height={LINES_H} preserveAspectRatio="none" aria-hidden="true" focusable="false">
           {Array.from({ length: Math.max(0, count - 1) }, (_, i) => (
             <line
               key={`l-${i}`}
@@ -195,14 +194,16 @@ export function Constellation({
               >
                 <span className={`strip-roman ${chord ? STATUS_WEIGHT[chord.status] : ''}`}>{chord?.roman ?? ' '}</span>
                 <Star fn={fn} active={active} />
-                <span className="strip-name" title={notation === 'both' ? `${step.anglo} · ${step.latin}` : undefined}>
-                  {name}
-                </span>
-                <span
-                  className={`strip-frets${step.frets ? ' strip-frets--set' : ''}`}
-                  title={step.frets ? t('voicing.step') : t('voicing.auto')}
-                >
-                  {label}
+                <span className="strip-tile">
+                  <span className="strip-name" title={notation === 'both' ? `${step.anglo} · ${step.latin}` : undefined}>
+                    {name}
+                  </span>
+                  <span
+                    className={`strip-frets${step.frets ? ' strip-frets--set' : ''}`}
+                    title={step.frets ? t('voicing.step') : t('voicing.auto')}
+                  >
+                    {label}
+                  </span>
                 </span>
               </button>
             </div>
@@ -227,8 +228,10 @@ export function Constellation({
             >
               <span className="strip-roman">{suggestion.roman ?? ' '}</span>
               <Star fn="tonic" ghost />
-              <span className="strip-name">+ {suggestion.anglo}</span>
-              <span className="strip-frets">{s('ghost')}</span>
+              <span className="strip-tile">
+                <span className="strip-name">+ {suggestion.anglo}</span>
+                <span className="strip-frets">{s('ghost')}</span>
+              </span>
             </button>
           </div>
         ))}

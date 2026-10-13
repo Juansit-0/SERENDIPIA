@@ -101,7 +101,7 @@
   background: var(--cc-ground-3);
   border: 1px solid var(--cc-line-strong);
   border-top: 4px solid var(--fn-fill);
-  border-radius: 4px;
+  border-radius: 0;
   transition: border-color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
 }
 
@@ -152,6 +152,7 @@
 }
 
 .tv-card__name {
+  font-variant-numeric: lining-nums;
   font-family: var(--vf-display);
   line-height: 1;
   white-space: nowrap;
@@ -215,14 +216,27 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  padding: 0.4rem 0.4rem 0.4rem 0.7rem;
-  border: 1px solid var(--cc-line);
-  border-left: 3px solid var(--cc-accent-deep);
-  border-radius: 3px;
+  padding: 0.4rem 0.4rem 0.4rem 0.4rem;
+  border: 1px solid var(--cc-line-strong);
+  border-radius: 0;
   background: var(--cc-ground);
 }
 
+.tv-classic__chip {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  background: var(--cc-accent);
+  color: var(--cc-accent-ink);
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
 .tv-classic__text {
+  flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -395,6 +409,7 @@
 }
 
 .pv-slot__name {
+  font-variant-numeric: lining-nums;
   font-family: var(--vf-display);
   line-height: 1;
   white-space: nowrap;
@@ -484,7 +499,9 @@
 
 .pv-stat__value {
   margin: 0;
-  font-family: var(--vf-display);
+  font-family: var(--vf-ui);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums lining-nums;
   font-size: 2.5rem;
   line-height: 1;
   color: var(--cc-ink);
@@ -680,4 +697,54 @@
   .pv-slot {
     transition: none;
   }
+}
+
+.pv-steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: how;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.pv-steps li {
+  counter-increment: how;
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+  font-family: var(--vf-serif);
+  font-size: 0.9375rem;
+  line-height: 1.25;
+  color: var(--cc-ink-soft);
+}
+
+.pv-steps li::before {
+  content: counter(how);
+  flex: none;
+  width: 1.2rem;
+  text-align: center;
+  font-family: var(--vf-ui);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--cc-accent-ink);
+  background: var(--cc-accent);
+}
+
+.pv-setup__note {
+  font-size: 0.8125rem;
+  color: var(--cc-ink-faint);
+}
+
+@media (min-width: 1024px) and (min-height: 640px) {
+  .pv-plate {
+    width: clamp(4.5rem, 12vh, 7rem);
+  }
+}
+
+.pv-stat__value.is-empty {
+  font-size: 1.5rem;
+  font-weight: 400;
+  padding-top: 0.5rem;
 }

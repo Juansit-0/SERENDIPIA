@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { chordText } from '../../i18n/chord'
-import { voicingTitle } from './voicingTitle'
+import { voicingTitles } from './voicingTitle'
 import type { ChordModel } from './useChordModel'
 
 const GLYPHS = [
@@ -25,7 +25,7 @@ export function InfoRow({ m, onListen }: { m: ChordModel; onListen: () => void }
   useEffect(() => () => setChordInputFocused(false), [setChordInputFocused])
 
   const soundingName = notation === 'latin' ? m.sounding.latin : m.sounding.anglo
-  const activeLabel = m.activeVoicing ? voicingTitle(m.activeVoicing, c) : null
+  const activeLabel = m.activeVoicing ? (voicingTitles(m.voicings, c)[m.selectedVoicing] ?? null) : null
   const qualityName = lang === 'es' ? chord.quality.nameEs : chord.quality.nameEn
 
   return (

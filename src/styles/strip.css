@@ -5,7 +5,10 @@
  */
 
 .strip {
-  --strip-col: 76px;
+  --strip-col: 80px;
+  --strip-name: 1rem;
+  --strip-roman: 0.8125rem;
+  --strip-fret: 0.8125rem;
   background: var(--cc-ground);
   color: var(--cc-ink);
   font-family: var(--font-ui);
@@ -54,7 +57,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
-  padding: 3px 12px;
+  padding: 2px 12px;
   min-height: 34px;
   border-bottom: 1px solid var(--cc-line);
 }
@@ -180,20 +183,53 @@
   flex-direction: column;
   align-items: center;
   width: calc(100% - 4px);
-  padding: 0 2px;
-  border: 1px solid transparent;
-  border-radius: 10px;
+  padding: 0;
+  border: 0;
   background: transparent;
   color: inherit;
   font: inherit;
   cursor: pointer;
-  transition: background 0.16s ease, border-color 0.16s ease;
 }
 
-.strip-step:hover:not(:disabled),
-.strip-ghost:hover {
+/* The framed tile hangs from its star: a clear chip, below the line so marks never touch it. */
+.strip-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+  margin-top: 2px;
+  padding: 2px 1px 3px;
+  border: 1px solid var(--cc-line-strong);
+  border-radius: 9px;
+  background: var(--cc-ground-3);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.35);
+  transition: background 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease, transform 0.12s ease;
+}
+
+.strip-ghost .strip-tile {
+  border-style: dashed;
+  background: transparent;
+  box-shadow: none;
+}
+
+.strip-step:hover:not(:disabled) .strip-tile,
+.strip-ghost:hover .strip-tile {
+  border-color: var(--cc-accent);
   background: var(--cc-accent-soft);
-  border-color: var(--cc-line-strong);
+  box-shadow: 0 0 0 3px var(--cc-accent-soft);
+}
+
+.strip-step:active:not(:disabled) .strip-tile {
+  transform: translateY(1px);
+  box-shadow: none;
+}
+
+.strip-step:focus-visible,
+.strip-ghost:focus-visible {
+  outline-offset: 3px;
+  border-radius: 12px;
 }
 
 .strip-step:disabled {
@@ -202,17 +238,24 @@
 
 .strip-step.is-dragging {
   opacity: 0.4;
-  border: 1px dashed var(--cc-line-strong);
+}
+
+.strip-step.is-active .strip-tile {
+  border-color: var(--sc);
+  border-width: 2px;
+  padding: 1px 0 2px;
+  background: color-mix(in srgb, var(--sc) 22%, var(--cc-ground-3));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--sc) 35%, transparent), 0 0 18px -2px var(--sc);
 }
 
 .strip-roman {
-  height: 13px;
+  height: 14px;
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 0.75rem;
-  line-height: 13px;
+  font-size: var(--strip-roman, 0.8125rem);
+  line-height: 14px;
   color: var(--st, var(--cc-ink-soft));
 }
 
@@ -264,8 +307,8 @@
 }
 
 .strip-step.is-active .strip-star {
-  transform: scale(1.3);
-  filter: drop-shadow(0 0 5px var(--sc));
+  transform: scale(1.4) translateY(-1px);
+  filter: drop-shadow(0 0 6px var(--sc));
 }
 
 .strip-ghost:hover .strip-star__ghost {
@@ -278,10 +321,10 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  line-height: 15px;
-  letter-spacing: 0.01em;
+  font-size: var(--strip-name, 1rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
 }
 
 .strip-step.is-active .strip-name {
@@ -298,9 +341,9 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 0.6875rem;
-  line-height: 12px;
-  color: var(--cc-ink-faint);
+  font-size: var(--strip-fret, 0.8125rem);
+  line-height: 1.1;
+  color: var(--cc-ink-soft);
   font-variant-numeric: tabular-nums;
 }
 
@@ -416,8 +459,8 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 4px 16px;
-  min-height: 34px;
-  padding: 3px 12px;
+  min-height: 32px;
+  padding: 2px 12px;
   border-top: 1px solid var(--cc-line);
   font-size: 0.8125rem;
 }
@@ -708,6 +751,20 @@
 .strip-select option {
   background: var(--cc-ground-2);
   color: var(--cc-ink);
+}
+
+/* Wide screens: bigger type and wider steps. */
+@media (min-width: 1600px) {
+  .strip {
+    --strip-col: 100px;
+    --strip-name: 1.1875rem;
+    --strip-roman: 0.9375rem;
+    --strip-fret: 0.875rem;
+  }
+
+  .strip__title {
+    font-size: 1.0625rem;
+  }
 }
 
 @media (pointer: coarse) {

@@ -78,6 +78,7 @@ export function useChordModel() {
     keyDiffers,
     alternatives,
     activeVoicing,
+    voicings: store.voicings,
     heroName: notation === 'latin' ? chord.latin : chord.anglo,
     otherName: notation === 'latin' ? chord.anglo : chord.latin,
     nameOf,

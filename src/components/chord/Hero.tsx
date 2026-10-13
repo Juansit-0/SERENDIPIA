@@ -1,13 +1,10 @@
 import type { CSSProperties } from 'react'
 import { chordText } from '../../i18n/chord'
-import { useTheme } from '../../state/theme'
 import type { ChordModel } from './useChordModel'
 
 /** The hero module: kicker, the chord name set huge inside a thin orbit, and the other spelling on its own line. */
 export function Hero({ m }: { m: ChordModel }) {
-  const { theme } = useTheme()
   const c = chordText[m.lang]
-  const kicker = (theme === 'night' ? c.kickerNight : c.kickerDay).split('\n')
   const showName = !m.noChord
   const name = m.heroName
   const stale = m.chordError && m.chartSource === 'voicing'
@@ -18,15 +15,10 @@ export function Hero({ m }: { m: ChordModel }) {
     <section className="cc-module cv-hero" aria-label={c.chordLabel}>
       <div className="cv-orbit-clip" aria-hidden="true">
         <svg className="cv-orbit" viewBox="0 0 100 100" preserveAspectRatio="none" focusable="false">
-          <ellipse cx="50" cy="64" rx="49" ry="23" className="cv-orbit-a" vectorEffect="non-scaling-stroke" />
-          <ellipse cx="50" cy="64" rx="46" ry="17" className="cv-orbit-b" vectorEffect="non-scaling-stroke" />
+          <ellipse cx="50" cy="55" rx="49" ry="23" className="cv-orbit-a" vectorEffect="non-scaling-stroke" />
+          <ellipse cx="50" cy="55" rx="46" ry="17" className="cv-orbit-b" vectorEffect="non-scaling-stroke" />
         </svg>
       </div>
-      <p className="cv-kicker">
-        {kicker.map((line) => (
-          <span key={line}>{line}</span>
-        ))}
-      </p>
       <div className={`cv-name-wrap ${stale ? 'is-stale' : ''}`}>
         {showName ? (
           <p

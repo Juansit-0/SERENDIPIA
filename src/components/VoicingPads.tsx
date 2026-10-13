@@ -2,7 +2,7 @@ import { useStore } from '../state/store'
 import { chordText } from '../i18n/chord'
 import { MiniPlate } from './MiniPlate'
 import { Mesh } from './chord/Mesh'
-import { voicingTitle } from './chord/voicingTitle'
+import { voicingTitles } from './chord/voicingTitle'
 import '../styles/chord.css'
 
 /** The positions column: every voicing as a mini diagram, the active one filled; a × clears a marked one. */
@@ -19,10 +19,12 @@ export function VoicingPads({ activeIndex }: { activeIndex?: number }) {
         <p className="cv-pos-empty">{c.positionsEmpty}</p>
       ) : (
         <ul className="cv-pos-list">
-          {voicings.map((voicing, index) => {
+          {(() => {
+            const titles = voicingTitles(voicings, c)
+            return voicings.map((voicing, index) => {
             const isMarked = voicing.source === 'marked'
             const selected = index === active
-            const label = voicingTitle(voicing, c)
+            const label = titles[index]
             return (
               <li key={voicing.signature} className="cv-pos-item">
                 <button
@@ -56,7 +58,8 @@ export function VoicingPads({ activeIndex }: { activeIndex?: number }) {
                 )}
               </li>
             )
-          })}
+          })
+          })()}
         </ul>
       )}
     </section>

@@ -41,10 +41,11 @@
 :root[data-theme='night'],
 .on-dark {
   --cc-ground: #0d0b14;
-  --cc-ground-2: #14111d;
-  --cc-ground-3: #1e1a2b;
-  --cc-line: #3b3352;
-  --cc-line-strong: #6a5d8c;
+  /* Sections and controls step up from the ground (finish review: frames ≥ 3:1). */
+  --cc-ground-2: #1d1829;
+  --cc-ground-3: #2a2440;
+  --cc-line: #75689a;
+  --cc-line-strong: #a596cc;
   --cc-ink: #ece5f8;
   --cc-ink-soft: #c2b7da;
   --cc-ink-faint: #9b90b5;
@@ -68,11 +69,11 @@
 }
 
 :root[data-theme='day'] {
-  --cc-ground: #e8e7ec;
-  --cc-ground-2: #f3f2f6;
+  --cc-ground: #e3e2e8;
+  --cc-ground-2: #f6f5f9;
   --cc-ground-3: #ffffff;
-  --cc-line: #b5b2c0;
-  --cc-line-strong: #5f5b6c;
+  --cc-line: #7e7a8c;
+  --cc-line-strong: #4a4656;
   --cc-ink: #15131c;
   --cc-ink-soft: #37343f;
   --cc-ink-faint: #595565;
@@ -98,9 +99,9 @@
 /* The day strip band stays charcoal: re-apply the night palette inside it. */
 :root[data-theme='day'] .on-dark {
   --cc-ground: #2a2a2f;
-  --cc-ground-2: #323238;
-  --cc-ground-3: #3c3c44;
-  --cc-line: #55545f;
+  --cc-ground-2: #34343b;
+  --cc-ground-3: #43434d;
+  --cc-line: #85849a;
 }
 
 @layer base {
@@ -188,6 +189,14 @@
     color: var(--cc-accent-deep);
   }
 
+  /* Only section headers carry the filled band; inline labels stay plain text. */
+  :is(h1, h2, h3, h4, legend).cc-label {
+    display: inline-block;
+    padding: 0.18rem 0.5rem;
+    border-radius: 2px;
+    background: var(--cc-accent-soft);
+  }
+
   /*
    * Buttons: every control reads as a control (user note). Three ranks:
    * primary = filled accent, secondary = framed with raised ground, ghost = framed hairline.
@@ -203,6 +212,8 @@
     border: 1px solid var(--cc-line-strong);
     background: var(--cc-ground-3);
     color: var(--cc-ink);
+    /* Raised at rest so every control reads as a control (user note + finish review). */
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 2px 5px -2px rgba(0, 0, 0, 0.45);
     font-family: var(--font-ui);
     font-size: 0.875rem;
     font-weight: 500;
@@ -246,8 +257,8 @@
   }
 
   .cc-btn--ghost {
-    background: transparent;
-    border-color: var(--cc-line);
+    background: var(--cc-ground-3);
+    border-color: var(--cc-line-strong);
   }
 
   .cc-btn--icon {

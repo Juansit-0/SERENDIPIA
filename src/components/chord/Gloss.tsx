@@ -1,5 +1,4 @@
 import { chordText } from '../../i18n/chord'
-import { usePlayheadBeat } from '../../state/playhead'
 import { useTheme } from '../../state/theme'
 import { useStore } from '../../state/store'
 
@@ -13,11 +12,10 @@ const PHASES = [
 ]
 const SUN = [180, 135, 90, 45, 0, -45]
 
-/** Decoration: a column of moon (night) or sun (day) phases; the beat lights one while the progression plays. */
+/** Decoration: a static column of moon (night) or sun (day) phases. */
 export function PhaseColumn() {
   const { theme } = useTheme()
-  const beat = usePlayheadBeat()
-  const current = beat < 0 ? -1 : beat % PHASES.length
+  const current = 2 // quiet ornament: the top bar owns the beat indicator
   return (
     <div className="cc-module cv-phases" aria-hidden="true" data-current={current}>
       {PHASES.map((path, index) => {
@@ -25,8 +23,7 @@ export function PhaseColumn() {
         return (
           <svg
             key={index}
-            className={`cv-phase ${current === index ? 'is-now' : ''} ${current < 0 ? 'is-idle' : ''}`}
-            style={{ animationDelay: `${index * 0.7}s` }}
+            className={`cv-phase ${current === index ? 'is-now' : ''}`}
             viewBox="-13 -13 26 26"
             focusable="false"
           >
@@ -59,6 +56,7 @@ const STAR = 'M0,-9 Q1.35,-1.35 9,0 Q1.35,1.35 0,9 Q-1.35,1.35 -9,0 Q-1.35,-1.35
 /** «Hallazgo» dictionary entry. */
 export function GlossFind() {
   const { lang } = useStore()
+  const { theme } = useTheme()
   const c = chordText[lang]
   return (
     <section className="cc-module cv-gloss cv-gloss--find" aria-label={c.glossWord}>
@@ -67,6 +65,7 @@ export function GlossFind() {
       </svg>
       <p className="cv-gloss-word">{c.glossWord}</p>
       <p className="cc-gloss cv-gloss-phon">{c.glossPhon}</p>
+      <p className="cv-gloss-tag">{(theme === 'night' ? c.kickerNight : c.kickerDay).replace('\n', ' ')}</p>
       <p className="cc-gloss cv-gloss-def">{c.glossDef}</p>
     </section>
   )

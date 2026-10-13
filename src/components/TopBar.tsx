@@ -96,12 +96,12 @@ export function TopBar() {
           <span className="cc-brand__word max-sm:sr-only">{x.brand}</span>
         </h1>
 
-        <nav className="flex gap-1 max-sm:order-2 max-sm:w-full" aria-label={t('a11y.views')}>
+        <nav className="flex gap-1 max-sm:order-2 max-sm:w-full max-sm:min-w-0" aria-label={t('a11y.views')}>
           {VIEWS.map((item) => (
             <button
               key={item}
               type="button"
-              className="cc-btn cc-btn--ghost max-sm:flex-1"
+              className="cc-btn cc-btn--ghost max-sm:min-w-0 max-sm:flex-1 max-sm:px-2"
               aria-current={view === item ? 'page' : undefined}
               onClick={() => setView(item)}
             >
@@ -123,7 +123,7 @@ export function TopBar() {
         </button>
 
         <span className="max-sm:hidden desk:max-[1199px]:hidden">
-          <BeatMoons theme={theme} label={x.beatIndicator} />
+          <BeatMoons label={x.beatIndicator} />
         </span>
 
         <div className="cc-stepper max-sm:ml-auto" role="group" aria-label={t('transport.tempo')}>
@@ -343,7 +343,7 @@ export function TopBar() {
                     step={0.01}
                     value={volume}
                     onChange={(event) => setVolume(Number(event.target.value))}
-                    className="h-7 w-full cursor-pointer accent-[var(--cc-accent-deep)]"
+                    className="h-8 w-full cursor-pointer accent-[var(--cc-accent-deep)]"
                   />
                 </div>
                 <div className="cc-pop__row flex flex-wrap items-center gap-2">

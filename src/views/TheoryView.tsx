@@ -76,11 +76,14 @@ export function TheoryView() {
           <span className="tv-classics__hint cc-gloss">{v('theory.classicsHint')}</span>
         </div>
         <ul className="tv-classics__list">
-          {progressions.map((template) => {
+          {progressions.map((template, index) => {
             const steps = resolveProgression(template, keyRootPc)
             const name = lang === 'es' ? template.nameEs : template.nameEn
             return (
               <li className="tv-classic" key={template.id}>
+                <span className="tv-classic__chip" aria-hidden="true">
+                  {index + 1}
+                </span>
                 <div className="tv-classic__text">
                   <span className="tv-classic__name">{name}</span>
                   <span className="tv-classic__seq">{steps.map((step) => (notation === 'latin' ? step.latin : step.anglo)).join(' · ')}</span>

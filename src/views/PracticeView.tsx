@@ -203,7 +203,7 @@ export function PracticeView() {
       ? [t('practice.left'), `${live ? remaining : 60}${t('practice.seconds')}`, false]
       : [v('practice.ownTempo'), live ? tempo : startTempo, false],
     [t('practice.changes'), count, false],
-    [mode === 'minute' ? t('practice.best') : t('practice.bestTempo'), best ?? '—', true],
+    [mode === 'minute' ? t('practice.best') : t('practice.bestTempo'), best ?? v('practice.noRecord'), true],
   ]
 
   return (
@@ -278,7 +278,11 @@ export function PracticeView() {
               </button>
             </div>
           ) : null}
-          <p className="pv-setup__hint cc-gloss">{mode === 'minute' ? t('practice.tapHint') : t('practice.metronomeHint')}</p>
+          <ol className="pv-steps">
+            <li>{v('practice.how1')}</li>
+            <li>{v('practice.how2')}</li>
+            <li>{v(mode === 'minute' ? 'practice.how3.minute' : 'practice.how3.metronome')}</li>
+          </ol>
         </section>
       </div>
 
@@ -287,7 +291,7 @@ export function PracticeView() {
           {readouts.map(([label, value, soft]) => (
             <div className="pv-stat" key={label}>
               <dt className="cc-label">{label}</dt>
-              <dd className={`pv-stat__value cc-num ${soft ? 'is-soft' : ''}`}>{value}</dd>
+              <dd className={`pv-stat__value cc-num ${soft ? 'is-soft' : ''} ${soft && typeof value === 'string' ? 'is-empty' : ''}`}>{value}</dd>
             </div>
           ))}
         </dl>

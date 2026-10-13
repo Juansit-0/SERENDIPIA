@@ -1,434 +1,303 @@
 ---
 name: SERENDIPIA
-description: Riso-print chord lab — paper ground, flat spot inks, registration marks, overprinted turquoise.
+description: Carta celeste — an observatory of chance where the fretboard is a sky chart, chords are stars and the progression is a constellation; one system in two themes (night, day).
 colors:
-  paper: "#f4f1ea"
-  paper-deep: "#eae4d6"
-  paper-shade: "#e0d8c6"
-  ink: "#1a1a1a"
-  ink-soft: "#4c4a44"
-  ink-faint: "#6f6b60"
-  rule: "#cbc2ae"
-  rule-strong: "#a79c84"
-  rule-cell: "#938870"
-  blue: "#0078bf"
-  blue-ink: "#005f96"
-  orange: "#ff6c2f"
-  yellow: "#ffe800"
-  turquoise: "#40e0d0"
-  red: "#d8452f"
-  ink-deep: "#0b0b0b"
+  night-ground: "#0d0b14"
+  night-ground-2: "#1d1829"
+  night-ground-3: "#2a2440"
+  night-line: "#75689a"
+  night-line-strong: "#a596cc"
+  night-ink: "#ece5f8"
+  night-ink-soft: "#c2b7da"
+  night-ink-faint: "#9b90b5"
+  night-accent: "#c7b3e8"
+  night-accent-ink: "#120f1a"
+  night-accent-deep: "#d6c6f0"
+  night-danger: "#ff8f8f"
+  night-focus: "#40e0d0"
+  day-ground: "#e3e2e8"
+  day-ground-2: "#f6f5f9"
+  day-ground-3: "#ffffff"
+  day-line: "#7e7a8c"
+  day-line-strong: "#4a4656"
+  day-ink: "#15131c"
+  day-ink-soft: "#37343f"
+  day-ink-faint: "#595565"
+  day-accent: "#40e0d0"
+  day-accent-ink: "#0b1716"
+  day-accent-deep: "#0a6f68"
+  day-danger: "#b3261e"
+  day-focus: "#0a6f68"
+  day-band-ground: "#2a2a2f"
+  day-band-ground-2: "#34343b"
+  day-band-ground-3: "#43434d"
+  fn-tonic-night: "#c7b3e8"
+  fn-sub-night: "#40e0d0"
+  fn-dom-night: "#e8c37a"
+  fn-borrowed-night: "#e2a4bf"
+  fn-tonic-day: "#5d43a3"
+  fn-sub-day: "#0a6f68"
+  fn-dom-day: "#8a5d0c"
+  fn-borrowed-day: "#9c3f66"
+  fn-tonic-fill-day: "#b7a1e6"
+  fn-sub-fill-day: "#40e0d0"
+  fn-dom-fill-day: "#e9b949"
+  fn-borrowed-fill-day: "#e6a2c0"
+  role-root-night: "#d8c9f5"
+  role-third-night: "#9a93ee"
+  role-seventh-night: "#ece5f8"
+  role-other-night: "#8b82b8"
+  role-root-day: "#40e0d0"
+  role-third-day: "#5d43a3"
+  role-seventh-day: "#15131c"
+  role-other-day: "#55505f"
 typography:
   display:
-    fontFamily: "Archivo Variable, Archivo, system-ui, -apple-system, sans-serif"
-    fontSize: "clamp(2.5rem, 5.5vw, 5rem)"
-    fontWeight: 800
-    lineHeight: 0.92
-    letterSpacing: "-0.02em"
-    fontVariation: "'wdth' 104, 'wght' 800"
-  headline:
-    fontFamily: "Archivo Variable, Archivo, system-ui, -apple-system, sans-serif"
-    fontSize: "clamp(2.25rem, 4vw, 3.5rem)"
-    fontWeight: 800
+    fontFamily: "'IM Fell English', 'Iowan Old Style', Georgia, serif"
+    fontSize: "min(7.5rem, container-fit)"
+    fontWeight: 400
     lineHeight: 0.95
-    fontVariation: "'wdth' 104, 'wght' 800"
-  wordmark:
-    fontFamily: "Archivo Variable, Archivo, system-ui, -apple-system, sans-serif"
-    fontSize: "1.0625rem"
-    fontWeight: 800
-    letterSpacing: "0.24em"
-    fontVariation: "'wdth' 92, 'wght' 800"
-  subtitle:
-    fontFamily: "Archivo Variable, Archivo, system-ui, -apple-system, sans-serif"
-    fontSize: "1.15rem"
-    fontWeight: 800
-    fontVariation: "'wdth' 92, 'wght' 800"
-  title:
-    fontFamily: "Archivo Variable, Archivo, system-ui, -apple-system, sans-serif"
-    fontSize: "1rem"
-    fontWeight: 520
-    fontVariation: "'wdth' 100, 'wght' 520"
-  body:
-    fontFamily: "Archivo Variable, Archivo, system-ui, -apple-system, sans-serif"
+    letterSpacing: "-0.01em"
+  gloss:
+    fontFamily: "'EB Garamond', 'Iowan Old Style', Georgia, serif"
     fontSize: "0.9375rem"
     fontWeight: 400
-    lineHeight: 1.45
-  field:
-    fontFamily: "Archivo Variable, Archivo, system-ui, -apple-system, sans-serif"
-    fontSize: "1.25rem"
-    fontWeight: 600
-    letterSpacing: "0.01em"
-    fontVariation: "'wdth' 100, 'wght' 600"
-  control:
-    fontFamily: "Archivo Variable, Archivo, system-ui, -apple-system, sans-serif"
-    fontSize: "0.6875rem"
-    fontWeight: 600
-    letterSpacing: "0.1em"
-    fontVariation: "'wdth' 96, 'wght' 600"
+    lineHeight: 1.4
+  body:
+    fontFamily: "'Jost Variable', 'Avenir Next', system-ui, sans-serif"
+    fontSize: "0.875rem"
+    fontWeight: 500
+    lineHeight: 1.3
   label:
-    fontFamily: "Archivo Variable, Archivo, system-ui, -apple-system, sans-serif"
-    fontSize: "0.625rem"
-    fontWeight: 600
-    letterSpacing: "0.16em"
-    fontVariation: "'wdth' 92, 'wght' 600"
-  readout:
-    fontFamily: "Martian Mono Variable, ui-monospace, 'SF Mono', Menlo, monospace"
-    fontSize: "0.75rem"
-    fontWeight: 500
-    letterSpacing: "0.02em"
-    fontFeature: "'tnum'"
-  chip:
-    fontFamily: "Martian Mono Variable, ui-monospace, 'SF Mono', Menlo, monospace"
+    fontFamily: "'Jost Variable', 'Avenir Next', system-ui, sans-serif"
     fontSize: "0.6875rem"
-    fontWeight: 500
-    fontFeature: "'tnum'"
-  micro:
-    fontFamily: "Martian Mono Variable, ui-monospace, 'SF Mono', Menlo, monospace"
-    fontSize: "0.5rem"
-    fontWeight: 500
-  micro-7:
-    fontFamily: "Archivo Variable, Archivo, system-ui, -apple-system, sans-serif"
-    fontSize: "7px"
     fontWeight: 600
-  micro-8:
-    fontFamily: "Martian Mono Variable, ui-monospace, 'SF Mono', Menlo, monospace"
-    fontSize: "8px"
-    fontWeight: 500
-  micro-9:
-    fontFamily: "Martian Mono Variable, ui-monospace, 'SF Mono', Menlo, monospace"
-    fontSize: "9px"
-    fontWeight: 600
-  micro-10:
-    fontFamily: "Archivo Variable, Archivo, system-ui, -apple-system, sans-serif"
-    fontSize: "10px"
-    fontWeight: 600
-  micro-11:
-    fontFamily: "Martian Mono Variable, ui-monospace, 'SF Mono', Menlo, monospace"
-    fontSize: "11px"
-    fontWeight: 500
-  micro-13:
-    fontFamily: "Martian Mono Variable, ui-monospace, 'SF Mono', Menlo, monospace"
-    fontSize: "13px"
-    fontWeight: 500
-  lead:
-    fontFamily: "Archivo Variable, Archivo, system-ui, -apple-system, sans-serif"
-    fontSize: "1.1rem"
-    fontWeight: 500
-  latin-reading:
-    fontFamily: "Archivo Variable, Archivo, system-ui, -apple-system, sans-serif"
-    fontSize: "1.15rem"
-    fontWeight: 500
+    lineHeight: 1.2
+    letterSpacing: "0.16em"
 rounded:
-  stamp: "2px"
-  plate: "3px"
-  sheet: "2px"
-  cell: "1px"
-  scrollbar: "6px"
+  module: "3px"
+  band: "2px"
+  popover: "6px"
   pill: "999px"
 spacing:
-  tight: "3px"
-  snug: "6px"
-  block: "8px"
-  panel: "16px"
-  page: "12px"
+  gap-collage: "6px"
+  gap-desk: "8px"
+  topbar-height: "52px"
+  control-desk: "32px"
+  control-touch: "44px"
 components:
-  stamp:
-    backgroundColor: "transparent"
-    textColor: "{colors.ink}"
-    typography: "{typography.control}"
-    rounded: "{rounded.stamp}"
-    padding: "5px 11px"
+  module:
+    backgroundColor: "{colors.night-ground-2}"
+    textColor: "{colors.night-ink}"
+    rounded: "{rounded.module}"
+  button:
+    backgroundColor: "{colors.night-ground-3}"
+    textColor: "{colors.night-ink}"
+    rounded: "{rounded.pill}"
+    padding: "0.35rem 0.85rem"
     height: "32px"
-  stamp-pressed:
-    backgroundColor: "{colors.ink}"
-    textColor: "{colors.paper}"
-    typography: "{typography.control}"
-    rounded: "{rounded.stamp}"
-    padding: "5px 11px"
+  button-primary:
+    backgroundColor: "{colors.night-accent}"
+    textColor: "{colors.night-accent-ink}"
+    rounded: "{rounded.pill}"
+  button-primary-day:
+    backgroundColor: "{colors.day-accent}"
+    textColor: "{colors.day-accent-ink}"
+  button-lg:
+    rounded: "{rounded.pill}"
+    padding: "0.5rem 1.4rem"
+    height: "48px"
+  button-icon:
+    rounded: "{rounded.pill}"
+    width: "32px"
     height: "32px"
-  stamp-ink:
-    backgroundColor: "{colors.ink}"
-    textColor: "{colors.paper}"
-    typography: "{typography.control}"
-    rounded: "{rounded.stamp}"
-    padding: "5px 11px"
-    height: "32px"
-  stamp-live:
-    backgroundColor: "{colors.turquoise}"
-    textColor: "{colors.ink}"
-    typography: "{typography.control}"
-    rounded: "{rounded.stamp}"
-    padding: "5px 11px"
-    height: "32px"
-  plate:
-    backgroundColor: "{colors.paper}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.plate}"
-    padding: "16px"
-  sheet:
-    backgroundColor: "{colors.paper}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.sheet}"
-    padding: "8px"
-  proof-sheet:
-    backgroundColor: "{colors.paper}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.sheet}"
-    width: "84px"
-    padding: "8px"
-  step-sheet:
-    backgroundColor: "{colors.paper}"
-    textColor: "{colors.ink}"
-    typography: "{typography.title}"
-    rounded: "{rounded.sheet}"
-    padding: "6px"
-    height: "68px"
+  segmented:
+    backgroundColor: "{colors.night-ground}"
+    rounded: "{rounded.pill}"
+    padding: "2px"
   chip:
-    backgroundColor: "{colors.paper}"
-    textColor: "{colors.ink-soft}"
-    typography: "{typography.chip}"
-    rounded: "{rounded.stamp}"
-    padding: "2px 6px"
-  chip-ink:
-    backgroundColor: "{colors.ink}"
-    textColor: "{colors.paper}"
-    typography: "{typography.chip}"
-    rounded: "{rounded.stamp}"
-    padding: "2px 6px"
-  field:
-    backgroundColor: "transparent"
-    textColor: "{colors.ink}"
-    typography: "{typography.field}"
-    rounded: "0"
-    padding: "6px 2px"
-  cell:
-    backgroundColor: "transparent"
-    rounded: "{rounded.cell}"
-    height: "30px"
-  tempo-block:
-    backgroundColor: "{colors.yellow}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.stamp}"
-    padding: "2px 8px"
+    textColor: "{colors.night-ink-soft}"
+    rounded: "{rounded.pill}"
+    padding: "0.15rem 0.55rem"
+  popover:
+    backgroundColor: "{colors.night-ground-2}"
+    textColor: "{colors.night-ink}"
+    rounded: "{rounded.popover}"
+  section-label:
+    backgroundColor: "{colors.night-accent-deep}"
+    typography: "{typography.label}"
+    rounded: "{rounded.band}"
+    padding: "0.18rem 0.5rem"
 ---
 
 # Design System: SERENDIPIA
 
 ## Overview
 
-**Creative North Star: "The Riso Print Shop"**
+**Creative North Star: "Carta celeste"**
 
-SERENDIPIA is a print shop that happens to be a chord lab. The page is one paper sheet; every working surface is a bordered plate carrying registration marks at its corners; every control is a rubber stamp pressed in ink; every chord is set as a poster screen on an ink block with a misregistered turquoise plate slipped beneath it. The progression is a strip of chained paper sheets that advances under an ink wipe while the notes two neighbouring chords share overprint in turquoise. Nothing floats, nothing glows, nothing is glass.
+SERENDIPIA is an observatory of chance, not a chord website. The fretboard is a sky chart, each chord is a star, the progression is a constellation the player traces, and suggestions are "hallazgos". One system lives in two themes on `html[data-theme="night|day"]`. Night is a near-black violet ground with print grain and lilac ink. Day is a silver-grey ground with near-black ink, vivid turquoise fills and deep-turquoise strokes. The theme follows the operating system until the player chooses, and the choice is stored.
 
-The material logic is flat and physical throughout: riso spot inks on paper, soft neutral paper shadows, 1px ink rules, dashed cut lines, corner crop marks, a halftone screen over the ink-block chord names, and a fixed print grain over the whole page. The world's own palette (paper, ink, riso blue, orange, yellow) does the work; turquoise #40E0D0 rides only as an accent ink and is always printed as material — a plate, a dot, a band, a selection — through `mix-blend-mode: multiply`. Type is one variable grotesque for words (Archivo) and one variable mono rationed to measurements (Martian Mono). Motion exists for two jobs only: state transitions and the 0.5s wipe that reveals the step being played.
+The surface is a poster collage: clearly bounded modules with hairline frames and corner ticks, small spaced-caps section headers, dashed hatch bars, a barcode, a warped mesh, concentric ripples, orbit ellipses. Type is engraved: a Fell serif for the chord name, a Garamond serif for dictionary-style glosses, a geometric sans for everything you operate. Density is high and exact: on a desk the whole app fits one screen with no page scroll.
+
+Color is information. Function colors and note-role shapes mean the same thing in both themes, and ornament never sits on data.
 
 **Key Characteristics:**
-- Paper #F4F1EA ground; plates with 1px ink borders, 3px radius and registration marks.
-- Flat spot inks: blue #0078BF, orange #FF6C2F, yellow #FFE800, turquoise accent #40E0D0, red #D8452F signals.
-- Soft neutral paper shadows only; depth is paper, never glow (ink at 10–12% alpha).
-- The misregistration device: a solid colored plate offset 4–5px behind selected objects and the monumental chord name.
-- Ink-stamp controls with `aria-pressed` ink fill, pressed inset, and a turquoise live state.
-- Print texture: fixed grain overlay, halftone dot screens on ink blocks, dashed cut lines, 9px crop marks, 11px registration marks.
-- One viewport, max 1560px; views fold to a single column below 1280px; the 16-slot strip and 12-fret detector grid scroll internally.
+- Two themes, one meaning: the same function names and note roles resolve to a lilac/turquoise/gold/rose set at night and a darker, legible set by day.
+- Sections and controls must read as such: framed, raised, with a visible pressed state.
+- Flat tonal layering (ground, ground-2, ground-3) with hairline frames; shadows are small and structural.
+- Engraved serif display, distressed at night and clean by day.
+- Desk shell with no page scroll at 1024x640 and up; phones flow normally.
 
 ## Colors
 
-Flat riso spot inks on paper: two papers, three inks in the black-brown family, two rule tones, and five chromatic inks — with turquoise reserved as the state accent.
+A violet-black night and a silver day, joined by one lilac-or-turquoise accent and four function hues that never change meaning. Token names in the frontmatter are the normative values; each theme's `--cc-*` set is switched by the `data-theme` attribute.
 
 ### Primary
-- **Riso Blue** (#0078BF): the working ink that letters words — every structural label and section head (via **Blue Ink** #005F96 for legibility), the interval symbols inside chord chips, the field's focus underline, and the dominant-function rule. Never decorative.
-- **Riso Orange** (#FF6C2F): the dominant-function ink rule, the marker dots over frets 3/5/7/9/12/15/17/19/21/24 in the grid head, and the hover replacement for a lit cell's turquoise dot.
-- **Riso Yellow** (#FFE800): the tempo block only — one solid yellow ink block behind the tempo digits.
-- **Riso Blue Ink** (#005F96): the label-weight blue for small type and the loading chip's border and text.
+- **Lilac Accent (night)** (night-accent): the filled state of primary buttons, pressed segments, selection highlight. Its ink is near-black violet (night-accent-ink).
+- **Turquoise Accent (day)** (day-accent): the same roles by day, with near-black text. Because turquoise is too light for text on the silver ground, text and strokes use the Deep Turquoise (day-accent-deep) instead.
+- **Accent Deep** (night-accent-deep / day-accent-deep): section labels, the hero chord name, hover borders. Lighter lilac at night, deep turquoise by day.
 
-### Secondary
-- **Turquoise Accent** (#40E0D0): the user's own ink. It prints as a misregistered plate behind the chord name and the active step, as the 15px pressed-note dot inside grid cells (multiply), as the shared-note overprint band and the selected proof label (multiply), as the global text selection, as the tonic-function rule, and as the fill of the live stamp state.
+### Secondary: function colors
+- **Tonic** (fn-tonic-*): lilac at night, violet by day.
+- **Subdominant** (fn-sub-*): turquoise at night, deep turquoise by day.
+- **Dominant** (fn-dom-*): starlight gold at night, ochre by day.
+- **Borrowed** (fn-borrowed-*): muted rose at night, plum-rose by day.
+- Each has a `-fill` partner for shapes and areas. At night the fill equals the stroke; by day the fill is lighter (violet-lilac, turquoise, amber, pink) so text on top stays legible.
 
-### Tertiary
-- **Signal Red** (#D8452F): error only — the invalid chord underline and message, the × on muted strings in grid cells and mini plates, and the muted legend mark.
+### Tertiary: note roles on the chart
+- **Root** (role-root-*): lilac-white star at night; turquoise star with a near-black outline by day.
+- **Third** (role-third-*): periwinkle at night; violet by day.
+- **Seventh** (role-seventh-*): ink-colored at both themes.
+- **Extension** uses the ink color as a stroke only; **other tones** use a muted violet (night) or grey (day).
 
 ### Neutral
-- **Paper** (#F4F1EA): page ground, every plate face, every sheet, chips, selects, the sheet thumb border.
-- **Paper Deep** (#EAE4D6): empty progression slots, printed at 40% opacity.
-- **Paper Shade** (#E0D8C6): a declared third paper step; no shipped surface currently uses it.
-- **Ink** (#1A1A1A): body text, plate borders, cell lit borders, the ink block behind chord names, the field underline, fat 2px rules, pressed-stamp fill.
-- **Ink Soft** (#4C4A44): the label class's base color, readout secondary text, registration-mark strokes, cell hover border.
-- **Ink Faint** (#6F6B60): field placeholders, fret/step indices, difficulty tags, empty-slot hints, the free-fret dot glyph.
-- **Rule** (#CBC2AE): divider rules above chip lists, empty strip slots.
-- **Rule Cell** (#938870): 1px fretboard cell borders. Darker than Rule so each cell, a control, reaches the WCAG 3:1 non-text contrast on paper (3.1:1); lit cells still step up to ink.
-- **Rule Strong** (#A79C84): sheet and chip borders, dashed cut lines, 9px crop marks, mini-plate string/fret strokes, scrollbar thumbs.
+- **Ground / Ground-2 / Ground-3**: page, section and control surfaces, stepping up so frames and controls clear 3:1 against the ground.
+- **Line / Line-strong**: hairline frames and stronger control borders. Line-strong also colors the corner ticks and the hatch.
+- **Ink / Ink-soft / Ink-faint**: primary, secondary and tertiary text. Ink-faint is the floor for meaningful text.
+- **Danger** and **Focus**: danger is salmon at night and brick by day; focus is turquoise at night and deep turquoise by day (2px outline, 2px offset).
+- **Charcoal strip band** (day-band-*): the day progression strip stays charcoal. The `.on-dark` scope re-applies the night palette with these three grounds.
 
 ### Named Rules
-**The Ink-Is-Material Rule.** Chromatic ink is a material before it is a color: it appears as plates, bands, dots, rules and fills. Turquoise and orange never letter a word; the only non-material turquoise in the build is the 13px legend glyph. Blue letters labels, red letters errors — nothing else sets colored type below display size.
-
-**The Multiply-Overprint Rule.** Every turquoise state mark that sits on paper prints with `mix-blend-mode: multiply` (lit cell dot, selected proof label, shared-note band). It is never translucent, never glowing; where inks meet, they darken like overprint.
-
-**The Paper-Only Rule.** No dark mode, no colored shadow, no gradient, no glow. Chromatic inks are opaque matte fills; depth comes from paper shadows and ink rules.
+**The Color-Is-Information Rule.** Hue is reserved for harmonic function (tonic, subdominant, dominant, borrowed) and note role. Never use a function hue as decoration, and never change what a hue means between themes.
+**The Print-Grain Rule.** A fixed overlay of fractal noise sits over the page (overlay blend, 9% at night, 6% by day). It is texture only and never carries meaning.
 
 ## Typography
 
-**Display Font:** Archivo Variable (fallback Archivo, system-ui, sans-serif) — self-hosted woff2, variable weight 100–900, variable width 62%–125%.
-**Body Font:** Archivo Variable.
-**Label/Mono Font:** Martian Mono Variable (fallback ui-monospace, SF Mono, Menlo) — self-hosted woff2, variable weight 100–800, variable width 75%–112.5%.
+**Display Font:** IM Fell English (with Iowan Old Style, Georgia, serif)
+**Gloss Font:** EB Garamond (with Iowan Old Style, Georgia, serif)
+**UI Font:** Jost Variable (with Avenir Next, system-ui, sans-serif)
 
-**Character:** Archivo is the printer's grotesque: widened and heavy for the monumental chord name and the wordmark, neutral for UI text. Martian Mono is rationed to data and readouts so the interface reads like a press sheet — it never sets a sentence.
+**Character:** An old star atlas annotated by a modern hand. The Fell serif is engraved and slightly irregular, the Garamond reads like dictionary entries, and Jost keeps every control unambiguous. All three are self-hosted through @fontsource.
 
 ### Hierarchy
-- **Display** (wght 800, wdth 104, clamp(2.5rem, 5.5vw, 5rem), 0.92, −0.02em): the dictionary chord symbol, screen-printed paper-on-ink inside a halftone block.
-- **Headline** (wght 800, wdth 104, clamp(2.25rem, 4vw, 3.5rem), 0.95): the detector's detected chord name.
-- **Wordmark** (wght 800, wdth 92, 17px, 0.24em tracking): SERENDIPIA in the transport strip.
-- **Subtitle** (wght 800, wdth 92, 1.15rem): the Latin reading under the chord when notation is "both".
-- **Title** (wght 520, wdth 100, 16px; 15px in template rows): chord names in chips, suggestions, degree cards and step sheets (`fv-ui`).
-- **Body** (400, 15px / 0.9375rem, 1.45): default UI text, note comments, error copy.
-- **Field** (600, wdth 100, 20px, 0.01em): the chord input value.
-- **Control** (600, wdth 96, 11px, 0.1em, uppercase): every stamp label.
-- **Label** (600, wdth 92, 10px, 0.16em, uppercase): section and field headings, printed in blue ink.
-- **Readout** (Martian Mono 500, 12px, 0.02em, tabular numerals): the readout class — position/span lines, counts, hints, empty states.
-- **Chip** (Martian Mono 500, 11px, tabular): chip and stamp-adjacent data (quality names, bass, inversion, alternatives).
-- **Micro** (Martian Mono 500, 8px; 7px in-cell and Latin step lines): step indices, fret strings under proofs, roman numerals on ghost slots.
+- **Display / hero chord name** (400, fitted, 0.95): the chord name set as large as its box allows, capped at 7.5rem on the desk. Size is the minimum of the cap and a container-width fit based on character count, and it never wraps. Filtered with a distress effect at night, clean by day. Color: accent-deep.
+- **Card chord names** (400, up to 3.6rem in theory cards, 3rem in practice slots, line-height 1): the same display face fitted to the card.
+- **Gloss** (EB Garamond 400, 0.9375rem, ink-soft): dictionary-style explanations, Latin name, hallazgo text.
+- **Body / control** (Jost 500, 0.8125-0.875rem): buttons, segments, readouts.
+- **Label** (Jost 600, 0.6875rem, 0.16em tracking, uppercase, accent-deep): section headers. Meaningful text is never below 11px.
 
 ### Named Rules
-**The Rationed-Mono Rule.** Martian Mono appears only where something is measured, counted or marked: fret strings, step indices, roman numerals, chip data, difficulty tags, tempo digits, readouts. Prose, labels and chord names are Archivo.
-
-**The Width-Axis Rule.** The display voice is Archivo's width and weight axes: chord name wdth 104/wght 800, wordmark and Latin reading wdth 92/wght 800, UI chord names wdth 100/wght 520. Nothing wider or heavier than wdth 104/wght 800.
-
-**The Silkscreen-Label Rule.** Structural headings are 10px uppercase, 0.16em tracking, wdth 92/wght 600, lettered in blue ink. Sentences are never uppercased or letterspaced.
+**The Numeral Rule.** Readouts (tempo, fret, beat, counts) use tabular numerals through `.cc-num`. Chord names in the display serif use lining numerals so extensions (7, 9, 13) read as numbers. The build sets no oldstyle numerals anywhere.
+**The Serif-For-Names Rule.** Engraved serif is for chord names and glosses only; anything you click is Jost.
 
 ## Layout
 
-**Desktop app shell (`desk:` = width ≥ 1024px and height ≥ 640px).** The app is exactly one viewport tall and never scrolls as a page: the transport strip on top (two dense rows, 64px, stamps ≥ 28px), the current view filling the middle, and the progression strip always visible at the bottom (≈ 144px: header with undo/redo, Chain, Clear and Save/Library/Share; 52px sheets; a one-line analysis with key, latest change and suggested capo). Views split the remaining height into columns; only secondary lists (suggestions, templates) may scroll inside their plate. The step picker and the Save/Library/Share panels float above the strip as popovers (Escape or a click outside closes them). Extra height at large screens goes to the fretboard rows (StepGrid `fill`, up to 64px), the hero chord name, degree cards and practice diagrams. Meaningful text never goes below 10px. Phones and short windows keep the flowing layout described below.
+The Acorde view is a poster collage on a fixed grid. Top bar: one row, 52px, no wrapping on the desk. Below it, the app fills the viewport height (`h-dvh`, overflow hidden) from 1024px wide and 640px tall (the `desk` condition). The main view and the progression strip share the remaining height; there is no page scroll on the desk. Content max width is 1560px, 1840px from 1600px wide.
 
-Below `sm` the transport strip folds to the view tabs, Run, tempo and a **Ajustes ▾** stamp (with a one-line readout of beats · loop · click · capo); the stamp reveals the rest of the strip and the choice is remembered per browser. From `sm` up the strip is always fully open.
+Acorde at desk size is a four-row grid with 6px gaps: hero row (height clamp(108px, 13.5vh + 28px, 220px)) holding the hero module and the 38px moon/sun phase column; a 40px info row (input, "suena" with capo, probable key, glyph row); a flexible row with the positions column (188px, 224px from 1600px) beside the full-width 12-fret chart; and an auto row for notes and intervals, Escuchar plus Añadir, alternatives, hallazgos and the barcode. The chart rows flex between 25px and 72px (96px from 1600px wide) and compress to 22px at heights under 700px.
 
-The app is one paper sheet: `.grain` wraps a centered column of max-width 1560px with 12px padding (20px horizontal, 16px vertical from `sm` up) and 16px gaps between the transport strip and the view. Every view ends with the progression plate spanning all columns.
+Below the desk condition, everything flows in one column with normal page scroll. Teoría is a card grid (2 columns, 4 from 640px, 7 for the degree row on the desk); Práctica is a slot grid of 1 to 4 columns. The progression strip is 16 columns of at least 80px each and scrolls horizontally inside its own frame. It is shown in Acorde and Teoría and not in Práctica.
 
-- **Transport strip** (plate across the top): below 640px it stacks vertically as a flex column; from `sm` up it becomes a wrapping row with 20px column gaps. Left group = wordmark + tab stamps; middle = run, tempo block with −/+, beats, loop, click with its 4-dot beat readout; right group (pushed with auto margin, full-width until `sm`) = timbre select, key select + major/minor, notation stamps, volume slider, ES/EN, audio chips.
-- **Dictionary**: one column until 1280px, then `minmax(280px,1fr) minmax(420px,1.7fr) minmax(250px,0.9fr)` — symbol plate / board + proofs plate / root + suggestions column — plus the full-width strip after it.
-- **Detector**: one column until 1280px, then `minmax(420px,1.6fr) minmax(280px,1fr)` — interactive grid plate / result plate — then the strip.
-- **Theory**: one column until 1280px, then `minmax(320px,1.1fr) minmax(320px,1fr)` — diatonic plate (with progression templates below it) / suggestions plate, then the strip.
-- **Fret grid**: `24px` string-label column + `34px` open-string column + N equal fret columns, 3px gaps, 30px cells; window 5 frets in the dictionary, 12 in the detector.
-- **Root grids**: six equal columns, 6px gaps. **Diatonic degrees**: 2 columns below `sm`, 4 above, 8px gaps.
-- **Progression strip**: 16 equal slots with 6px gaps; 68px sheets; a "Swipe →" hint shows below `sm`, an "Arrastra o toca un paso para moverlo · Alt+←/→" readout from `lg` up (screen-reader text below `lg`); the step picker carries "← Mover / Mover →" stamps so touch can reorder.
+Control sizing: 32px on the desk, 28px for segmented options, 44px for coarse pointers, 48px for the large primary.
 
 ### Named Rules
-**The Fold-At-XL Rule.** Every view is a single column until 1280px. Panels reflow and reorder; they do not shrink into unreadable grids.
-
-**The Internal-Scroll Rule.** Wide print surfaces scroll inside their plate, never the page: the 16-slot strip has a 760px minimum width below `sm` inside an `overflow-x-auto` with `snap-x snap-mandatory` and start snapping on each sheet, dropping the floor from `sm` up; the 12-fret detector grid has a 560px minimum inside its own scroller.
+**The Desk-Fits Rule.** On the desk nothing may push the page into scroll. New content must fit a row budget or live in a popover.
+**The Ornament-Never-On-Data Rule.** Mesh, ripples, orbits, hatch, barcode and checker bands sit behind or beside content, with no pointer events, and never overlap a fret position, a note, a chord name or a number.
 
 ## Elevation & Depth
 
-Depth is paper, not light: two soft neutral shadows built from ink at 10–12% alpha, an inset ink press for stamps, and the colored plate offset that simulates a misregistered second pass. There is no glow, no gradient, no glass, and no colored shadow anywhere in the build.
+Depth is tonal first: ground, ground-2 (modules, popovers) and ground-3 (controls) step up in lightness, and hairline frames mark every edge. Shadows are small and structural.
 
-### Shadow Vocabulary
-- **Sheet rest** (`box-shadow: 0 1px 2px rgba(26, 26, 26, 0.1), 0 5px 12px rgba(26, 26, 26, 0.07)`): every `.sheet` at rest — proof sheets, suggestion slips, step sheets, degree cards.
-- **Sheet lift** (`box-shadow: 0 2px 4px rgba(26, 26, 26, 0.12), 0 12px 22px rgba(26, 26, 26, 0.12)`): sheet hover, paired with `translateY(-2px)`.
-- **Stamp press** (`box-shadow: inset 0 2px 0 rgba(26, 26, 26, 0.28)`): a stamp while active.
+- **Control rest** (`box-shadow: inset 0 1px 0 rgba(255,255,255,0.07), 0 2px 5px -2px rgba(0,0,0,0.45)`): every button reads as raised.
+- **Hover halo** (`0 0 0 3px var(--cc-accent-soft)`; primary `0 0 0 4px` plus `0 6px 18px -8px rgba(0,0,0,0.5)`): an accent glow, not a drop.
+- **Popover** (`0 18px 40px -16px rgba(0,0,0,0.55)`): menus lifted off the page.
 
 ### Named Rules
-**The Paper-Shadows Rule.** Only paper casts shadow, and only in neutral ink tones. Sheets use the rest shadow; hover swaps to the lift shadow and straightens the sheet to 0°; stamps never lift — they press in.
-
-**The Misregistration Rule.** Selection and highlight are printed as a second pass: a solid turquoise plate sits 4px behind a selected proof sheet or the active step, and 5px behind the monumental chord name and the detected chord name. The device is only ever turquoise in the shipped build (the component also declares orange and blue tones).
+**The Sections-And-Buttons-Must-Read Rule.** Every section has a visible header and a framed edge; every control is a filled or framed shape with a visible pressed or active state. Pressed, current and expanded states all fill with the accent.
 
 ## Shapes
 
-Square print geometry with hairline rules. Radii are near-zero: stamps, sheets and chips 2px; plates 3px; grid cells 1px. Nothing is a pill; the only round things are the 15px pressed-note dot in a lit cell, the 3px fret-marker dots, the 11px registration circles, the 3.4–4.4px note marks in voicing mini plates, the 6px scrollbar thumb, and the range slider.
+Sections are nearly square: a 3px radius, a 1px hairline, and 7px L-shaped corner ticks at the top-left and bottom-right. Controls are pills (999px). Popovers are 6px. Section header bands are 2px. Note roles on the chart are geometry, not color alone:
 
-Structure is drawn with borders and gaps, never with fill contrast alone: 1px ink on plates, 1px rule on cells and empty slots, 1.5px ink on stamps, 2px ink on the chord field underline and the 2px ink rule under the grid head. Sheets and proof sheets carry a solid or dashed 1px outline; ghost strip slots use a dashed cut line. Distinctive print marks: 11px registration marks (circle + cross) at plate corners, 9px L-shaped crop marks framing the proof-sheet field, and a 4px-pitch halftone dot screen on ink blocks.
+- **Root:** four-point star.
+- **Third:** filled circle.
+- **Seventh:** diamond.
+- **Extension:** ring (stroke only).
+- **Other tones:** small dot.
 
-### Named Rules
-**The Square-Corner Rule.** 3px is the largest radius a working surface may take. Plates are 3px, stamps and sheets 2px, cells 1px. Circles exist only as print marks, dots and controls.
-
-**The Rule-Plus-Gap Rule.** Separation is a 1px rule plus a 3–8px gap. Fill contrast never replaces a border.
+Ornament vocabulary: dashed "/////" hatch (6px, 60-degree), diamond checker band (12px, accent on ink), warped mesh, concentric ripples, orbit ellipses around the hero, four-point stars.
 
 ## Components
 
-### Buttons — Ink Stamps
-- **Character:** rubber stamps: uppercase, letterspaced, pressed in on click.
-- **Shape:** 2px radius, 1.5px ink border, transparent face, 32px min-height, 5px/11px padding, 11px uppercase label at 0.1em (wdth 96/wght 600).
-- **Sizes:** inline variants collapse padding to 2px/6px for tempo ±, beats, notation, mode and language; the Run stamp holds an 86px minimum width; the timbre and key selects wear the stamp face with `appearance: none` and a pointer cursor.
-- **Hover:** 8% ink wash over the paper. **Active:** inset 2px ink press shadow.
-- **Pressed state (`aria-pressed="true"`):** ink fill with paper text — tabs, notation, loop, click, beats-per-chord, major/minor, sevenths, root keys.
-- **Live:** turquoise fill with ink text (`stamp--live`) — the Run stamp while playing and the "Activar sonido" prompt.
-- **Ink:** permanently ink-filled (`stamp--ink`) — Escuchar and the detector's play action; hover darkens to pure black.
-- **Disabled:** opacity 0.35, no shadow, `not-allowed` — the Run stamp when the progression is empty and the click is off.
-- **Focus:** global 2px blue outline, 2px offset.
+### Modules
+Poster cells. Ground-2 fill, 1px line border, 3px radius, corner ticks. The only way to group content on the page.
+
+### Section label
+Jost 600, 11px, uppercase, 0.16em tracking, accent-deep. Header elements (h1 to h4, legend) get a filled band (accent-soft) with 2px radius; inline labels stay plain text.
+
+### Buttons
+- **Default / ghost:** ground-3 fill, line-strong border, pill, 32px minimum height, Jost 500 at 0.875rem, raised at rest.
+- **Hover:** border shifts to accent-deep with a 3px accent-soft halo. Active moves 1px down.
+- **Pressed / current / expanded:** accent fill, accent-ink text.
+- **Primary:** accent fill at rest, weight 600. **Large:** 48px, 1.125rem; used for Escuchar. **Icon:** 32px square.
+- **Disabled:** 40% opacity, no shadow.
+- Icons are inline SVG line icons in the app's own icon set.
+
+### Segmented control
+A framed pill group on the ground, 2px padding. Options are 28px minimum; the selected one fills with the accent; hover tints with accent-soft.
 
 ### Chips
-- **Style:** Martian Mono 11px, ink-soft text on paper, 1px rule-strong border, 2px radius, 2px/6px padding; chord-note chips mix in a 10px blue interval symbol and a 16px/520 Archivo note name.
-- **Variants:** `chip--ink` (ink fill, paper text) marks the detected chord quality; `chip--blue` (blue-ink border and text) is the audio loading chip.
-- **State:** chips are labels, not controls — no hover or pressed behavior. The loading chip (blue, "Imprimiendo…") and the fallback chip (plain paper, "Modo síntesis") appear in the transport only while audio is loading or degraded.
+Information, not controls: hairline pill, 12px text in ink-soft, no hover.
 
-### Plates and Sheets
-- **Plates:** paper face, 1px ink border, 3px radius, 16px padding — transport strip, symbol plate, board plate, side columns, result plate, theory columns, strip plate. Three carry registration corners: the transport strip, the dictionary board plate and the detector grid plate print four 11px marks inset 6px.
-- **Sheets:** paper face, 1px rule-strong border, 2px radius, rest shadow, 2px radius hover-straightening lift — suggestion slips, degree cards, proof sheets, step sheets.
-- **Proof sheets (signature):** 84px-wide sheets stacked under the board inside a dashed cut-line field with four 9px crop marks; each rests at a staggered `translateY` of 0/4/8px following its index mod 3, holds a 40×46 mini fret plate (0.7 rule-strong strokes, turquoise r2.2 dots with a 0.6 ink stroke, ink open rings, red ×), a label band, a mono difficulty tag and a mono fret string. The selected proof gets an ink border and its label band prints turquoise with multiply; it is also the one wrapped in the offset plate.
+### Popovers
+Ground-2, line-strong border, 6px radius, large soft shadow. Used for the key grid (4-column), Reproducción, Sonido and strip tools.
 
-### Inputs and Fields
-- **Style:** transparent background, no box, 2px ink underline, 20px chord value (wdth 100/wght 600), 10px blue label above it, ink-faint placeholder, autofocused on load.
-- **Focus:** the global outline is removed and the underline turns blue.
-- **Error:** underline turns red and an 11px Martian Mono red line reads "No reconozco ese acorde".
-- **Range:** 80px wide, ink accent color. **Selects:** paper face, ink text, stamp styling on the two transport selects.
+### Hero chord name
+Engraved display serif inside an orbit, accent-deep, fitted to its module. Distress filter at night only.
 
-### Navigation
-Three tab stamps (Diccionario / Detector / Teoría) in a 6px-gap row after the wordmark. The active tab is the pressed-ink state — ink fill, paper text. No underline, no indicator animation. The current view is mirrored to the URL hash.
+### Gloss
+Garamond, ink-soft, dictionary-style entries.
 
-### Tempo Block
-A yellow ink block with 2px radius, 2px/8px padding, holding 1.05rem semibold mono tempo digits with tabular numerals, flanked by two compact stamps (− / +) bound to 40–208 BPM. Next to Loop, a click stamp (`aria-pressed`) arms a synthesized metronome: a square-wave blip at C5 with a C6 accent on the first beat of each 4/4 bar; while running, four 6px dots print the bar (ink for the accent, ink-soft for the other beats, rule at rest).
+### Fretboard
+12 frets, always interactive. Strings read as the main lines and frets recede. Marks use the note-role shapes and colors.
 
-### Step Grid (signature)
-A `24px + 34px + N` column grid at 3px gaps inside the board plate, built from 1px-rule `.cell` buttons 30px tall, rows reversed so the highest string sits on top, under a head row of fret numerals and a 2px ink rule. Marker frets print a 3px orange dot above the numeral. Each cell holds one mono glyph: ○ ink for open, × red for muted, · ink-faint for free; open cells take an ink border. A pressed note prints a 15px turquoise dot with multiply centered in the cell and takes an ink border; hovering that lit cell swaps the dot to orange. The dictionary grid is a 5-fret window with per-string playback; the detector grid is a 12-fret interactive window that also prints 7px note names inside lit cells and under open strings, and scrolls inside the plate below 560px.
+### Constellation strip
+The progression as a row of stars (16 columns). Stars take the function color and light up in turn while playing. Day theme sits on a charcoal band (`.on-dark`).
 
-### Progression Strip (signature)
-A 16-slot grid of paper sheets at 6px gaps, 68px tall. A filled sheet carries a 3px function ink rule at its top (turquoise tonic, blue subdominant, orange dominant, rule-strong for non-diatonic), a mono step index, the chord name at clamp(9px, 0.72vw, 13px), the Latin line in mono 8px when notation is "both", and a bottom band printing the notes shared with the next chord — turquoise, multiply, mono 9px, em-dash when there is no overlap. Filled sheets remove their chord on click and disable while playing; the strip header holds a Clear stamp (only when non-empty) and an n/16 readout. Sheets reorder by drag: the dragged sheet prints as a cutline at 40% opacity, a 3px ink rule marks the insertion point between slots (folding empty slots and ghosts into "move to end"), and dropping rewrites the strip order. The keyboard equivalent is Ctrl/⌘+←/→ on a focused sheet, announced through a polite live region. Ghost slots are dashed cut lines with a "+" index, a faint chord name, a roman numeral and a tooltip reason; hover turns border and text blue. Remaining slots are empty paper-deep/40 wells. The active step is wrapped in an offset plate, takes an ink border, and re-enters via the wipe.
+### Top bar
+One row, 52px: views, Correr plus moon-phase beat and tempo, capo, key popover, Reproducción, Sonido, theme toggle, settings. The beat is shown as moon phases advancing per beat.
 
-### Registration and Print Marks
-- **Registration marks:** 11×11 SVG circle-and-cross at 0.8 stroke in ink-soft at 85% opacity, inset 6px at the four corners of the transport strip, the dictionary board plate and the detector grid plate.
-- **Crop marks:** 9×9 L-shaped rule-strong borders inset 4px at the four corners of the proof field.
-- **Cut lines:** 1px dashed rule-strong — the proof field frame and ghost strip slots.
-- **Halftone:** 1px paper dots at 16% alpha on a 4px pitch, printed over the ink-block chord name.
-- **Grain:** a fixed, pointer-transparent SVG noise layer at 80% opacity in multiply over the whole page — the press's paper grain.
+### Eclipse (theme switch)
+View Transitions reveal: the new theme grows as a circle (clip-path, 700ms, cubic-bezier(0.65, 0, 0.35, 1)) out of the toggle's center. With reduced motion or no API the switch is instant. `.cc-twinkle` pulses opacity between 0.55 and 1 over 3.2s, only when motion is allowed.
 
-### Browser Surface
-- **Selection:** turquoise background, ink text.
-- **Focus:** one global `:focus-visible` — 2px solid blue, 2px offset. Nothing suppresses it except the chord field, which replaces it with its blue underline.
-- **Scrollbars:** thin; WebKit bars are 10px with a rule-strong thumb, a 3px paper border and a 6px radius.
-- **Numerals:** `.readout` sets tabular numerals; the tempo block also sets `tabular-nums`.
-- **Color scheme:** `color-scheme: light` on `html` and a matching meta tag, so selects and scrollbars render light.
-- **Motion:** `--ease-print` (cubic-bezier(0.16, 1, 0.3, 1)) is the easing for every state transition — sheets 0.18s, stamps 0.15s, cells 0.14s. The active step enters with a 0.5s clip-path wipe. A lift animation (0.35s) is declared in the theme but not applied by any shipped component.
-
-### Implemented States
-- **Hover:** stamps take an 8% ink wash; sheets lift 2px, straighten to 0° and take the lift shadow plus an ink border; grid cells take an ink-soft border and a 5% ink wash; a hovered lit cell swaps its turquoise dot to orange; dashed ghost steps turn blue in border and text.
-- **Pressed:** stamps drop into an inset 2px ink shadow while held; grid cells and sheets take no press styling.
-- **Pressed state (`aria-pressed="true"`):** ink fill with paper text on tabs, notation, loop, click, beats, major/minor, sevenths and root keys; proof sheets take an ink border with a multiply turquoise label band; interactive grid cells report their lit state.
-- **Live turquoise:** the Run stamp while playing and the "Activar sonido" prompt fill turquoise with ink text.
-- **Dragging:** the dragged step sheet prints as a 1px dashed rule-strong cutline at 40% opacity; a 3px ink vertical rule marks the insertion point in the 6px gap before the target slot, or after the last filled sheet for "move to end"; no lift shadow, no rotation.
-- **Disabled:** stamps at opacity 0.35 with no shadow and a not-allowed cursor (Run with an empty progression and click off); step sheets disable and stop dragging while playing with a stop tooltip.
-- **Empty:** readout lines print in ink-faint — no voicings in range, no suggestions yet, empty progression hint, and the detector's "Ningún acorde reconocible" at 1.05rem in ink-soft; empty strip slots print as paper-deep/40 wells with a rule border.
-- **Error:** the chord field underline turns red with an 11px mono red message; no other field errors exist.
-- **Loading / fallback:** the blue loading chip and the neutral fallback chip in the transport; the enable prompt is a live stamp until audio starts.
-- **Active step:** the playing sheet is wrapped in a turquoise offset plate, takes an ink border, and re-enters under the 0.5s wipe on each pass.
+### Named Rules
+**The Day/Night Eclipse Rule.** The two themes differ in ground, ink, accent and grain, never in meaning. Switching always goes through `setTheme`, with the circle origin at the toggle.
 
 ## Do's and Don'ts
 
 ### Do:
-- **Do** print turquoise as material: offset plate behind selection, multiply dot in lit cells, multiply band for shared notes and selected proof labels, live stamp fill, selection background. Never let it letter a word.
-- **Do** set every label with the silkscreen style — 10px uppercase, 0.16em tracking, wdth 92/wght 600 — and print it in blue ink.
-- **Do** keep Martian Mono for measurement only: fret strings, indices, roman numerals, chips, difficulty tags, tempo and readouts, always with tabular numerals.
-- **Do** keep the misregistration offsets — 4px behind a selected proof or active step, 5px behind the monumental chord name and detected chord name.
-- **Do** stack proof sheets at 84px wide with the 0–4–8px resting stagger and the 40×46 mini plate; hover lifts a sheet 2px and straightens it.
-- **Do** keep the sheet shadow, lift shadow and stamp press exactly as the theme declares them, in neutral ink tones.
-- **Do** keep the print texture: grain overlay, halftone screens on ink blocks, registration marks at plate corners, crop marks and dashed cut lines around the proof field.
-- **Do** keep the function ink rules on step sheets and degree cards — turquoise tonic, blue subdominant, orange dominant — and the turquoise overprint band for shared notes.
-- **Do** keep the 16-slot strip (dashed ghosts, paper-deep/40 empties, snap scrolling below the fold) and the 12-fret detector grid with internal scroll.
+- **Do** express harmonic function with the four function hues and note roles with their shapes; keep both identical in meaning across themes.
+- **Do** frame every section as a module with a header, and give every control a raised or filled shape with a visible pressed state.
+- **Do** use tabular numerals for readouts and lining numerals for chord names.
+- **Do** keep meaningful text at 11px or larger, controls at 28px or larger on the desk and 44px on touch, and visible 2px focus outlines.
+- **Do** respect reduced motion: twinkle, ripples and the eclipse become static or instant.
+- **Do** add tokens as `--cc-*` pairs for both themes at once.
 
 ### Don't:
-- **Don't** add a third typeface, a serif, or a second sans; Archivo and Martian Mono are the whole press.
-- **Don't** use chromatic ink as small-size text; turquoise and orange are material, and red is reserved for errors and muted strings.
-- **Don't** exceed 3px of radius on plates or 2px on stamps and sheets, and never introduce pills.
-- **Don't** replace borders and gaps with fill contrast, gradients, glows, glass or colored shadows.
-- **Don't** reintroduce a dark theme: `color-scheme: light` and the paper ground are committed.
-- **Don't** drop the grain, halftone, registration or crop marks — they are the print identity, not decoration.
-- **Don't** put Martian Mono into sentences or chord names.
-- **Don't** animate beyond state transitions and the active-step wipe.
-
-Reduced motion: `@media (prefers-reduced-motion: reduce)` in `@layer base` collapses every animation and transition to 0.001ms, so the strip wipe, sheet lifts, and state changes resolve instantly.
+- **Don't** put ornament (mesh, ripples, hatch, orbit, barcode) over data or give it pointer events.
+- **Don't** use a function hue decoratively, or encode a note role by color alone.
+- **Don't** use turquoise as text on the day ground; use the deep turquoise.
+- **Don't** add page scroll to the desk shell, or wrap the top bar.
+- **Don't** reintroduce the legacy Riso paper, blue, orange and yellow tokens that remain in `tailwind.css`; they are leftovers.
+- **Don't** build white-card diagram grids or generic dark neon DAW chrome.

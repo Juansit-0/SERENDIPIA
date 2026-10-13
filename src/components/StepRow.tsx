@@ -60,7 +60,7 @@ export function StepRow() {
   ]
 
   return (
-    <section className="strip on-dark relative min-w-0 desk:shrink-0" aria-label={t('progression.title')}>
+    <section className="strip relative min-w-0 desk:shrink-0" aria-label={t('progression.title')}>
       <div className="strip__checker" aria-hidden="true" />
 
       <div className="strip__bar">

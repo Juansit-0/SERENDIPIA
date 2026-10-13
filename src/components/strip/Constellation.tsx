@@ -120,7 +120,7 @@ export function Constellation({
   return (
     <div className="strip-sky" tabIndex={-1}>
       <div className="strip-track" role="group" aria-label={t('a11y.stepRow')}>
-        <svg className="strip-lines" viewBox={`0 0 ${SLOTS} ${LINES_H}`} height={LINES_H} preserveAspectRatio="none" aria-hidden="true" focusable="false">
+        <svg className="strip-lines" viewBox={`0 0 ${SLOTS} ${LINES_H}`} height={LINES_H} style={{ height: LINES_H }} preserveAspectRatio="none" aria-hidden="true" focusable="false">
           {Array.from({ length: Math.max(0, count - 1) }, (_, i) => (
             <line
               key={`l-${i}`}

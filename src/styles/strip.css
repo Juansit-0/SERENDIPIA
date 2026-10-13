@@ -1,7 +1,7 @@
 /*
  * Progression strip as a constellation (Carta celeste).
- * The band always sits inside `.on-dark` (charcoal by day, night ground by night), so every
- * var below resolves to the night palette; the function colors mean the same in both themes.
+ * The band follows the page theme: night ground by night, a light silver band under the
+ * turquoise checker by day. Function colors mean the same in both themes.
  */
 
 .strip {
@@ -25,6 +25,7 @@
 
 :root[data-theme='day'] .strip {
   border-top: 0;
+  background: var(--cc-ground-2);
 }
 
 :root[data-theme='day'] .strip__checker {
@@ -145,16 +146,17 @@
 }
 
 .strip-lines {
+  /* Only spans roman + star (LINES_H): stretching it to the track pushed the lines through the tiles. */
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
   width: 100%;
-  height: 100%;
   overflow: visible;
   pointer-events: none;
 }
 
 .strip-line {
-  stroke: var(--cc-accent);
+  stroke: var(--cc-accent-deep);
   stroke-opacity: 0.5;
   stroke-width: 1.2;
 }
@@ -182,7 +184,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: calc(100% - 4px);
+  width: calc(100% - 12px);
   padding: 0;
   border: 0;
   background: transparent;

@@ -176,7 +176,7 @@ A violet-black night and a silver day, joined by one lilac-or-turquoise accent a
 - **Line / Line-strong**: hairline frames and stronger control borders. Line-strong also colors the corner ticks and the hatch.
 - **Ink / Ink-soft / Ink-faint**: primary, secondary and tertiary text. Ink-faint is the floor for meaningful text.
 - **Danger** and **Focus**: danger is salmon at night and brick by day; focus is turquoise at night and deep turquoise by day (2px outline, 2px offset).
-- **Day strip band**: by day the progression strip is a light silver band (`ground-2`) under the turquoise diamond checker, in the day palette (the earlier charcoal band was rejected by the user). `.on-dark` remains available in celeste.css but the strip no longer uses it.
+- **Strip band**: in both themes the progression strip is a section one step up from the page (`ground-2`) under an 8px diamond checker band — turquoise on dark ink by day, lilac on the night ground by night (the earlier charcoal day band and the borderless night strip were both rejected by the user). `.on-dark` remains available in celeste.css but the strip no longer uses it.
 
 ### Named Rules
 **The Color-Is-Information Rule.** Hue is reserved for harmonic function (tonic, subdominant, dominant, borrowed) and note role. Never use a function hue as decoration, and never change what a hue means between themes.
@@ -273,7 +273,7 @@ Garamond, ink-soft, dictionary-style entries.
 12 frets, always interactive. Strings read as the main lines and frets recede. Marks use the note-role shapes and colors.
 
 ### Constellation strip
-The progression as a row of stars (16 columns). Stars take the function color and light up in turn while playing. By day it sits on a light silver band under the turquoise checker; the constellation lines join the stars only (the lines layer spans roman + star height, never the tiles).
+The progression as a row of stars (16 columns). Stars take the function color and light up in turn while playing. It sits on a `ground-2` band under the diamond checker (turquoise by day, lilac by night); the constellation lines join the stars only (the lines layer spans roman + star height, never the tiles).
 
 ### Top bar
 One row, 52px: views, Correr plus moon-phase beat and tempo, capo, key popover, Reproducción, Sonido, theme toggle, settings. The beat is shown as moon phases advancing per beat.

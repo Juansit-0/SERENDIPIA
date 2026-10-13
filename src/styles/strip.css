@@ -9,27 +9,24 @@
   --strip-name: 1rem;
   --strip-roman: 0.8125rem;
   --strip-fret: 0.8125rem;
-  background: var(--cc-ground);
+  /* A section like any module: one step up from the page ground, under the diamond band. */
+  background: var(--cc-ground-2);
   color: var(--cc-ink);
   font-family: var(--font-ui);
-  border-top: 1px solid var(--cc-line-strong);
 }
 
+/* Diamond checker band on top in both themes: lilac on night ink, turquoise on day ink. */
 .strip__checker {
-  display: none;
+  display: block;
   height: 8px;
   background:
-    conic-gradient(from 45deg at 50% 50%, #40e0d0 0 25%, transparent 0 50%, #40e0d0 0 75%, transparent 0) 0 0 / 8px 8px,
-    #15131c;
+    conic-gradient(from 45deg at 50% 50%, var(--cc-accent) 0 25%, transparent 0 50%, var(--cc-accent) 0 75%, transparent 0) 0 0 / 8px 8px,
+    var(--strip-checker-ink, #15131c);
 }
 
-:root[data-theme='day'] .strip {
-  border-top: 0;
-  background: var(--cc-ground-2);
-}
-
-:root[data-theme='day'] .strip__checker {
-  display: block;
+:root[data-theme='night'] .strip__checker {
+  --strip-checker-ink: var(--cc-ground);
+  opacity: 0.85;
 }
 
 /* Function colors: fill for the stars and swatches, ink for text. */

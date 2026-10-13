@@ -277,6 +277,9 @@ The progression as a row of stars (16 columns). Stars take the function color an
 
 Motion (only with motion allowed): a new chord lands as a star turning into place (520ms) and its line fades in after it; the playhead flares as it reaches each star; hallazgo stars breathe out of step with each other.
 
+### Oír (hearing the guitar)
+A microphone button sits at the end of the chord input. While on, the context module becomes the readout: a twinkling dot, «Oigo» + the chord in IM Fell English (settling in like the hero), the two runner-up names faint, a thin confidence bar and «+ Añadir». A chord heard three times in a row with ≥62% confidence becomes the Acorde view's chord (as a shape under the capo). Engine: `src/music/listen.ts` (spectral peaks → notes, overtones ×3/×5/×6/×7 dropped → the fretboard's own naming via `detectFromMidi`); mic plumbing shared with the tuner in `src/audio/mic.ts`.
+
 ### Ready to play
 Installable (site.webmanifest, 192/512 icons) and offline after the first visit: the build emits `sw.js` (`scripts/offline.ts`) precaching every built file (latin font subsets only), network-first for the page. The screen stays on (Wake Lock) while music plays and in Práctica. While stopped, a page-turner pedal (PageDown/PageUp) or ←/→ with nothing focused walks the progression: the chord shows in Acorde, strums once, and its strip tile is framed in the accent (`.is-cursor`). Ajustes lists the shortcuts as key caps.
 

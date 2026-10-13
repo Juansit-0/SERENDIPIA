@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { detectPitch, median } from '../music/pitch'
+import { openMic } from './mic'
 
 export type TunerStatus = 'idle' | 'starting' | 'listening' | 'denied' | 'unsupported' | 'error'
 
@@ -16,42 +17,27 @@ const HOLD_MS = 1200
 export function useTuner(): { status: TunerStatus; frequency: number | null; start: () => Promise<void>; stop: () => void } {
   const [status, setStatus] = useState<TunerStatus>('idle')
   const [frequency, setFrequency] = useState<number | null>(null)
-  const session = useRef<{ stream: MediaStream; context: AudioContext; timer: number } | null>(null)
+  const session = useRef<{ close: () => void; timer: number } | null>(null)
 
   const stop = useCallback(() => {
     const current = session.current
     session.current = null
     if (!current) return
     window.clearInterval(current.timer)
-    current.stream.getTracks().forEach((track) => track.stop())
-    void current.context.close().catch(() => undefined)
+    current.close()
     setStatus('idle')
     setFrequency(null)
   }, [])
 
   const start = useCallback(async () => {
     if (session.current) return
-    if (!navigator.mediaDevices?.getUserMedia || typeof AudioContext === 'undefined') {
-      setStatus('unsupported')
-      return
-    }
     setStatus('starting')
-    let stream: MediaStream
-    try {
-      // Raw signal: the voice-call processing (echo cancelling, noise gate, auto gain) bends a string's pitch.
-      stream = await navigator.mediaDevices.getUserMedia({
-        audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
-      })
-    } catch (error) {
-      const name = (error as DOMException | null)?.name
-      setStatus(name === 'NotAllowedError' || name === 'SecurityError' ? 'denied' : 'error')
+    const mic = await openMic(WINDOW)
+    if (typeof mic === 'string') {
+      setStatus(mic)
       return
     }
-    const context = new AudioContext()
-    await context.resume().catch(() => undefined)
-    const analyser = context.createAnalyser()
-    analyser.fftSize = WINDOW
-    context.createMediaStreamSource(stream).connect(analyser)
+    const { context, analyser } = mic
     const buffer = new Float32Array(WINDOW)
     const recent: number[] = []
     let lastHeard = 0
@@ -72,7 +58,7 @@ export function useTuner(): { status: TunerStatus; frequency: number | null; sta
         setFrequency(null)
       }
     }, READ_EVERY_MS)
-    session.current = { stream, context, timer }
+    session.current = { close: mic.close, timer }
     setStatus('listening')
   }, [])
 

@@ -1,5 +1,12 @@
-import { useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
+import { useChordListener } from '../../audio/useChordListener'
 import { chordText } from '../../i18n/chord'
+import { hearText } from '../../i18n/hear'
+import { shapeChord } from '../../music/capo'
+import type { DetectionCandidate } from '../../music/detectChord'
+import { parseChord } from '../../music/parseChord'
+import { useStore } from '../../state/store'
+import { MicIcon } from '../icons'
 import { voicingTitles } from './voicingTitle'
 import type { ChordModel } from './useChordModel'
 
@@ -27,6 +34,28 @@ export function InfoRow({ m, onListen }: { m: ChordModel; onListen: () => void }
   const soundingName = notation === 'latin' ? m.sounding.latin : m.sounding.anglo
   const activeLabel = m.activeVoicing ? (voicingTitles(m.voicings, c)[m.selectedVoicing] ?? null) : null
   const qualityName = lang === 'es' ? chord.quality.nameEs : chord.quality.nameEn
+
+  // «Oír»: the microphone names the chord being strummed and the view follows it (as a shape under the capo).
+  const { setChord, addToProgression } = useStore()
+  const h = hearText[lang]
+  const shapeOf = useCallback(
+    (candidate: DetectionCandidate) => {
+      const parsed = parseChord(candidate.anglo)
+      return parsed ? shapeChord(parsed, capo) : null
+    },
+    [capo],
+  )
+  const follow = useCallback(
+    (candidate: DetectionCandidate) => {
+      const shape = shapeOf(candidate)
+      if (shape) setChord(shape)
+    },
+    [shapeOf, setChord],
+  )
+  const ear = useChordListener(follow)
+  const listening = ear.status === 'listening' || ear.status === 'starting'
+  const earMessage =
+    ear.status === 'denied' ? h.denied : ear.status === 'unsupported' ? h.unsupported : ear.status === 'error' ? h.error : null
 
   return (
     <div className="cv-info">
@@ -56,38 +85,105 @@ export function InfoRow({ m, onListen }: { m: ChordModel; onListen: () => void }
           autoCapitalize="off"
           enterKeyHint="go"
         />
+        <button
+          type="button"
+          className={`cc-btn cc-btn--icon cv-ear ${listening ? 'is-on' : ''}`}
+          aria-pressed={listening}
+          aria-label={listening ? h.stop : h.start}
+          title={listening ? h.stop : h.start}
+          onClick={() => (listening ? ear.stop() : void ear.start())}
+        >
+          <MicIcon size={18} />
+        </button>
       </div>
 
-      <div className="cc-module cv-context">
-        {chordError ? (
-          <p id="chord-input-error" className="cv-error" role="alert">
-            {t('chord.invalid')}
-          </p>
-        ) : capo > 0 ? (
-          <p>
-            {c.capoSounds} <b className="cc-num">{capo}</b> {c.capoSoundsVerb} <b className="cv-sounds">{soundingName}</b>
-          </p>
-        ) : (
-          <p>
-            <span className="cv-quality-k">{c.quality}</span> {qualityName}
-          </p>
-        )}
-        {!chordError && m.alternatives.length > 0 && (
-          <div className="cv-alts" role="group" aria-label={c.alsoMaybe}>
-            <span className="cc-label">{c.alsoMaybe}:</span>
-            {m.alternatives.slice(0, 4).map((candidate) => (
-              <button key={candidate.anglo} type="button" className="cc-btn cv-alt" onClick={() => m.pickDetectedName(candidate.anglo)}>
-                {notation === 'latin' ? candidate.latin : candidate.anglo}
+      {listening || earMessage ? (
+        <div className="cc-module cv-context cv-hearing" aria-live="polite">
+          {earMessage ? (
+            <p className="cv-error">{earMessage}</p>
+          ) : ear.status === 'starting' ? (
+            <p>{h.starting}</p>
+          ) : ear.heard ? (
+            <>
+              <span className="cv-hear-dot" aria-hidden="true" />
+              <p className="cv-hear-name">
+                {h.heard} <b key={ear.heard.candidate.anglo}>{notation === 'latin' ? ear.heard.candidate.latin : ear.heard.candidate.anglo}</b>
+                {ear.heard.alternatives.length > 0 && (
+                  <span className="cv-hear-alt">
+                    {' '}
+                    {h.alsoMaybe}{' '}
+                    {ear.heard.alternatives
+                      .slice(0, 2)
+                      .map((item) => (notation === 'latin' ? item.latin : item.anglo))
+                      .join(', ')}
+                  </span>
+                )}
+              </p>
+              <span className="cv-hear-meter" role="img" aria-label={`${Math.round(ear.heard.confidence * 100)}% ${h.sure}`}>
+                <i style={{ width: `${Math.round(ear.heard.confidence * 100)}%` }} />
+              </span>
+              <button
+                type="button"
+                className="cc-btn cv-use"
+                aria-label={h.addLabel}
+                title={h.addLabel}
+                onClick={() => {
+                  const shape = ear.heard && shapeOf(ear.heard.candidate)
+                  if (!shape) return
+                  addToProgression({
+                    rootPc: shape.rootPc,
+                    qualityId: shape.quality.id,
+                    anglo: shape.anglo,
+                    latin: shape.latin,
+                    bassPc: shape.bassPc,
+                    voicingSource: 'auto',
+                  })
+                }}
+              >
+                + {h.add}
               </button>
-            ))}
-          </div>
-        )}
-        {!chordError && m.alternatives.length === 0 && activeLabel && (
-          <p className="cv-ctx-pos">
-            {c.activePosition}: <b>{activeLabel}</b> · {c[m.activeVoicing!.difficulty]}
-          </p>
-        )}
-      </div>
+            </>
+          ) : (
+            <>
+              <span className="cv-hear-dot is-waiting" aria-hidden="true" />
+              <p>
+                {h.waiting} <span className="cv-hear-alt">{h.follow}</span>
+              </p>
+            </>
+          )}
+        </div>
+      ) : (
+        <div className="cc-module cv-context">
+          {chordError ? (
+            <p id="chord-input-error" className="cv-error" role="alert">
+              {t('chord.invalid')}
+            </p>
+          ) : capo > 0 ? (
+            <p>
+              {c.capoSounds} <b className="cc-num">{capo}</b> {c.capoSoundsVerb} <b className="cv-sounds">{soundingName}</b>
+            </p>
+          ) : (
+            <p>
+              <span className="cv-quality-k">{c.quality}</span> {qualityName}
+            </p>
+          )}
+          {!chordError && m.alternatives.length > 0 && (
+            <div className="cv-alts" role="group" aria-label={c.alsoMaybe}>
+              <span className="cc-label">{c.alsoMaybe}:</span>
+              {m.alternatives.slice(0, 4).map((candidate) => (
+                <button key={candidate.anglo} type="button" className="cc-btn cv-alt" onClick={() => m.pickDetectedName(candidate.anglo)}>
+                  {notation === 'latin' ? candidate.latin : candidate.anglo}
+                </button>
+              ))}
+            </div>
+          )}
+          {!chordError && m.alternatives.length === 0 && activeLabel && (
+            <p className="cv-ctx-pos">
+              {c.activePosition}: <b>{activeLabel}</b> · {c[m.activeVoicing!.difficulty]}
+            </p>
+          )}
+        </div>
+      )}
 
       {keyTop && (
         <div className="cc-module cv-keymod">

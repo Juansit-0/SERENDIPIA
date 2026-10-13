@@ -34,7 +34,11 @@ export function soundingMidi(frets: (number | null)[], tuning: number[] = STANDA
 }
 
 export function detectChord(frets: (number | null)[], tuning: number[] = STANDARD_TUNING): DetectionResult {
-  const midi = soundingMidi(frets, tuning)
+  return detectFromMidi(soundingMidi(frets, tuning))
+}
+
+/** Names the chord a set of sounding notes makes (from the fretboard, or heard through the microphone). */
+export function detectFromMidi(midi: number[]): DetectionResult {
   const pcs = [...new Set(midi.map((note) => ((note % 12) + 12) % 12))]
   const bassPc = midi.length > 0 ? ((Math.min(...midi) % 12) + 12) % 12 : null
 
@@ -74,7 +78,8 @@ export function detectChord(frets: (number | null)[], tuning: number[] = STANDAR
 
       const inversion = bassPc !== null ? tones.indexOf(bassPc) : -1
       const accidental = chordAccidental(rootPc)
-      const bassAccidental = bassPc !== null ? chordAccidental(bassPc) : accidental
+      // The bass is spelled in the chord's own key: D/F#, not D/Gb.
+      const bassAccidental = accidental
 
       candidates.push({
         rootPc,

@@ -1,5 +1,6 @@
 @import 'tailwindcss';
 @import './celeste.css';
+@import './motion.css';
 
 /* Desktop app shell: a wide and tall-enough window gets a fixed, no-scroll layout
    (top bar, the view in the middle, the progression strip always visible below). */

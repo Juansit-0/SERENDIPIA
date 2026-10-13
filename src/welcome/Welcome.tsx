@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from 'react'
+import { useCallback, useEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react'
 import { prefetchAudioEngine } from '../audio/loader'
 import { welcomeText } from '../i18n/welcome'
 import { useStore } from '../state/store'
 import { useTheme } from '../state/theme'
 import type { Palette, WelcomeScene } from './scene'
-import { closeWelcome } from './state'
+import { closeWelcome, startEntrance } from './state'
 import '../styles/welcome.css'
 
 /** The scene's colours come from the live theme tokens, so the sky always matches the app. */
@@ -22,6 +22,9 @@ function readPalette(): Palette {
     borrowed: token('--cc-fn-borrowed', '#e2a4bf'),
   }
 }
+
+/** How long the warp and the opening circle last. */
+const LEAVE_MS = 1050
 
 const reducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
 
@@ -74,14 +77,39 @@ export function Welcome() {
     primary.current?.focus()
   }, [step])
 
-  const finish = useCallback(() => {
-    prefetchAudioEngine()
-    closeWelcome()
-  }, [])
+  // Leaving: the stars jump to warp while a circle opens from the pressed button onto the app, which assembles itself.
+  const [leaving, setLeaving] = useState<{ x: number; y: number } | null>(null)
+  const timers = useRef<number[]>([])
+  useEffect(() => () => timers.current.forEach((timer) => window.clearTimeout(timer)), [])
+
+  const finish = useCallback(
+    (origin?: HTMLElement | null) => {
+      if (leaving) return
+      prefetchAudioEngine()
+      if (reducedMotion()) {
+        closeWelcome()
+        return
+      }
+      const box = origin?.getBoundingClientRect()
+      setLeaving(
+        box ? { x: box.left + box.width / 2, y: box.top + box.height / 2 } : { x: window.innerWidth / 2, y: window.innerHeight / 2 },
+      )
+      scene.current?.warp(LEAVE_MS)
+      timers.current.push(
+        window.setTimeout(() => startEntrance(), 220),
+        window.setTimeout(() => closeWelcome(), LEAVE_MS + 120),
+      )
+    },
+    [leaving],
+  )
 
   const go = (next: number) => setStep(Math.max(0, Math.min(last, next)))
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (leaving) {
+      event.preventDefault()
+      return
+    }
     if (event.key === 'Escape') {
       event.preventDefault()
       finish()
@@ -110,60 +138,83 @@ export function Welcome() {
   const current = text.steps[step]
 
   return (
-    <div
-      ref={dialog}
-      className="welcome"
-      data-sky={skyReady ? 'ready' : 'none'}
-      role="dialog"
-      aria-modal="true"
-      aria-label={text.label}
-      onKeyDown={onKeyDown}
-    >
-      <canvas ref={canvas} className="welcome__sky" aria-hidden="true" />
-      <div className="welcome__veil" aria-hidden="true" />
+    <>
+      <div
+        ref={dialog}
+        className="welcome"
+        data-sky={skyReady ? 'ready' : 'none'}
+        data-leaving={leaving ? 'true' : undefined}
+        style={
+          leaving
+            ? ({
+                '--wx': `${leaving.x}px`,
+                '--wy': `${leaving.y}px`,
+              } as CSSProperties)
+            : undefined
+        }
+        role="dialog"
+        aria-modal="true"
+        aria-label={text.label}
+        onKeyDown={onKeyDown}
+      >
+        <canvas ref={canvas} className="welcome__sky" aria-hidden="true" />
+        <div className="welcome__veil" aria-hidden="true" />
 
-      <button type="button" className="cc-btn cc-btn--ghost welcome__skip" onClick={finish}>
-        {text.skip}
-      </button>
+        <button type="button" className="cc-btn cc-btn--ghost welcome__skip" onClick={(event) => finish(event.currentTarget)}>
+          {text.skip}
+        </button>
 
-      <section className="welcome__card" aria-live="polite">
-        <div key={step} className="welcome__copy">
-          <p className="welcome__kicker">{current.kicker}</p>
-          <h1 className={step === 0 ? 'welcome__title welcome__title--brand' : 'welcome__title'}>{current.title}</h1>
-          <p className="welcome__body">{current.body}</p>
-        </div>
-
-        <div className="welcome__nav">
-          <ol className="welcome__dots" aria-label={`${text.progress} ${step + 1} ${text.of} ${text.steps.length}`}>
-            {text.steps.map((item, index) => (
-              <li key={item.title}>
-                <button
-                  type="button"
-                  className="welcome__dot"
-                  aria-current={index === step ? 'step' : undefined}
-                  aria-label={`${text.progress} ${index + 1}: ${item.title}`}
-                  onClick={() => go(index)}
-                />
-              </li>
-            ))}
-          </ol>
-          <div className="welcome__actions">
-            {step > 0 && (
-              <button type="button" className="cc-btn cc-btn--ghost" onClick={() => go(step - 1)}>
-                {text.back}
-              </button>
-            )}
-            <button
-              ref={primary}
-              type="button"
-              className="cc-btn cc-btn--primary cc-btn--lg"
-              onClick={() => (step === last ? finish() : go(step + 1))}
-            >
-              {step === 0 ? text.start : step === last ? text.play : text.next}
-            </button>
+        <section className="welcome__card" aria-live="polite">
+          <div key={step} className="welcome__copy">
+            <p className="welcome__kicker">{current.kicker}</p>
+            <h1 className={step === 0 ? 'welcome__title welcome__title--brand' : 'welcome__title'}>{current.title}</h1>
+            <p className="welcome__body">{current.body}</p>
           </div>
-        </div>
-      </section>
-    </div>
+
+          <div className="welcome__nav">
+            <ol className="welcome__dots" aria-label={`${text.progress} ${step + 1} ${text.of} ${text.steps.length}`}>
+              {text.steps.map((item, index) => (
+                <li key={item.title}>
+                  <button
+                    type="button"
+                    className="welcome__dot"
+                    aria-current={index === step ? 'step' : undefined}
+                    aria-label={`${text.progress} ${index + 1}: ${item.title}`}
+                    onClick={() => go(index)}
+                  />
+                </li>
+              ))}
+            </ol>
+            <div className="welcome__actions">
+              {step > 0 && (
+                <button type="button" className="cc-btn cc-btn--ghost" onClick={() => go(step - 1)}>
+                  {text.back}
+                </button>
+              )}
+              <button
+                ref={primary}
+                type="button"
+                className="cc-btn cc-btn--primary cc-btn--lg"
+                onClick={(event) => (step === last ? finish(event.currentTarget) : go(step + 1))}
+              >
+                {step === 0 ? text.start : step === last ? text.play : text.next}
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
+      {leaving && (
+        <div
+          className="welcome-ring"
+          aria-hidden="true"
+          style={
+            {
+              '--wx': `${leaving.x}px`,
+              '--wy': `${leaving.y}px`,
+            } as CSSProperties
+          }
+        />
+      )}
+    </>
   )
 }

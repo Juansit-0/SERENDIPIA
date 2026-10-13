@@ -11,7 +11,7 @@ vi.mock('../audio/loader', () => ({
 // jsdom has no WebGL: the sky is a stub that records which figure it was asked to show.
 const shown: number[] = []
 vi.mock('./scene', () => ({
-  createWelcomeScene: () => ({ show: (step: number) => shown.push(step), setPalette: () => undefined, dispose: () => undefined }),
+  createWelcomeScene: () => ({ show: (step: number) => shown.push(step), setPalette: () => undefined, warp: () => undefined, dispose: () => undefined }),
   sideBySide: () => true,
 }))
 
@@ -42,13 +42,22 @@ describe('welcome', () => {
     expect(screen.getByRole('heading', { name: 'Deja sitio a la casualidad' })).toBeTruthy()
     expect(shown.at(-1)).toBe(3)
     fireEvent.click(screen.getByRole('button', { name: 'Empezar a tocar' }))
+    // The exit plays first: a circle opens onto the app, which assembles itself.
+    expect(screen.getByRole('dialog').getAttribute('data-leaving')).toBe('true')
+    await act(() => new Promise((resolve) => setTimeout(resolve, 400)))
+    expect(document.documentElement.dataset.entrance).toBe('run')
+    await act(() => new Promise((resolve) => setTimeout(resolve, 900)))
     expect(screen.queryByRole('dialog', { name: 'Bienvenida a SERENDIPIA' })).toBeNull()
     expect(localStorage.getItem('serendipia.welcome.v1')).not.toBeNull()
   })
 
   it('can be skipped with Escape and shown again from Ajustes', async () => {
     await openApp()
+    // With reduced motion the welcome closes at once.
+    const matchMedia = window.matchMedia
+    window.matchMedia = ((query: string) => ({ matches: query.includes('reduce'), addEventListener() {}, removeEventListener() {} })) as unknown as typeof window.matchMedia
     fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' })
+    window.matchMedia = matchMedia
     expect(screen.queryByRole('dialog', { name: 'Bienvenida a SERENDIPIA' })).toBeNull()
     fireEvent.click(screen.getByRole('button', { name: 'Ajustes' }))
     fireEvent.click(screen.getByRole('button', { name: 'Ver la bienvenida' }))

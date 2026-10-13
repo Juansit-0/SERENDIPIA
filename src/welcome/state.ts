@@ -44,3 +44,16 @@ export function useWelcomeOpen(): boolean {
     () => false,
   )
 }
+
+/**
+ * The app assembling itself as the welcome opens onto it: `html[data-entrance]` drives the CSS entrance
+ * (top bar down, modules up, strip stars landing) and clears itself once it has played.
+ */
+export function startEntrance(ms = 2200): void {
+  if (typeof document === 'undefined') return
+  const root = document.documentElement
+  root.dataset.entrance = 'run'
+  window.setTimeout(() => {
+    if (root.dataset.entrance === 'run') delete root.dataset.entrance
+  }, ms)
+}

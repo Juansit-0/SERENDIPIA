@@ -18,6 +18,8 @@ export type Palette = Record<Hue, string> & { ground: string }
 export interface WelcomeScene {
   show: (step: number) => void
   setPalette: (palette: Palette, day: boolean) => void
+  /** The exit: every star rushes outward and past the viewer (a warp jump) over `ms`. */
+  warp: (ms: number) => void
   dispose: () => void
 }
 
@@ -45,6 +47,7 @@ const FIGURE_VERTEX = /* glsl */ `
   uniform float uScale;
   uniform float uMotion;
   uniform float uDay;
+  uniform float uWarp;
   varying vec3 vColor;
   varying float vBig;
   varying float vAlpha;
@@ -64,8 +67,13 @@ const FIGURE_VERTEX = /* glsl */ `
     vAlpha = size < 0.2 ? mix(0.5, 0.3, uDay) : (line ? mix(1.0, 0.5, uDay) : 1.0);
     if (line) size *= mix(1.0, 0.78, uDay);
     float twinkle = 1.0 + 0.18 * sin(uTime * 2.2 + aDelay * 60.0) * uMotion;
+    // Warp: each star flies out from the centre and towards the viewer, the late ones a little behind.
+    float w = clamp(uWarp * 1.25 - aDelay * 0.25, 0.0, 1.0);
+    w = w * w * w;
+    pos.xy *= 1.0 + w * 5.0;
+    pos.z += w * 10.5;
     vec4 mv = modelViewMatrix * vec4(pos, 1.0);
-    gl_PointSize = size * twinkle * uScale / -mv.z;
+    gl_PointSize = size * twinkle * (1.0 + w * 3.0) * uScale / -mv.z;
     gl_Position = projectionMatrix * mv;
   }
 `
@@ -95,6 +103,7 @@ const FIGURE_FRAGMENT = /* glsl */ `
 
 const FIELD_VERTEX = /* glsl */ `
   attribute float aSeed;
+  uniform float uWarp;
   uniform float uTime;
   uniform float uScale;
   uniform float uMotion;
@@ -103,8 +112,10 @@ const FIELD_VERTEX = /* glsl */ `
   void main() {
     vAlpha = 0.35 + 0.65 * fract(aSeed * 7.31);
     vAlpha *= 0.75 + 0.25 * sin(uTime * (0.6 + fract(aSeed * 3.7) * 1.6) + aSeed * 50.0) * uMotion;
-    vec4 mv = modelViewMatrix * vec4(position, 1.0);
-    gl_PointSize = (0.12 + 0.22 * fract(aSeed * 13.1)) * uScale / -mv.z;
+    vec3 pos = position;
+    pos.z += uWarp * uWarp * 22.0;
+    vec4 mv = modelViewMatrix * vec4(pos, 1.0);
+    gl_PointSize = (0.12 + 0.22 * fract(aSeed * 13.1)) * (1.0 + uWarp * 2.0) * uScale / max(0.5, -mv.z);
     gl_Position = projectionMatrix * mv;
   }
 `
@@ -162,7 +173,7 @@ export function createWelcomeScene(canvas: HTMLCanvasElement, options: { reduced
   const fieldMaterial = new ShaderMaterial({
     vertexShader: FIELD_VERTEX,
     fragmentShader: FIELD_FRAGMENT,
-    uniforms: { uTime: { value: 0 }, uScale: { value: 1 }, uMotion: { value: motion }, uColor: { value: new Color() }, uDay: { value: 0 } },
+    uniforms: { uTime: { value: 0 }, uScale: { value: 1 }, uMotion: { value: motion }, uColor: { value: new Color() }, uDay: { value: 0 }, uWarp: { value: 0 } },
     transparent: true,
     depthWrite: false,
   })
@@ -201,6 +212,7 @@ export function createWelcomeScene(canvas: HTMLCanvasElement, options: { reduced
       uMotion: { value: motion },
       uDay: { value: 0 },
       uInk: { value: new Color() },
+      uWarp: { value: 0 },
     },
     transparent: true,
     depthWrite: false,
@@ -398,6 +410,8 @@ export function createWelcomeScene(canvas: HTMLCanvasElement, options: { reduced
   observer.observe(canvas)
   resize()
 
+  let warpStart = -1
+  let warpMs = 1
   let frame = 0
   let stopped = false
   const startedAt = performance.now()
@@ -416,6 +430,9 @@ export function createWelcomeScene(canvas: HTMLCanvasElement, options: { reduced
       group.rotation.x += (pointer.y * 0.12 - group.rotation.x) * 0.04
     }
     updateShootingStar(now)
+    const warp = warpStart < 0 ? 0 : clamp01((now - warpStart) / warpMs)
+    figureMaterial.uniforms.uWarp.value = warp
+    fieldMaterial.uniforms.uWarp.value = warp
     renderer.render(scene, camera)
   }
   frame = requestAnimationFrame(tick)
@@ -423,6 +440,10 @@ export function createWelcomeScene(canvas: HTMLCanvasElement, options: { reduced
   return {
     show,
     setPalette,
+    warp(ms: number) {
+      warpStart = performance.now()
+      warpMs = Math.max(1, ms)
+    },
     dispose() {
       stopped = true
       cancelAnimationFrame(frame)

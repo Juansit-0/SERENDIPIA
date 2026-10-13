@@ -466,7 +466,9 @@ export function TopBar() {
             aria-pressed={theme === 'day'}
             onClick={() => toggle(themeButton.current)}
           >
-            {theme === 'night' ? <MoonIcon size={16} /> : <SunIcon size={16} />}
+            <span key={theme} className="cc-theme-icon">
+              {theme === 'night' ? <MoonIcon size={16} /> : <SunIcon size={16} />}
+            </span>
           </button>
         </div>
       </div>

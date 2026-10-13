@@ -26,7 +26,10 @@ export function Hero({ m }: { m: ChordModel }) {
             aria-live="polite"
             style={{ '--chars': Math.max(3, name.length), '--hero-max': 'var(--cv-hero-max)' } as CSSProperties}
           >
-            {name}
+            {/* Keyed so each new name plays its arrival; the live region itself stays put for screen readers. */}
+            <span key={name} className="cv-name-text">
+              {name}
+            </span>
           </p>
         ) : (
           <p className="cv-name-msg" role="status">
@@ -37,7 +40,9 @@ export function Hero({ m }: { m: ChordModel }) {
       {showName && (
         <div className="cv-latin">
           <p className="cv-latin-name" lang={m.notation === 'latin' ? 'en' : 'es'}>
-            {m.otherName}
+            <span key={m.otherName} className="cv-name-text">
+              {m.otherName}
+            </span>
           </p>
           <span className="cc-label cv-latin-label">{otherLabel}</span>
         </div>

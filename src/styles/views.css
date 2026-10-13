@@ -973,3 +973,173 @@
     transform: translateX(-2px);
   }
 }
+
+/* ---------- Teoría · Escalas: the key's scale over the neck ---------- */
+.tv-head__switches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.sv {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.75rem 0.9rem 0.6rem;
+  min-width: 0;
+}
+
+.sv-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.6rem 1.25rem;
+}
+
+.sv-control {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.sv-select {
+  min-width: 12rem;
+}
+
+.sv-over {
+  flex: 1 1 18rem;
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  color: var(--cc-ink-soft);
+}
+
+.sv-over b {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 1.375rem;
+  color: var(--cc-ink);
+}
+
+.sv-outside {
+  color: var(--cc-fn-borrowed);
+}
+
+.sv-board {
+  --dot: clamp(22px, 2.4vw, 32px);
+  display: grid;
+  grid-template-columns: 1.5rem repeat(var(--frets), minmax(var(--dot), 1fr));
+  grid-auto-rows: minmax(calc(var(--dot) + 6px), 1fr);
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.sv-row {
+  display: contents;
+}
+
+.sv-fretnum {
+  align-self: end;
+  padding-bottom: 2px;
+  text-align: center;
+  font-size: 0.6875rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--cc-ink-faint);
+}
+
+.sv-fretnum.is-marker {
+  color: var(--cc-ink);
+  font-weight: 700;
+}
+
+.sv-string-name {
+  display: grid;
+  place-items: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--cc-ink-soft);
+}
+
+/* Each cell draws its piece of string (centre line) and its fret wire (right edge). */
+.sv-cell {
+  position: relative;
+  display: grid;
+  place-items: center;
+  border-right: 1px solid var(--cc-line);
+  background: linear-gradient(var(--cc-line-strong), var(--cc-line-strong)) center / 100% 1.5px no-repeat;
+}
+
+.sv-cell.is-open {
+  border-right: 4px solid var(--cc-ink-soft);
+  background: none;
+}
+
+.sv-cell.in-box {
+  background-color: var(--cc-accent-soft);
+}
+
+.sv-dot {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: var(--dot);
+  height: var(--dot);
+  padding: 0;
+  border: 1.5px solid var(--cc-line-strong);
+  border-radius: 50%;
+  background: var(--cc-ground-3);
+  color: var(--cc-ink);
+  font: 600 0.6875rem / 1 var(--font-ui);
+  cursor: pointer;
+  transition: transform 0.12s ease, opacity 0.2s ease, background 0.2s ease;
+}
+
+.sv-dot:hover {
+  transform: scale(1.12);
+}
+
+/* The root reads apart from the rest: a squared stone with a heavier rim. */
+.sv-dot.is-root {
+  border: 2.5px solid var(--cc-accent-deep);
+  border-radius: 6px;
+  font-weight: 800;
+}
+
+.sv-dot.is-chord {
+  background: var(--cc-accent);
+  border-color: var(--cc-accent-deep);
+  color: var(--cc-accent-ink);
+}
+
+.sv-dot.is-dim {
+  opacity: 0.22;
+}
+
+.sv-hint {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--cc-ink-faint);
+}
+
+@media (min-width: 1024px) and (min-height: 640px) {
+  .sv {
+    flex: 1;
+    min-height: 0;
+  }
+
+  .sv-board {
+    flex: 1;
+    min-height: 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .sv-dot {
+    animation: mark-pop 300ms cubic-bezier(0.3, 1.5, 0.5, 1) backwards;
+  }
+
+  .sv-dot.is-chord {
+    box-shadow: 0 0 0 3px var(--cc-accent-soft);
+  }
+}

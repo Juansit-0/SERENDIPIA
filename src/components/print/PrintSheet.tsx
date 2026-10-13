@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { sheetText } from '../../i18n/sheet'
 import { tunerText } from '../../i18n/tuner'
@@ -15,6 +16,7 @@ import '../../styles/print.css'
 export function PrintSheet() {
   const { progression, analysis, keyRootPc, keyMode, tempo, beatsPerChord, capo, tuning, tuningId, notation, lang, shareLink } = useStore()
   const x = sheetText[lang]
+  const [printedOn] = useState(() => new Date().toLocaleDateString(lang === 'es' ? 'es' : 'en'))
   const diatonic = diatonicChords(keyRootPc, keyMode)
   const name = (step: { anglo: string; latin: string }) =>
     notation === 'latin' ? step.latin : notation === 'both' && step.anglo !== step.latin ? `${step.anglo} · ${step.latin}` : step.anglo
@@ -104,7 +106,7 @@ export function PrintSheet() {
           {x.link}: {shareLink()}
         </span>
         <span>
-          {x.printed} {new Date().toLocaleDateString(lang === 'es' ? 'es' : 'en')}
+          {x.printed} {printedOn}
         </span>
       </footer>
     </article>,

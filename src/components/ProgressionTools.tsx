@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
+import { LATIN_SHARP, PITCH_SHARP } from '../music/notes'
 import { exportLibrary } from '../state/library'
+import { shortestShift } from '../state/progressionOps'
 import { useStore } from '../state/store'
-import { ArrowRightIcon, CloseIcon, MoreIcon } from './icons'
+import { ArrowRightIcon, CloseIcon, MinusIcon, MoreIcon, PlusIcon } from './icons'
 import { useStrip } from './strip/useStrip'
 
-type Panel = 'closed' | 'menu' | 'save' | 'library' | 'share'
+type Panel = 'closed' | 'menu' | 'save' | 'library' | 'share' | 'transpose'
 
 /** The ⋯ menu of the progression strip: clear, save, my progressions, share link. */
 export function ProgressionTools({ onAnnounce }: { onAnnounce: (message: string) => void }) {
@@ -17,6 +19,9 @@ export function ProgressionTools({ onAnnounce }: { onAnnounce: (message: string)
     deleteFromLibrary,
     clearProgression,
     shareLink,
+    transposeProgression,
+    keyRootPc,
+    keyMode,
     notation,
     playing,
     t,
@@ -97,6 +102,7 @@ export function ProgressionTools({ onAnnounce }: { onAnnounce: (message: string)
   }
 
   const empty = progression.length === 0
+  const keyName = (pc: number) => (notation === 'latin' ? LATIN_SHARP[pc] : notation === 'both' ? `${PITCH_SHARP[pc]} · ${LATIN_SHARP[pc]}` : PITCH_SHARP[pc])
   const heading = (title: string) => (
     <div className="strip-menu__head">
       <button type="button" className="cc-btn cc-btn--icon cc-btn--ghost strip__btn" onClick={() => setPanel('menu')} aria-label={s('back')} title={s('back')}>
@@ -142,6 +148,9 @@ export function ProgressionTools({ onAnnounce }: { onAnnounce: (message: string)
               </button>
               <button type="button" className="cc-btn strip-menu__item" disabled={empty} onClick={() => setPanel('save')}>
                 {s('save')}
+              </button>
+              <button type="button" className="cc-btn strip-menu__item" disabled={empty} onClick={() => setPanel('transpose')}>
+                {s('transpose')}
               </button>
               <button
                 type="button"
@@ -196,6 +205,61 @@ export function ProgressionTools({ onAnnounce }: { onAnnounce: (message: string)
                   {t('library.save')}
                 </button>
               </form>
+            </>
+          )}
+
+          {panel === 'transpose' && (
+            <>
+              {heading(s('transpose'))}
+              <div className="strip-transpose">
+                <button
+                  type="button"
+                  className="cc-btn cc-btn--icon strip__btn"
+                  aria-label={s('transposeDown')}
+                  title={s('transposeDown')}
+                  onClick={() => {
+                    transposeProgression(-1)
+                    onAnnounce(s('transposeDown'))
+                  }}
+                >
+                  <MinusIcon size={16} />
+                </button>
+                <span className="strip-transpose__key">
+                  <span className="strip__muted">{s('keyLine')}</span> {keyName(keyRootPc)} {keyMode === 'minor' ? s('minor') : s('major')}
+                </span>
+                <button
+                  type="button"
+                  className="cc-btn cc-btn--icon strip__btn"
+                  aria-label={s('transposeUp')}
+                  title={s('transposeUp')}
+                  onClick={() => {
+                    transposeProgression(1)
+                    onAnnounce(s('transposeUp'))
+                  }}
+                >
+                  <PlusIcon size={16} />
+                </button>
+              </div>
+              <span className="cc-label strip-transpose__label">{s('transposeTo')}</span>
+              <div className="cc-keygrid" role="group" aria-label={s('transposeTo')}>
+                {PITCH_SHARP.map((name, pc) => (
+                  <button
+                    key={name}
+                    type="button"
+                    className="cc-btn"
+                    aria-pressed={pc === keyRootPc}
+                    aria-label={`${s('transposeTo')} ${name} / ${LATIN_SHARP[pc]}`}
+                    onClick={() => {
+                      transposeProgression(shortestShift(keyRootPc, pc))
+                      onAnnounce(`${s('transposeTo')} ${keyName(pc)}`)
+                    }}
+                  >
+                    <span aria-hidden="true">{notation === 'latin' ? LATIN_SHARP[pc] : name}</span>
+                    {notation === 'both' && <small aria-hidden="true">{LATIN_SHARP[pc]}</small>}
+                  </button>
+                ))}
+              </div>
+              <p className="strip-menu__note">{s('transposeHint')}</p>
             </>
           )}
 

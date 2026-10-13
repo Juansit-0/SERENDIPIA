@@ -134,3 +134,17 @@ describe('share links', () => {
     expect(window.location.search).toBe('')
   })
 })
+
+describe('transpose', () => {
+  it('moves the whole progression by semitones or to another key, each step undoable', () => {
+    renderApp()
+    openMenu()
+    fireEvent.click(screen.getByRole('button', { name: 'Transponer…' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Subir un semitono' }))
+    expect(stepNames()).toEqual(['Db', 'Ab', 'Bbm', 'Gb'])
+    fireEvent.click(screen.getByRole('button', { name: 'Llevar a G / Sol' }))
+    expect(stepNames()).toEqual(['G', 'D', 'Em', 'C'])
+    fireEvent.click(screen.getByRole('button', { name: 'Deshacer' }))
+    expect(stepNames()).toEqual(['Db', 'Ab', 'Bbm', 'Gb'])
+  })
+})

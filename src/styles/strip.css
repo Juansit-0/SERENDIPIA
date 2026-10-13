@@ -648,6 +648,23 @@
   color: var(--cc-ink-soft);
 }
 
+.strip-transpose {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.strip-transpose__key {
+  font-weight: 600;
+  font-variant-numeric: lining-nums;
+}
+
+.strip-transpose__label {
+  display: block;
+  margin-top: 10px;
+}
+
 /* ---------- step picker ---------- */
 .strip-picker {
   display: flex;

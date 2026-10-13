@@ -88,7 +88,8 @@ export function formatChord(
   if (options.bassPc === undefined || options.bassPc === null) {
     return { anglo: baseAnglo, latin: baseLatin }
   }
-  const bassAccidental = chordAccidental(options.bassPc)
+  // The bass is spelled in the chord's own key: D/F#, Eb/Bb, never D/Gb.
+  const bassAccidental = accidental
   return {
     anglo: `${baseAnglo}/${pitchName(options.bassPc, bassAccidental)}`,
     latin: `${baseLatin}/${latinName(options.bassPc, bassAccidental)}`,

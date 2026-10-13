@@ -38,7 +38,7 @@ import { STANDARD_TUNING, TUNINGS, Voicing, voicingFromFrets, voicingsFor } from
 import { playhead } from './playhead'
 import { chainVoicings, recommendCapo, type CapoOption } from '../music/playability'
 import { voicingLabel } from '../music/stepVoicing'
-import { appendStep, applyStepVoicing, MAX_STEPS, removeStep, stepId, toggleDetectorFret } from './progressionOps'
+import { appendStep, applyStepVoicing, MAX_STEPS, removeStep, stepId, toggleDetectorFret, transposeSteps } from './progressionOps'
 import { createHistory, pushHistory, redoHistory, undoHistory, type History } from './history'
 import {
   importLibrary as mergeBackup,
@@ -156,6 +156,8 @@ interface StoreValue {
   playFrets: (frets: (number | null)[], pattern?: PlayPattern) => void
   /** The open string's target pitch in the chosen tuning (no capo): the tuner's reference tone. */
   playOpenString: (stringIndex: number) => void
+  /** Moves the whole progression (and a fixed key) by semitones; one undo step. */
+  transposeProgression: (semitones: number) => void
   progression: ProgressionStep[]
   loadProgression: (steps: Array<Omit<ProgressionStep, 'id'>>) => void
   addToProgression: (step: Omit<ProgressionStep, 'id'>) => void
@@ -400,6 +402,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       })
     },
     [enableAudio, soundingTuning],
+  )
+
+  const transposeProgression = useCallback(
+    (semitones: number) => {
+      if (semitones === 0) return
+      setProgression((current) => transposeSteps(current, semitones))
+      if (!keyAuto) setManualKeyRootPc((current) => (((current + semitones) % 12) + 12) % 12)
+    },
+    [setProgression, keyAuto],
   )
 
   const playOpenString = useCallback(
@@ -808,6 +819,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     playVoicing,
     playFrets,
     playOpenString,
+    transposeProgression,
     progression,
     loadProgression,
     addToProgression,
@@ -840,7 +852,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     metronome, setMetronome, beatsPerChord, timbre, setTimbre, strum, setStepStrum, stopPlayback, keyRootPc, setKeyRootPc, keyMode, setKeyMode, keyAuto,
     detectedKey, analysis, nextSteps, suggestFrom, panelSuggestions, panelFollowsProgression, undo, redo, history.past.length, history.future.length, shareLink, library,
     saveProgressionToLibrary, importLibrary, loadFromLibrary, deleteFromLibrary, chainProgression, capoSuggestion, applyCapoSuggestion, chord, chordInput, chordError, setChordInput,
-    setChord, voicings, selectedVoicing, selectVoicing, playVoicing, playFrets, playOpenString, progression, loadProgression,
+    setChord, voicings, selectedVoicing, selectVoicing, playVoicing, playFrets, playOpenString, transposeProgression, progression, loadProgression,
     addToProgression, moveStep, setStepVoicing, removeFromProgression, markedVoicing, setMarkedVoicing,
     clearProgression, playing, togglePlay, audioReady, audioLoading, audioFallback, enableAudio, suggestions,
     addSuggestion, detectorFrets, toggleDetectorString, chartSource, chartFrets, detection, toggleChartFret,

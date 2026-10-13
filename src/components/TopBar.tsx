@@ -411,6 +411,22 @@ export function TopBar() {
                     </button>
                   </div>
                 </div>
+                <div className="cc-pop__row cc-credits">
+                  <span className="cc-label cc-pop__title">{x.credits}</span>
+                  <p>
+                    {x.creditsSounds}{' '}
+                    <a href="https://github.com/gleitz/midi-js-soundfonts" target="_blank" rel="noopener noreferrer">
+                      gleitz/midi-js-soundfonts
+                    </a>
+                    ,{' '}
+                    <a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank" rel="noopener noreferrer">
+                      {x.creditsSoundsLicense}
+                    </a>
+                    .
+                  </p>
+                  <p>{x.creditsFonts}</p>
+                  <p>{x.creditsCode}</p>
+                </div>
               </div>
             )}
           </Popover>

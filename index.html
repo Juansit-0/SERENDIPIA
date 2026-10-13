@@ -3,8 +3,22 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="color-scheme" content="light" />
-    <meta name="theme-color" content="#f4f1ea" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" content="#0d0b14" />
+    <script>
+      // Apply the saved theme (or the system's) before the first paint, so the page never flashes the other theme.
+      ;(function () {
+        var theme = null
+        try {
+          theme = localStorage.getItem('serendipia.theme')
+        } catch (e) {}
+        if (theme !== 'day' && theme !== 'night') {
+          theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'day' : 'night'
+        }
+        document.documentElement.dataset.theme = theme
+        document.querySelector('meta[name="theme-color"]').content = theme === 'day' ? '#40e0d0' : '#0d0b14'
+      })()
+    </script>
     <meta
       name="description"
       content="Instrumento de práctica de guitarra: posiciones de acordes, detector de acordes, teoría y progresiones que suenan solas."

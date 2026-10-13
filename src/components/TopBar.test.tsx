@@ -102,6 +102,15 @@ describe('theme preference in Ajustes', () => {
     expect(option('Automático').getAttribute('aria-pressed')).toBe('true')
     expect(localStorage.getItem('serendipia.theme')).toBeNull()
   })
+
+  it('credits the CC BY-SA guitar samples with links', () => {
+    renderApp()
+    fireEvent.click(screen.getByRole('button', { name: 'Ajustes' }))
+    expect(screen.getByRole('link', { name: 'licencia CC BY-SA 3.0' }).getAttribute('href')).toBe(
+      'https://creativecommons.org/licenses/by-sa/3.0/',
+    )
+    expect(screen.getByRole('link', { name: 'gleitz/midi-js-soundfonts' })).toBeTruthy()
+  })
 })
 
 describe('folded top bar on phones', () => {

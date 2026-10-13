@@ -37,9 +37,15 @@ function notify(): void {
   for (const listener of listeners) listener()
 }
 
+/** Browser chrome color (mobile address bar) matching the top bar of each theme. */
+const CHROME_COLOR: Record<Theme, string> = { night: '#0d0b14', day: '#40e0d0' }
+
 function apply(theme: Theme): void {
   current = theme
-  if (typeof document !== 'undefined') document.documentElement.dataset.theme = theme
+  if (typeof document !== 'undefined') {
+    document.documentElement.dataset.theme = theme
+    document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')?.setAttribute('content', CHROME_COLOR[theme])
+  }
   notify()
 }
 

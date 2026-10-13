@@ -320,3 +320,17 @@
     overflow-x: clip;
   }
 }
+
+/* Credits in Ajustes: small readable text, real links (CC BY-SA attribution for the samples). */
+.cc-credits p {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--cc-ink-soft);
+}
+
+.cc-credits a {
+  color: var(--cc-accent-deep);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}

@@ -80,3 +80,15 @@ describe('typed spelling', () => {
     expect(parseChord('CM7')?.quality.id).toBe('maj7')
   })
 })
+
+describe('formatChord bass', () => {
+  it('names the bass in the chord’s own spelling', () => {
+    expect(formatChord(7, 'min', { bassPc: 10 }).anglo).toBe('Gm/Bb')
+    expect(formatChord(2, 'min', { bassPc: 10 }).anglo).toBe('Dm/Bb')
+    expect(formatChord(0, 'min', { bassPc: 3 }).anglo).toBe('Cm/Eb')
+    expect(formatChord(0, '7', { bassPc: 10 }).anglo).toBe('C7/Bb')
+    expect(formatChord(2, 'maj', { bassPc: 6 }).anglo).toBe('D/F#')
+    expect(formatChord(3, 'maj', { bassPc: 10 }).anglo).toBe('Eb/Bb')
+    expect(formatChord(9, 'min', { bassPc: 10 }).latin).toBe('La m/Sib')
+  })
+})

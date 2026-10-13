@@ -56,12 +56,24 @@ function findPeaks(magnitudes: Float32Array, sampleRate: number, fftSize: number
   return peaks
 }
 
-/** True when `peak` sits on an overtone (×3, ×5, ×6, ×7) of a lower, comparably loud peak: it adds no real note. */
+/*
+ * Overtones that would add a false note: ×3 and ×6 (a fifth), ×5 (a major third, 14 cents flat of tempered),
+ * ×7 (31 cents flat of a minor seventh, so it needs a wider window). A ×5 as loud as its base is more likely
+ * a real third played in that octave, so only a clearly weaker one is dropped.
+ */
+const OVERTONES: Array<{ harmonic: number; tolerance: number; louder: number }> = [
+  { harmonic: 3, tolerance: 0.018, louder: 1.6 },
+  { harmonic: 5, tolerance: 0.018, louder: 0.8 },
+  { harmonic: 6, tolerance: 0.018, louder: 1.6 },
+  { harmonic: 7, tolerance: 0.03, louder: 1.6 },
+]
+
+/** True when `peak` sits on an overtone of a lower peak: it adds no real note. */
 function isOvertone(peak: Peak, lower: Peak[]): boolean {
   return lower.some((base) =>
-    [3, 5, 6, 7].some((harmonic) => {
+    OVERTONES.some(({ harmonic, tolerance, louder }) => {
       const ratio = peak.frequency / (base.frequency * harmonic)
-      return Math.abs(ratio - 1) < 0.018 && peak.level < base.level * 1.6
+      return Math.abs(ratio - 1) < tolerance && peak.level < base.level * louder
     }),
   )
 }

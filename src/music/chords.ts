@@ -1,4 +1,4 @@
-import { spellNote, tonicLetterIndex } from './notes'
+import { latinName, pitchName, spellNote, tonicLetterIndex } from './notes'
 
 export type QualityId =
   | 'maj'
@@ -146,6 +146,26 @@ export function chordToneSpelling(rootPc: number, quality: Quality, preferFlat: 
     const spelled = spellNote(letter, pc)
     return { interval, pc, anglo: spelled.anglo, latin: spelled.latin }
   })
+}
+
+/** Letter steps above the root for a bass that is not a chord tone (♭2, 2, ♭3, 3, 4, ♯4/♭5, 5, ♭6, 6, ♭7, 7). */
+const BASS_DEGREE: Record<number, number> = { 1: 1, 2: 1, 3: 2, 4: 2, 5: 3, 7: 4, 8: 5, 9: 5, 10: 6, 11: 6 }
+
+/**
+ * The bass of a slash chord, spelled from the chord: a chord tone keeps its letter (Gm/Bb, Cm7/Eb, C7/Bb, D/F#),
+ * any other bass is named by its interval over the root. Double sharps or flats fall back to the plain name.
+ */
+export function spellBass(rootPc: number, quality: Quality, bassPc: number, preferFlat: boolean): { anglo: string; latin: string } {
+  const pc = ((bassPc % 12) + 12) % 12
+  const single = (name: string) => !/(##|bb)/.test(name)
+  const tone = chordToneSpelling(rootPc, quality, preferFlat).find((item) => item.pc === pc)
+  if (tone && single(tone.anglo)) return { anglo: tone.anglo, latin: tone.latin }
+  const interval = (((pc - rootPc) % 12) + 12) % 12
+  const degree = interval === 6 ? (preferFlat ? 4 : 3) : (BASS_DEGREE[interval] ?? 0)
+  const spelled = spellNote((tonicLetterIndex(rootPc, preferFlat) + degree) % 7, pc)
+  if (single(spelled.anglo)) return { anglo: spelled.anglo, latin: spelled.latin }
+  const accidental = preferFlat ? 'flat' : 'sharp'
+  return { anglo: pitchName(pc, accidental), latin: latinName(pc, accidental) }
 }
 
 export function isTriadLike(quality: Quality): boolean {

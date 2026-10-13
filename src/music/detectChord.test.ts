@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { detectChord } from './detectChord'
+import { detectChord, detectFromMidi } from './detectChord'
 
 const fret = (values: string): (number | null)[] =>
   values.split(',').map((value) => (value === 'x' ? null : Number(value)))
@@ -41,5 +41,15 @@ describe('bass note', () => {
   it('uses the lowest sounding note, not the lowest string', () => {
     // B2 on the 6th string (fret 7) sits above the open A2 on the 5th.
     expect(detectChord([7, 0, 2, 2, 2, 0]).bassPc).toBe(9)
+  })
+})
+
+describe('slash-chord bass spelling', () => {
+  it('spells the bass from the chord, by interval', () => {
+    const names = (midi: number[]) => detectFromMidi(midi).candidates.map((candidate) => candidate.anglo)
+    expect(names([51, 58, 63, 67])).toContain('Cm7/Eb')
+    expect(names([58, 62, 67])).toContain('Gm/Bb')
+    expect(names([54, 57, 62])).toContain('D/F#')
+    expect(names([46, 52, 55, 60])).toContain('C7/Bb')
   })
 })

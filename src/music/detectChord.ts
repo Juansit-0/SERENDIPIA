@@ -1,4 +1,4 @@
-import { Quality, QUALITY_LIST, chordTones, essentialTones } from './chords'
+import { Quality, QUALITY_LIST, chordTones, essentialTones, spellBass } from './chords'
 import { STANDARD_TUNING } from './voicings'
 import { pitchName, latinName, chordAccidental, bothNames } from './notes'
 
@@ -78,20 +78,15 @@ export function detectFromMidi(midi: number[]): DetectionResult {
 
       const inversion = bassPc !== null ? tones.indexOf(bassPc) : -1
       const accidental = chordAccidental(rootPc)
-      // The bass is spelled in the chord's own key: D/F#, not D/Gb.
-      const bassAccidental = accidental
+      // The bass is spelled from the chord itself: D/F#, Gm/Bb, Cm7/Eb.
+      const bass = bassPc !== null && !bassIsRoot ? spellBass(rootPc, quality, bassPc, accidental === 'flat') : null
+      const latinSuffix = quality.suffix === '' ? '' : ` ${quality.suffix}`
 
       candidates.push({
         rootPc,
         quality,
-        anglo:
-          bassPc !== null && !bassIsRoot
-            ? `${pitchName(rootPc, accidental)}${quality.suffix}/${pitchName(bassPc, bassAccidental)}`
-            : `${pitchName(rootPc, accidental)}${quality.suffix}`,
-        latin:
-          bassPc !== null && !bassIsRoot
-            ? `${latinName(rootPc, accidental)}${quality.suffix === '' ? '' : ` ${quality.suffix}`}/${latinName(bassPc, bassAccidental)}`
-            : `${latinName(rootPc, accidental)}${quality.suffix === '' ? '' : ` ${quality.suffix}`}`,
+        anglo: bass ? `${pitchName(rootPc, accidental)}${quality.suffix}/${bass.anglo}` : `${pitchName(rootPc, accidental)}${quality.suffix}`,
+        latin: bass ? `${latinName(rootPc, accidental)}${latinSuffix}/${bass.latin}` : `${latinName(rootPc, accidental)}${latinSuffix}`,
         bassPc,
         bassIsRoot,
         inversion: inversion >= 0 ? inversion : 0,

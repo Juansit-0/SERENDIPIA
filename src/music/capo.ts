@@ -1,5 +1,5 @@
-import { qualityById, type QualityId } from './chords'
-import { chordAccidental, latinName, pitchName } from './notes'
+import { qualityById, spellBass, type QualityId } from './chords'
+import { chordAccidental } from './notes'
 import { formatChord, isMinorQuality, latinSuffix, type ParsedChord } from './parseChord'
 
 export const MAX_CAPO = 7
@@ -39,8 +39,9 @@ export function transposeChord(chord: ParsedChord, semitones: number): ParsedCho
   const rootPc = mod12(chord.rootPc + semitones)
   const bassPc = chord.bassPc === null ? null : mod12(chord.bassPc + semitones)
   const accidental = chordAccidental(rootPc, isMinorQuality(chord.quality))
-  const bassAccidental = bassPc !== null ? chordAccidental(bassPc) : accidental
   const labels = formatChord(rootPc, chord.quality.id, { accidental, bassPc })
+  // Same spelling as the label: D/F# has an F# bass, Gm/Bb a Bb one.
+  const bass = bassPc !== null ? spellBass(rootPc, chord.quality, bassPc, accidental === 'flat') : null
   return {
     rootPc,
     quality: chord.quality,
@@ -48,8 +49,8 @@ export function transposeChord(chord: ParsedChord, semitones: number): ParsedCho
     accidental,
     anglo: labels.anglo,
     latin: labels.latin,
-    bassAnglo: bassPc !== null ? pitchName(bassPc, bassAccidental) : null,
-    bassLatin: bassPc !== null ? latinName(bassPc, bassAccidental) : null,
+    bassAnglo: bass?.anglo ?? null,
+    bassLatin: bass?.latin ?? null,
   }
 }
 

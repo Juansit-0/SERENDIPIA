@@ -1,4 +1,4 @@
-import { Quality, QualityId, qualityById, qualityFromSuffix } from './chords'
+import { Quality, QualityId, qualityById, qualityFromSuffix, spellBass } from './chords'
 import { Accidental, chordAccidental, latinName, parsePitchToken, pitchName, typedAccidental } from './notes'
 
 export interface ParsedChord {
@@ -88,11 +88,11 @@ export function formatChord(
   if (options.bassPc === undefined || options.bassPc === null) {
     return { anglo: baseAnglo, latin: baseLatin }
   }
-  // The bass is spelled in the chord's own key: D/F#, Eb/Bb, never D/Gb.
-  const bassAccidental = accidental
+  // The bass is spelled from the chord itself: D/F#, Gm/Bb, Cm7/Eb, C7/Bb.
+  const bass = spellBass(rootPc, quality, options.bassPc, accidental === 'flat')
   return {
-    anglo: `${baseAnglo}/${pitchName(options.bassPc, bassAccidental)}`,
-    latin: `${baseLatin}/${latinName(options.bassPc, bassAccidental)}`,
+    anglo: `${baseAnglo}/${bass.anglo}`,
+    latin: `${baseLatin}/${bass.latin}`,
   }
 }
 

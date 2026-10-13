@@ -5,14 +5,17 @@ import { StoreProvider, useStore } from './state/store'
 import { ChordView } from './views/ChordView'
 import { PracticeView } from './views/PracticeView'
 import { TheoryView } from './views/TheoryView'
+import { Welcome } from './welcome/Welcome'
+import { useWelcomeOpen } from './welcome/state'
 
 function Shell() {
   const { view, togglePlay, undo, redo } = useStore()
+  const welcome = useWelcomeOpen()
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       // The practice view uses Space for its own tap counter.
-      if (event.code !== 'Space' || event.repeat || event.defaultPrevented || view === 'practice') return
+      if (event.code !== 'Space' || event.repeat || event.defaultPrevented || view === 'practice' || welcome) return
       const target = event.target as HTMLElement | null
       const tag = target?.tagName
       if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA' || target?.isContentEditable) return
@@ -22,7 +25,7 @@ function Shell() {
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [togglePlay, view])
+  }, [togglePlay, view, welcome])
 
   // ⌘Z / Ctrl+Z undoes a progression edit; ⌘⇧Z / Ctrl+Y redoes it. Text fields keep their own undo.
   useEffect(() => {
@@ -56,6 +59,7 @@ function Shell() {
         </main>
       </div>
       {view !== 'practice' && <StepRow />}
+      {welcome && <Welcome />}
     </div>
   )
 }

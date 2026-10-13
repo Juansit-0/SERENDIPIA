@@ -6,6 +6,7 @@ import { LATIN_SHARP, PITCH_SHARP } from '../music/notes'
 import { BEAT_OPTIONS, TEMPO_MAX, TEMPO_MIN } from '../state/settings'
 import { useStore, type Notation, type ViewId } from '../state/store'
 import { useTheme } from '../state/theme'
+import { openWelcome } from '../welcome/state'
 import { topbarText } from '../i18n/topbar'
 import '../styles/topbar.css'
 import { BeatMoons } from './topbar/BeatMoons'
@@ -366,7 +367,7 @@ export function TopBar() {
             triggerClassName="cc-btn--icon"
             trigger={<SettingsIcon size={16} />}
           >
-            {() => (
+            {({ close }) => (
               <div className="w-[16rem]">
                 <div className="cc-pop__row">
                   <span className="cc-label cc-pop__title">{x.theme}</span>
@@ -410,6 +411,18 @@ export function TopBar() {
                       EN
                     </button>
                   </div>
+                </div>
+                <div className="cc-pop__row">
+                  <button
+                    type="button"
+                    className="cc-btn cc-btn--ghost w-full"
+                    onClick={() => {
+                      close()
+                      openWelcome()
+                    }}
+                  >
+                    {x.welcomeAgain}
+                  </button>
                 </div>
                 <div className="cc-pop__row cc-credits">
                   <span className="cc-label cc-pop__title">{x.credits}</span>

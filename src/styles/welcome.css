@@ -1,0 +1,188 @@
+/* First-visit welcome: a full-screen sky (three.js canvas) with the step text over it. */
+.welcome {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  background: radial-gradient(120% 90% at 70% 40%, var(--cc-ground-2), var(--cc-ground) 70%);
+  color: var(--cc-ink);
+  font-family: var(--font-ui);
+  overflow: hidden;
+}
+
+.welcome__sky,
+.welcome__veil {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Keeps the text legible over the stars: the ground deepens under the copy. */
+.welcome__veil {
+  pointer-events: none;
+  background: linear-gradient(to top, var(--cc-ground) 0%, transparent 55%);
+}
+
+.welcome__skip {
+  position: relative;
+  justify-self: end;
+  margin: 16px;
+}
+
+.welcome__card {
+  position: relative;
+  grid-row: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: min(100%, 34rem);
+  padding: 0 20px 28px;
+}
+
+.welcome__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.welcome__kicker {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--cc-accent-deep);
+}
+
+.welcome__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(2.25rem, 7vw, 3.5rem);
+  line-height: 1;
+  text-wrap: balance;
+}
+
+.welcome__title--brand {
+  font-size: clamp(2.75rem, 11vw, 5.5rem);
+  letter-spacing: 0.06em;
+}
+
+.welcome__body {
+  margin: 0;
+  max-width: 30rem;
+  font-family: var(--font-serif);
+  font-size: clamp(1.125rem, 2.4vw, 1.3125rem);
+  line-height: 1.45;
+  color: var(--cc-ink-soft);
+  text-wrap: pretty;
+}
+
+.welcome__nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.welcome__dots {
+  display: flex;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Diamond step marks, with a 32px hit area around the 10px mark. */
+.welcome__dot {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.welcome__dot::before {
+  content: '';
+  position: absolute;
+  inset: 11px;
+  border: 1.5px solid var(--cc-line-strong);
+  transform: rotate(45deg);
+  transition: background-color 200ms ease, border-color 200ms ease, transform 300ms ease;
+}
+
+.welcome__dot[aria-current='step']::before {
+  background: var(--cc-accent);
+  border-color: var(--cc-accent-deep);
+  transform: rotate(45deg) scale(1.25);
+}
+
+.welcome__actions {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+/* Without WebGL the welcome is still whole: the text just sits centred on the ground. */
+.welcome[data-sky='none'] .welcome__card {
+  grid-row: 2;
+  align-self: center;
+  justify-self: center;
+}
+
+@media (min-width: 640px) and (min-aspect-ratio: 5/4) {
+  .welcome {
+    grid-template-rows: auto 1fr;
+  }
+
+  .welcome__veil {
+    background: linear-gradient(to right, var(--cc-ground) 0%, color-mix(in srgb, var(--cc-ground) 60%, transparent) 38%, transparent 62%);
+  }
+
+  .welcome__card {
+    grid-row: 2;
+    align-self: center;
+    width: min(34rem, 46vw);
+    padding: 0 0 0 clamp(24px, 6vw, 120px);
+  }
+
+  .welcome__title--brand {
+    font-size: clamp(2.5rem, 6.4vw, 5.5rem);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .welcome {
+    animation: welcome-in 600ms ease both;
+  }
+
+  .welcome__copy > * {
+    animation: welcome-rise 700ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+
+  .welcome__copy > :nth-child(2) {
+    animation-delay: 90ms;
+  }
+
+  .welcome__copy > :nth-child(3) {
+    animation-delay: 180ms;
+  }
+}
+
+@keyframes welcome-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes welcome-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+    filter: blur(4px);
+  }
+}

@@ -10,6 +10,7 @@ vi.mock('../audio/loader', () => ({
 
 export function renderApp(search = '') {
   localStorage.clear()
+  localStorage.setItem('serendipia.welcome.v1', 'seen')
   window.history.replaceState(null, '', `/${search}`)
   return render(<App />)
 }

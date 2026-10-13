@@ -275,6 +275,11 @@ Garamond, ink-soft, dictionary-style entries.
 ### Constellation strip
 The progression as a row of stars (16 columns). Stars take the function color and light up in turn while playing. It sits on a `ground-2` band under the diamond checker (turquoise by day, lilac by night); the constellation lines join the stars only (the lines layer spans roman + star height, never the tiles).
 
+Motion (only with motion allowed): a new chord lands as a star turning into place (520ms) and its line fades in after it; the playhead flares as it reaches each star; hallazgo stars breathe out of step with each other.
+
+### Welcome
+First visit only (not when arriving by a shared link); Ajustes ⚙ → «Ver la bienvenida» shows it again. A full-screen three.js sky (`src/welcome/scene.ts`, lazy chunk) where ~1700 stars gather into one figure per step: the brand mark, an Am chord chart, the C–G–Am–F constellation in function colors, and the same constellation with dotted hallazgos and shooting stars. Night: additive light; day: printed ink dots, chord stars with an ink ring. Text sits left of the sky (≥640px wide and ≥5:4) or under it, in IM Fell English / EB Garamond. Reduced motion: figures appear without travel, no drift or shooting stars. Without WebGL the text stands alone, centred. Skip, Escape, ←/→ and the diamond step marks all work.
+
 ### Top bar
 One row, 52px: views, Correr plus moon-phase beat and tempo, capo, key popover, Reproducción, Sonido, theme toggle, settings. The beat is shown as moon phases advancing per beat.
 

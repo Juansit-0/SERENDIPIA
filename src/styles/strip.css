@@ -846,6 +846,52 @@
   .strip-step.is-active .strip-star__ring {
     animation: cc-twinkle 2s ease-in-out infinite;
   }
+
+  /* A new chord lands as a star turning into place; its line to the previous one fades in after it. */
+  .strip-step .strip-star {
+    animation: strip-land 520ms cubic-bezier(0.2, 0.9, 0.3, 1.3) backwards;
+  }
+
+  .strip-line:not(.strip-line--dotted) {
+    animation: strip-line-in 600ms ease 180ms backwards;
+  }
+
+  /* The playhead flares as it reaches each star, then settles into its steady glow. */
+  .strip-step.is-active .strip-star {
+    animation: strip-flare 650ms ease-out;
+  }
+
+  /* Hallazgos breathe, each a little out of step with the others. */
+  .strip-ghost .strip-star__ghost {
+    animation: cc-twinkle 3.4s ease-in-out infinite;
+  }
+
+  .strip-cell:nth-child(3n + 1) .strip-star__ghost {
+    animation-delay: -1.1s;
+  }
+
+  .strip-cell:nth-child(3n + 2) .strip-star__ghost {
+    animation-delay: -2.3s;
+  }
+}
+
+@keyframes strip-land {
+  from {
+    opacity: 0;
+    transform: scale(0.2) rotate(-120deg);
+  }
+}
+
+@keyframes strip-line-in {
+  from {
+    stroke-opacity: 0;
+  }
+}
+
+@keyframes strip-flare {
+  from {
+    filter: drop-shadow(0 0 14px var(--sc)) brightness(1.35);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

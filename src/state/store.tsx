@@ -48,6 +48,7 @@ import {
   saveToLibrary as storeInLibrary,
   type LibraryEntry,
 } from './library'
+import { emitPluck } from './pluck'
 import { loadSessionSteps, saveSessionSteps } from './session'
 import { decodeShare, shareUrl, type SharedProgression } from './share'
 import { flattenSong, loadSongs, removeSong, saveSong as storeSong, type Song, type SongStep } from './songs'
@@ -397,6 +398,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     (index?: number, pattern: PlayPattern = 'strum-down') => {
       const target = voicings[index ?? selectedVoicing]
       if (!target) return
+      emitPluck(target.frets)
       void enableAudio().then(() => {
         loadedAudioEngine()?.playFrets(target.frets, soundingTuning, pattern)
       })
@@ -415,6 +417,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const playFrets = useCallback(
     (frets: (number | null)[], pattern: PlayPattern = 'strum-down') => {
+      emitPluck(frets)
       void enableAudio().then(() => {
         loadedAudioEngine()?.playFrets(frets, soundingTuning, pattern)
       })
@@ -474,6 +477,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (parsed) setChord(parsed)
       const frets = resolveStepFrets(step, tuning)
       if (frets) {
+        emitPluck(frets)
         void enableAudio().then(() => loadedAudioEngine()?.playFrets(frets, soundingTuning, 'strum-down'))
       }
     },

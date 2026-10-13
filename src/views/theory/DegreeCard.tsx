@@ -19,7 +19,7 @@ export function DegreeCard({ degree, name, gloss, functionLabel, current, addLab
     <li className="tv-card" data-fn={FN_KEY[degree.harmonicFunction]} data-current={current || undefined}>
       <button type="button" className="tv-card__main" aria-pressed={current} aria-label={`${degree.roman} ${name}`} onClick={onSelect}>
         <span className="tv-card__roman cc-num">{degree.roman}</span>
-        <span className="tv-card__name" style={{ ['--chars' as string]: name.length }}>
+        <span key={name} className="tv-card__name" style={{ ['--chars' as string]: name.length }}>
           {name}
         </span>
         <span className="tv-card__fn">{functionLabel}</span>

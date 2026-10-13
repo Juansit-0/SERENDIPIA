@@ -1,5 +1,6 @@
 import { useRef, useState, type CSSProperties, type KeyboardEvent } from 'react'
 import { pitchName, type Accidental } from '../music/notes'
+import { usePluck } from '../state/pluck'
 import { useStore } from '../state/store'
 import { NoteMark } from './chord/NoteMark'
 import type { NoteRole } from './chord/roles'
@@ -64,6 +65,7 @@ export function StepGrid({
   const { t } = useStore()
   const fretColumns = Array.from({ length: windowSize }, (_, index) => windowStart + index)
   const rowOrder = frets.map((_, index) => index).reverse()
+  const pluck = usePluck()
   const strings = frets.length
   const absolute = (fret: number | null) => (fret === null ? null : fret + capo)
   const capoVisible = capo > 0 && capo >= windowStart && capo < windowStart + windowSize
@@ -160,8 +162,10 @@ export function StepGrid({
         ))}
         {rowOrder.map((stringIndex, rowIndex) => (
           <i
-            key={`string-${stringIndex}`}
-            className="cv-string"
+            // A struck string remounts so its ring plays again on every strum.
+            key={`string-${stringIndex}-${pluck.strings[stringIndex] ? pluck.tick : 0}`}
+            className={pluck.strings[stringIndex] && pluck.tick > 0 ? 'cv-string is-ringing' : 'cv-string'}
+            data-string={stringIndex}
             style={{ top: rowPct(rowIndex), height: `${Math.max(1, 2.9 - (stringIndex / Math.max(1, strings - 1)) * 2)}px` }}
           />
         ))}

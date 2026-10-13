@@ -180,6 +180,99 @@
     animation: tune-glow 1.2s ease-in-out infinite;
   }
 
+  /* ---------- fretboard: struck strings ring, the thick ones longer ---------- */
+  .cv-string.is-ringing {
+    animation: string-ring 700ms cubic-bezier(0.2, 0.6, 0.3, 1) backwards;
+  }
+
+  .cv-string.is-ringing[data-string='0'],
+  .cv-string.is-ringing[data-string='1'] {
+    animation-duration: 950ms;
+  }
+
+  .cv-string.is-ringing[data-string='1'] {
+    animation-delay: 25ms;
+  }
+
+  .cv-string.is-ringing[data-string='2'] {
+    animation-delay: 50ms;
+  }
+
+  .cv-string.is-ringing[data-string='3'] {
+    animation-delay: 75ms;
+  }
+
+  .cv-string.is-ringing[data-string='4'] {
+    animation-delay: 100ms;
+  }
+
+  .cv-string.is-ringing[data-string='5'] {
+    animation-delay: 125ms;
+  }
+
+  /* ---------- Teoría: the degrees deal out like cards; their orbit fades in behind ---------- */
+  .tv-card {
+    animation: rise-in 420ms cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+  }
+
+  .tv-card:nth-child(1) {
+    animation-delay: 0ms;
+  }
+
+  .tv-card:nth-child(2) {
+    animation-delay: 45ms;
+  }
+
+  .tv-card:nth-child(3) {
+    animation-delay: 90ms;
+  }
+
+  .tv-card:nth-child(4) {
+    animation-delay: 135ms;
+  }
+
+  .tv-card:nth-child(5) {
+    animation-delay: 180ms;
+  }
+
+  .tv-card:nth-child(6) {
+    animation-delay: 225ms;
+  }
+
+  .tv-card:nth-child(7) {
+    animation-delay: 270ms;
+  }
+
+  .tv-orbit {
+    animation: orbit-in 1200ms cubic-bezier(0.2, 0.8, 0.2, 1) 150ms backwards;
+  }
+
+  /* Switching triads/sevenths: each name settles in again. */
+  .tv-card__name {
+    animation: name-in 460ms cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+  }
+
+  /* ---------- Práctica: every change sends a ring out; the counters tick ---------- */
+  .pv-tap__ripple {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 9rem;
+    height: 9rem;
+    border: 3px solid var(--cc-accent-deep);
+    border-radius: 50%;
+    pointer-events: none;
+    animation: tap-ripple 650ms cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+  }
+
+  .pv-stat__value {
+    animation: stat-tick 260ms cubic-bezier(0.3, 1.4, 0.5, 1) backwards;
+  }
+
+  .pv-tap:not(:disabled) .pv-tap__rings {
+    animation: rings-breathe 3.2s ease-in-out infinite;
+  }
+
   /* ---------- the song chip pops in when a song starts ---------- */
   .strip__song {
     animation: pop-in 260ms cubic-bezier(0.3, 1.4, 0.5, 1) backwards;
@@ -272,5 +365,73 @@
   }
   50% {
     filter: drop-shadow(0 0 5px var(--cc-accent));
+  }
+}
+
+@keyframes string-ring {
+  0% {
+    transform: translateY(0);
+    background: var(--cc-accent);
+    box-shadow: 0 0 8px 1px var(--cc-accent);
+  }
+  10% {
+    transform: translateY(-2.6px);
+  }
+  22% {
+    transform: translateY(2.2px);
+  }
+  34% {
+    transform: translateY(-1.6px);
+    background: var(--cc-accent);
+    box-shadow: 0 0 6px 0 var(--cc-accent);
+  }
+  48% {
+    transform: translateY(1.1px);
+  }
+  62% {
+    transform: translateY(-0.6px);
+  }
+  78% {
+    transform: translateY(0.3px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes orbit-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94) rotate(-2deg);
+  }
+}
+
+@keyframes tap-ripple {
+  from {
+    opacity: 0.9;
+    transform: translate(-50%, -50%) scale(0.6);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(4);
+  }
+}
+
+@keyframes stat-tick {
+  from {
+    opacity: 0.4;
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes rings-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.04);
+    opacity: 1;
   }
 }

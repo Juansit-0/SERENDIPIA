@@ -291,7 +291,9 @@ export function PracticeView() {
           {readouts.map(([label, value, soft]) => (
             <div className="pv-stat" key={label}>
               <dt className="cc-label">{label}</dt>
-              <dd className={`pv-stat__value cc-num ${soft ? 'is-soft' : ''} ${soft && typeof value === 'string' ? 'is-empty' : ''}`}>{value}</dd>
+              <dd key={String(value)} className={`pv-stat__value cc-num ${soft ? 'is-soft' : ''} ${soft && typeof value === 'string' ? 'is-empty' : ''}`}>
+                {value}
+              </dd>
             </div>
           ))}
         </dl>
@@ -328,6 +330,7 @@ export function PracticeView() {
                 </g>
               </svg>
               <span className="pv-tap__label">{t('practice.tap')}</span>
+              {count > 0 && <span key={count} className="pv-tap__ripple" aria-hidden="true" />}
             </button>
             <span className="pv-stage__key cc-label">{v('practice.space')}</span>
           </>

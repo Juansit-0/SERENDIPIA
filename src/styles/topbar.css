@@ -79,10 +79,19 @@
 }
 
 .cc-stepper .cc-btn {
+  position: relative;
+  z-index: 1;
   min-height: 28px;
   width: 28px;
   min-width: 28px;
   padding: 0;
+}
+
+/* The bar has no room for bigger steppers at 1366px: widen the hit area invisibly (~38px) instead. */
+.cc-stepper .cc-btn::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
 }
 
 .cc-stepper__val {

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { exportLibrary } from '../state/library'
 import { useStore } from '../state/store'
 import { ArrowRightIcon, CloseIcon, MoreIcon } from './icons'
 import { useStrip } from './strip/useStrip'
@@ -11,6 +12,7 @@ export function ProgressionTools({ onAnnounce }: { onAnnounce: (message: string)
     progression,
     library,
     saveToLibrary,
+    importLibrary,
     loadFromLibrary,
     deleteFromLibrary,
     clearProgression,
@@ -23,6 +25,10 @@ export function ProgressionTools({ onAnnounce }: { onAnnounce: (message: string)
   const [panel, setPanel] = useState<Panel>('closed')
   const [name, setName] = useState('')
   const [link, setLink] = useState('')
+  // Deleting a saved progression takes a second tap, so a slip never loses one.
+  const [confirmId, setConfirmId] = useState<string | null>(null)
+  const [libraryNote, setLibraryNote] = useState('')
+  const fileInput = useRef<HTMLInputElement | null>(null)
 
   const root = useRef<HTMLDivElement | null>(null)
   const trigger = useRef<HTMLButtonElement | null>(null)
@@ -66,6 +72,28 @@ export function ProgressionTools({ onAnnounce }: { onAnnounce: (message: string)
       // No clipboard access (e.g. insecure context): show the link to copy by hand.
     }
     setPanel('share')
+  }
+
+  const downloadBackup = () => {
+    const blob = new Blob([exportLibrary(library)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const anchor = document.createElement('a')
+    anchor.href = url
+    anchor.download = `serendipia-${new Date().toISOString().slice(0, 10)}.json`
+    anchor.click()
+    URL.revokeObjectURL(url)
+    onAnnounce(s('backupSaved'))
+  }
+
+  const readBackup = async (file: File) => {
+    const result = importLibrary(await file.text())
+    const note = !result
+      ? s('backupInvalid')
+      : result.added === 0
+        ? s('backupNothing')
+        : `${s('backupAdded')}: ${result.added}`
+    setLibraryNote(note)
+    onAnnounce(note)
   }
 
   const empty = progression.length === 0
@@ -115,7 +143,14 @@ export function ProgressionTools({ onAnnounce }: { onAnnounce: (message: string)
               <button type="button" className="cc-btn strip-menu__item" disabled={empty} onClick={() => setPanel('save')}>
                 {s('save')}
               </button>
-              <button type="button" className="cc-btn strip-menu__item" onClick={() => setPanel('library')}>
+              <button
+                type="button"
+                className="cc-btn strip-menu__item"
+                onClick={() => {
+                  setLibraryNote('')
+                  setPanel('library')
+                }}
+              >
                 {s('mine')} ({library.length})
               </button>
               <button type="button" className="cc-btn strip-menu__item" disabled={empty} onClick={() => void share()}>
@@ -132,7 +167,13 @@ export function ProgressionTools({ onAnnounce }: { onAnnounce: (message: string)
                 onSubmit={(event) => {
                   event.preventDefault()
                   if (!name.trim()) return
-                  saveToLibrary(name)
+                  if (!saveToLibrary(name)) {
+                    onAnnounce(s('libraryFull'))
+                    setLibraryNote(s('libraryFull'))
+                    setPanel('library')
+                    return
+                  }
+                  setLibraryNote('')
                   onAnnounce(t('library.saved'))
                   setName('')
                   setPanel('library')
@@ -206,14 +247,49 @@ export function ProgressionTools({ onAnnounce }: { onAnnounce: (message: string)
                       <button
                         type="button"
                         className="cc-btn cc-btn--ghost strip__btn"
-                        onClick={() => deleteFromLibrary(entry.id)}
-                        aria-label={`${t('library.delete')}: ${entry.name}`}
+                        onClick={() => {
+                          if (confirmId !== entry.id) {
+                            setConfirmId(entry.id)
+                            return
+                          }
+                          deleteFromLibrary(entry.id)
+                          setConfirmId(null)
+                          onAnnounce(`${s('removed')}: ${entry.name}`)
+                        }}
+                        onBlur={() => setConfirmId((current) => (current === entry.id ? null : current))}
+                        aria-label={`${confirmId === entry.id ? s('removeConfirm') : t('library.delete')}: ${entry.name}`}
                       >
-                        {s('remove')}
+                        {confirmId === entry.id ? s('removeConfirm') : s('remove')}
                       </button>
                     </li>
                   ))}
                 </ul>
+              )}
+              <div className="strip-menu__backup">
+                <button type="button" className="cc-btn cc-btn--ghost strip__btn" disabled={library.length === 0} onClick={downloadBackup} title={s('backupHint')}>
+                  {s('backupExport')}
+                </button>
+                <button type="button" className="cc-btn cc-btn--ghost strip__btn" onClick={() => fileInput.current?.click()} title={s('backupHint')}>
+                  {s('backupImport')}
+                </button>
+                <input
+                  ref={fileInput}
+                  type="file"
+                  accept="application/json,.json"
+                  className="sr-only"
+                  tabIndex={-1}
+                  aria-hidden="true"
+                  onChange={(event) => {
+                    const file = event.currentTarget.files?.[0]
+                    event.currentTarget.value = ''
+                    if (file) void readBackup(file)
+                  }}
+                />
+              </div>
+              {libraryNote && (
+                <p className="strip-menu__note">
+                  {libraryNote}
+                </p>
               )}
             </>
           )}

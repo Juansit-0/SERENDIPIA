@@ -40,7 +40,15 @@ import { chainVoicings, recommendCapo, type CapoOption } from '../music/playabil
 import { voicingLabel } from '../music/stepVoicing'
 import { appendStep, applyStepVoicing, MAX_STEPS, removeStep, stepId, toggleDetectorFret } from './progressionOps'
 import { createHistory, pushHistory, redoHistory, undoHistory, type History } from './history'
-import { loadLibrary, removeFromLibrary, saveToLibrary as storeInLibrary, type LibraryEntry } from './library'
+import {
+  importLibrary as mergeBackup,
+  isLibraryFull,
+  loadLibrary,
+  removeFromLibrary,
+  saveToLibrary as storeInLibrary,
+  type LibraryEntry,
+} from './library'
+import { loadSessionSteps, saveSessionSteps } from './session'
 import { decodeShare, shareUrl, type SharedProgression } from './share'
 import { loadSettings, saveSettings, type Notation, type PersistedSettings, type SuggestFrom } from './settings'
 
@@ -126,7 +134,10 @@ interface StoreValue {
   /** A link that opens this progression (with tempo, beats, capo and strum). */
   shareLink: () => string
   library: LibraryEntry[]
-  saveToLibrary: (name: string) => void
+  /** False when the library is full and `name` is new. */
+  saveToLibrary: (name: string) => boolean
+  /** Merges a backup file; null when it is not one. */
+  importLibrary: (text: string) => { added: number; skipped: number } | null
   loadFromLibrary: (entry: LibraryEntry) => void
   deleteFromLibrary: (id: string) => void
   /** Re-voice every step to minimise hand movement across the progression. */
@@ -219,13 +230,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     createHistory(
       shared
         ? shared.steps.map((step, index) => ({ ...step, id: `shared-${index}` }))
-        : resolveProgression(PROGRESSIONS[0], initial.keyRootPc).map((step, index) => ({
+        : (loadSessionSteps()?.map((step, index) => ({ ...step, id: `kept-${index}` })) ??
+          resolveProgression(PROGRESSIONS[0], initial.keyRootPc).map((step, index) => ({
             rootPc: step.rootPc,
             qualityId: step.qualityId,
             anglo: step.anglo,
             latin: step.latin,
             id: `seed-${index}`,
-          })),
+          }))),
     ),
   )
   const progression = history.present
@@ -244,6 +256,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [shared])
 
   const [library, setLibrary] = useState<LibraryEntry[]>(loadLibrary)
+
+  // Keep the progression being worked on, so a reload (or a crash) never loses it.
+  useEffect(() => saveSessionSteps(progression.map(({ id: _id, ...step }) => step)), [progression])
   const [playing, setPlaying] = useState(false)
   const [detectorFrets, setDetectorFrets] = useState<(number | null)[]>([0, 0, 0, 0, 0, 0])
   const [chartSource, setChartSource] = useState<ChartSource>('voicing')
@@ -647,7 +662,20 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const shareLink = useCallback(() => shareUrl(snapshot(), window.location), [snapshot])
 
-  const saveProgressionToLibrary = useCallback((name: string) => setLibrary(storeInLibrary(name, snapshot())), [snapshot])
+  const saveProgressionToLibrary = useCallback(
+    (name: string) => {
+      if (isLibraryFull(loadLibrary(), name)) return false
+      setLibrary(storeInLibrary(name, snapshot()))
+      return true
+    },
+    [snapshot],
+  )
+
+  const importLibrary = useCallback((text: string) => {
+    const result = mergeBackup(text)
+    if (result) setLibrary(result.entries)
+    return result ? { added: result.added, skipped: result.skipped } : null
+  }, [])
 
   const loadFromLibrary = useCallback(
     (entry: LibraryEntry) => {
@@ -754,6 +782,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     shareLink,
     library,
     saveToLibrary: saveProgressionToLibrary,
+    importLibrary,
     loadFromLibrary,
     deleteFromLibrary,
     chainProgression,
@@ -800,7 +829,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     t, lang, notation, view, setView, tuningId, setTuningId, tuning, soundingTuning, capo, setCapo, tempo, volume, loop,
     metronome, setMetronome, beatsPerChord, timbre, setTimbre, strum, setStepStrum, stopPlayback, keyRootPc, setKeyRootPc, keyMode, setKeyMode, keyAuto,
     detectedKey, analysis, nextSteps, suggestFrom, panelSuggestions, panelFollowsProgression, undo, redo, history.past.length, history.future.length, shareLink, library,
-    saveProgressionToLibrary, loadFromLibrary, deleteFromLibrary, chainProgression, capoSuggestion, applyCapoSuggestion, chord, chordInput, chordError, setChordInput,
+    saveProgressionToLibrary, importLibrary, loadFromLibrary, deleteFromLibrary, chainProgression, capoSuggestion, applyCapoSuggestion, chord, chordInput, chordError, setChordInput,
     setChord, voicings, selectedVoicing, selectVoicing, playVoicing, playFrets, progression, loadProgression,
     addToProgression, moveStep, setStepVoicing, removeFromProgression, markedVoicing, setMarkedVoicing,
     clearProgression, playing, togglePlay, audioReady, audioLoading, audioFallback, enableAudio, suggestions,

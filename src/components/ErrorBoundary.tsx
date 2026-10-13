@@ -2,7 +2,7 @@ import { Component, type ErrorInfo, type ReactNode } from 'react'
 import { loadSettings } from '../state/settings'
 
 /** Settings and view state that could keep the app crashing; the library and practice records are kept. */
-const RESETTABLE_KEYS = ['serendipia.settings.v2', 'serendipia.settings.v1', 'serendipia.transportOpen']
+const RESETTABLE_KEYS = ['serendipia.settings.v2', 'serendipia.settings.v1', 'serendipia.transportOpen', 'serendipia.session.v1']
 
 const TEXT = {
   es: {

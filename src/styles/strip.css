@@ -634,6 +634,20 @@
   color: var(--cc-ink-soft);
 }
 
+.strip-menu__backup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px solid var(--cc-line);
+}
+
+.strip-menu__note {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--cc-ink-soft);
+}
+
 /* ---------- step picker ---------- */
 .strip-picker {
   display: flex;

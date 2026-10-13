@@ -1,6 +1,8 @@
 // @vitest-environment jsdom
 import { act, cleanup, fireEvent, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { render } from '@testing-library/react'
+import App from '../App'
 import { renderApp } from '../test/renderApp'
 
 afterEach(cleanup)
@@ -53,8 +55,35 @@ describe('library', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Abrir' }))
     expect(stepNames()).toEqual(['C', 'G', 'Am', 'F'])
 
+    // Deleting takes a second tap.
     fireEvent.click(screen.getByRole('button', { name: 'Borrar: Verso' }))
+    expect(screen.getByText('Verso')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: '¿Borrar?: Verso' }))
     expect(screen.getByText('Aún no guardaste ninguna progresión.')).toBeTruthy()
+  })
+
+  it('imports a backup file into the library', async () => {
+    renderApp()
+    openMenu()
+    fireEvent.click(screen.getByRole('button', { name: 'Mis progresiones (0)' }))
+    const backup = JSON.stringify({ app: 'serendipia', version: 1, entries: [{ name: 'Mi favorita', savedAt: '', data: 'p=Am_F_C_G' }] })
+    const input = document.querySelector<HTMLInputElement>('.strip-menu__backup input[type="file"]')!
+    await act(async () => {
+      fireEvent.change(input, { target: { files: [new File([backup], 'serendipia.json', { type: 'application/json' })] } })
+    })
+    expect(screen.getByText('Mi favorita')).toBeTruthy()
+    expect(document.querySelector('.strip-menu__note')?.textContent).toBe('Progresiones importadas: 1')
+  })
+})
+
+describe('kept progression', () => {
+  it('a reload brings back the progression being worked on', () => {
+    const { unmount } = renderApp()
+    removeStep(0)
+    expect(stepNames()).toEqual(['G', 'Am', 'F'])
+    unmount()
+    render(<App />)
+    expect(stepNames()).toEqual(['G', 'Am', 'F'])
   })
 })
 

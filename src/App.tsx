@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { StepRow } from './components/StepRow'
 import { TopBar } from './components/TopBar'
 import { StoreProvider, useStore } from './state/store'
+import { useWakeLock } from './state/wakeLock'
 import { ChordView } from './views/ChordView'
 import { PracticeView } from './views/PracticeView'
 import { TheoryView } from './views/TheoryView'
@@ -9,8 +10,28 @@ import { Welcome } from './welcome/Welcome'
 import { useWelcomeOpen } from './welcome/state'
 
 function Shell() {
-  const { view, togglePlay, undo, redo } = useStore()
+  const { view, togglePlay, undo, redo, playing, moveStepCursor } = useStore()
   const welcome = useWelcomeOpen()
+  // The screen stays on while music plays or while practising.
+  useWakeLock(playing || view === 'practice')
+
+  // A page-turner pedal (PageDown/PageUp) or the arrow keys walk the progression chord by chord while stopped.
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (welcome || playing || view === 'practice' || event.defaultPrevented || event.metaKey || event.ctrlKey || event.altKey) return
+      const target = event.target as HTMLElement | null
+      const tag = target?.tagName
+      if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA' || target?.isContentEditable) return
+      const pedal = event.key === 'PageDown' || event.key === 'PageUp'
+      // Arrows only when nothing in particular has focus: the fretboard and menus use them to move around.
+      const arrow = (event.key === 'ArrowRight' || event.key === 'ArrowLeft') && (!target || target === document.body)
+      if (!pedal && !arrow) return
+      event.preventDefault()
+      moveStepCursor(event.key === 'PageDown' || event.key === 'ArrowRight' ? 1 : -1)
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [welcome, playing, view, moveStepCursor])
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {

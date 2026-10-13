@@ -438,6 +438,19 @@ export function TopBar() {
                     {x.welcomeAgain}
                   </button>
                 </div>
+                <div className="cc-pop__row">
+                  <span className="cc-label cc-pop__title">{x.shortcuts}</span>
+                  <dl className="cc-shortcuts">
+                    {x.shortcutsList.map(([keys, action]) => (
+                      <div key={keys}>
+                        <dt>
+                          <kbd>{keys}</kbd>
+                        </dt>
+                        <dd>{action}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
                 <div className="cc-pop__row cc-credits">
                   <span className="cc-label cc-pop__title">{x.credits}</span>
                   <p>

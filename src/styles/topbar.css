@@ -466,3 +466,37 @@
     transition: transform 120ms linear, opacity 200ms ease;
   }
 }
+
+/* Shortcuts in Ajustes: key caps beside what they do. */
+.cc-shortcuts {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  font-size: 0.75rem;
+}
+
+.cc-shortcuts div {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.cc-shortcuts dt {
+  flex: none;
+  min-width: 6.5rem;
+}
+
+.cc-shortcuts dd {
+  margin: 0;
+  color: var(--cc-ink-soft);
+}
+
+.cc-shortcuts kbd {
+  padding: 1px 5px;
+  border: 1px solid var(--cc-line-strong);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  font: 600 0.6875rem / 1.4 var(--font-ui);
+  white-space: nowrap;
+}

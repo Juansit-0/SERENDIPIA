@@ -311,6 +311,17 @@
   filter: drop-shadow(0 0 6px var(--sc));
 }
 
+/* The pedal / arrow-key cursor: the chord being practised by hand, framed in the accent. */
+.strip-step.is-cursor .strip-tile {
+  outline: 2px solid var(--cc-accent-deep);
+  outline-offset: 2px;
+}
+
+.strip-step.is-cursor .strip-star {
+  transform: scale(1.25);
+  filter: drop-shadow(0 0 5px var(--sc));
+}
+
 .strip-ghost:hover .strip-star__ghost {
   fill: var(--sc);
   fill-opacity: 0.3;

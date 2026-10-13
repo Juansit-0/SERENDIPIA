@@ -157,6 +157,10 @@ interface StoreValue {
   chordError: boolean
   setChordInput: (value: string) => void
   setChord: (chord: ParsedChord) => void
+  /** The step a pedal or the arrow keys point at while stopped (-1: none). */
+  stepCursor: number
+  /** Moves the cursor to the next/previous step, shows that chord and strums it. */
+  moveStepCursor: (delta: number) => void
   voicings: Voicing[]
   selectedVoicing: number
   selectVoicing: (index: number, play?: boolean) => void
@@ -458,6 +462,23 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setChordInputState(next.anglo)
     setChordError(false)
   }, [])
+
+  const [stepCursor, setStepCursor] = useState(-1)
+  const moveStepCursor = useCallback(
+    (delta: number) => {
+      if (progression.length === 0) return
+      const next = stepCursor < 0 ? (delta > 0 ? 0 : progression.length - 1) : (stepCursor + delta + progression.length) % progression.length
+      setStepCursor(next)
+      const step = progression[next]
+      const parsed = parseChord(step.anglo)
+      if (parsed) setChord(parsed)
+      const frets = resolveStepFrets(step, tuning)
+      if (frets) {
+        void enableAudio().then(() => loadedAudioEngine()?.playFrets(frets, soundingTuning, 'strum-down'))
+      }
+    },
+    [progression, stepCursor, setChord, tuning, soundingTuning, enableAudio],
+  )
 
   const addToProgression = useCallback((step: Omit<ProgressionStep, 'id'>) => {
     setProgression((current) => appendStep(current, step, stepId()))
@@ -902,6 +923,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     chordError,
     setChordInput,
     setChord,
+    stepCursor: stepCursor < progression.length ? stepCursor : -1,
+    moveStepCursor,
     voicings,
     selectedVoicing,
     selectVoicing,
@@ -941,7 +964,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     metronome, setMetronome, beatsPerChord, timbre, setTimbre, strum, setStepStrum, stopPlayback, keyRootPc, setKeyRootPc, keyMode, setKeyMode, keyAuto,
     detectedKey, analysis, nextSteps, suggestFrom, panelSuggestions, panelFollowsProgression, undo, redo, history.past.length, history.future.length, shareLink, library,
     saveProgressionToLibrary, importLibrary, songs, saveSongToList, deleteSong, playSong, songPlay, loadFromLibrary, deleteFromLibrary, chainProgression, capoSuggestion, applyCapoSuggestion, chord, chordInput, chordError, setChordInput,
-    setChord, voicings, selectedVoicing, selectVoicing, playVoicing, playFrets, playOpenString, transposeProgression, progression, loadProgression,
+    setChord, stepCursor, moveStepCursor, voicings, selectedVoicing, selectVoicing, playVoicing, playFrets, playOpenString, transposeProgression, progression, loadProgression,
     addToProgression, moveStep, setStepVoicing, removeFromProgression, markedVoicing, setMarkedVoicing,
     clearProgression, playing, togglePlay, audioReady, audioLoading, audioFallback, enableAudio, suggestions,
     addSuggestion, detectorFrets, toggleDetectorString, chartSource, chartFrets, detection, toggleChartFret,

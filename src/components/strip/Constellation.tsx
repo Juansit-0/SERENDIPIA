@@ -40,6 +40,7 @@ export function Constellation({
   const {
     progression,
     playing,
+    stepCursor,
     removeFromProgression,
     moveStep,
     nextSteps,
@@ -167,7 +168,7 @@ export function Constellation({
               )}
               <button
                 type="button"
-                className={`strip-step${active ? ' is-active' : ''}${dragging ? ' is-dragging' : ''}`}
+                className={`strip-step${active ? ' is-active' : ''}${!playing && stepCursor === index ? ' is-cursor' : ''}${dragging ? ' is-dragging' : ''}`}
                 data-step-index={index}
                 data-fn={fn}
                 aria-describedby={count > 1 ? 'step-reorder-hint' : undefined}

@@ -3,25 +3,21 @@
  * Plain CSS on top of celeste.css tokens; ornament always sits behind data (z-index 0, no pointer events).
  */
 
-/* `@theme inline` does not emit the font variables, so the views carry their own. */
 .tv,
 .pv {
-  --vf-display: 'IM Fell English', 'Iowan Old Style', Georgia, serif;
-  --vf-serif: 'EB Garamond', 'Iowan Old Style', Georgia, serif;
-  --vf-ui: 'Jost Variable', 'Avenir Next', system-ui, sans-serif;
-  font-family: var(--vf-ui);
+  font-family: var(--font-ui);
 }
 
 .tv .cc-gloss,
 .pv .cc-gloss {
-  font-family: var(--vf-serif);
+  font-family: var(--font-serif);
 }
 
 .tv .cc-btn,
 .tv .cc-label,
 .pv .cc-btn,
 .pv .cc-label {
-  font-family: var(--vf-ui);
+  font-family: var(--font-ui);
 }
 
 /* ---------- Teoría ---------- */
@@ -40,7 +36,7 @@
 }
 
 .tv-head__title {
-  font-family: var(--vf-display);
+  font-family: var(--font-display);
   font-weight: 400;
   font-size: 1.75rem;
   line-height: 1;
@@ -144,7 +140,7 @@
 }
 
 .tv-card__roman {
-  font-family: var(--vf-ui);
+  font-family: var(--font-ui);
   font-size: 0.8125rem;
   font-weight: 600;
   letter-spacing: 0.06em;
@@ -153,7 +149,7 @@
 
 .tv-card__name {
   font-variant-numeric: lining-nums;
-  font-family: var(--vf-display);
+  font-family: var(--font-display);
   line-height: 1;
   white-space: nowrap;
   font-size: min(3.6rem, calc((100cqi - 1.3rem) / (var(--chars, 3) * 0.58)));
@@ -161,7 +157,7 @@
 }
 
 .tv-card__fn {
-  font-family: var(--vf-ui);
+  font-family: var(--font-ui);
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.1em;
@@ -357,7 +353,7 @@
   min-height: 36px;
   padding: 0.3rem 0.6rem;
   text-align: center;
-  font-family: var(--vf-ui);
+  font-family: var(--font-ui);
   font-size: 1rem;
   font-weight: 500;
   color: var(--cc-ink);
@@ -410,7 +406,7 @@
 
 .pv-slot__name {
   font-variant-numeric: lining-nums;
-  font-family: var(--vf-display);
+  font-family: var(--font-display);
   line-height: 1;
   white-space: nowrap;
   font-size: min(3rem, calc((100cqi - 5.5rem) / (var(--chars, 2) * 0.58)));
@@ -499,7 +495,7 @@
 
 .pv-stat__value {
   margin: 0;
-  font-family: var(--vf-ui);
+  font-family: var(--font-ui);
   font-weight: 500;
   font-variant-numeric: tabular-nums lining-nums;
   font-size: 2.5rem;
@@ -576,7 +572,7 @@
 .pv-tap__label {
   position: relative;
   z-index: 1;
-  font-family: var(--vf-display);
+  font-family: var(--font-display);
   font-size: clamp(2.75rem, 12vw, 4rem);
   letter-spacing: 0.04em;
   line-height: 1;
@@ -603,7 +599,7 @@
 .pv-follow__chord {
   position: relative;
   z-index: 1;
-  font-family: var(--vf-display);
+  font-family: var(--font-display);
   font-size: clamp(3rem, 14vw, 5.5rem);
   line-height: 1;
   color: var(--cc-ink);
@@ -714,7 +710,7 @@
   display: flex;
   gap: 0.5rem;
   align-items: baseline;
-  font-family: var(--vf-serif);
+  font-family: var(--font-serif);
   font-size: 0.9375rem;
   line-height: 1.25;
   color: var(--cc-ink-soft);
@@ -725,7 +721,7 @@
   flex: none;
   width: 1.2rem;
   text-align: center;
-  font-family: var(--vf-ui);
+  font-family: var(--font-ui);
   font-size: 0.75rem;
   font-weight: 700;
   color: var(--cc-accent-ink);

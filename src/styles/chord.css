@@ -105,8 +105,6 @@
 
 /* ---------- Layout ---------- */
 .cv {
-  /* Own alias: the legacy tailwind.css theme also defines --font-display (Archivo). */
-  --cv-display: 'IM Fell English', 'Iowan Old Style', Georgia, serif;
   --cv-hero-h: 160px;
   --cv-hero-max: 4.5rem;
   display: flex;
@@ -198,13 +196,13 @@
   opacity: 0.5;
 }
 .cv .cc-hero {
-  font-family: var(--cv-display);
+  font-family: var(--font-display);
 }
 .cv-name {
   padding-bottom: 0.04em;
 }
 .cv-name-msg {
-  font: 400 clamp(1.25rem, 2.2vw + 0.4rem, 2.1rem) / 1.1 var(--cv-display);
+  font: 400 clamp(1.25rem, 2.2vw + 0.4rem, 2.1rem) / 1.1 var(--font-display);
   color: var(--cc-ink-soft);
   padding-bottom: 8px;
 }
@@ -218,7 +216,7 @@
   border-left: 1px solid var(--cc-line-strong);
 }
 .cv-latin-name {
-  font: italic 400 1.35rem / 1.15 var(--cv-display);
+  font: italic 400 1.35rem / 1.15 var(--font-display);
   color: var(--cc-ink);
   overflow-wrap: anywhere;
 }
@@ -266,7 +264,7 @@
   min-width: 0;
 }
 .cv-gloss-word {
-  font: 400 clamp(1.7rem, 2.6vw, 2.35rem) / 1 var(--cv-display);
+  font: 400 clamp(1.7rem, 2.6vw, 2.35rem) / 1 var(--font-display);
   color: var(--cc-ink);
   padding-right: 20px;
 }

@@ -299,5 +299,5 @@ View Transitions reveal: the new theme grows as a circle (clip-path, 700ms, cubi
 - **Don't** use a function hue decoratively, or encode a note role by color alone.
 - **Don't** use turquoise as text on the day ground; use the deep turquoise.
 - **Don't** add page scroll to the desk shell, or wrap the top bar.
-- **Don't** reintroduce the legacy Riso paper, blue, orange and yellow tokens that remain in `tailwind.css`; they are leftovers.
+- **Don't** reintroduce the retired Riso Studio tokens (paper, riso blue, orange, yellow, Archivo, Martian Mono); `tailwind.css` now only imports Tailwind and `celeste.css`, declares the `desk` variant and sets page defaults on Carta celeste tokens.
 - **Don't** build white-card diagram grids or generic dark neon DAW chrome.

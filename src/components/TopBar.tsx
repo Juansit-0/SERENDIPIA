@@ -41,7 +41,7 @@ export function TopBar() {
   }
   const foldable = open ? 'contents' : 'hidden sm:contents'
   const themeButton = useRef<HTMLButtonElement>(null)
-  const { theme, toggle } = useTheme()
+  const { theme, preference, toggle, setPreference } = useTheme()
   const {
     t,
     lang,
@@ -368,6 +368,28 @@ export function TopBar() {
           >
             {() => (
               <div className="w-[16rem]">
+                <div className="cc-pop__row">
+                  <span className="cc-label cc-pop__title">{x.theme}</span>
+                  <div className="cc-seg" role="group" aria-label={x.theme}>
+                    {(
+                      [
+                        ['auto', x.themeAuto],
+                        ['day', x.themeDay],
+                        ['night', x.themeNight],
+                      ] as const
+                    ).map(([value, label]) => (
+                      <button
+                        key={value}
+                        type="button"
+                        aria-pressed={preference === value}
+                        title={value === 'auto' ? x.themeAutoHint : undefined}
+                        onClick={(event) => setPreference(value, event.currentTarget)}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 <div className="cc-pop__row">
                   <span className="cc-label cc-pop__title">{t('transport.notation')}</span>
                   <div className="cc-seg" role="group" aria-label={t('transport.notation')}>

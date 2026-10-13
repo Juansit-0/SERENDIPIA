@@ -282,7 +282,9 @@ One row, 52px: views, Correr plus moon-phase beat and tempo, capo, key popover, 
 View Transitions reveal: the new theme grows as a circle (clip-path, 700ms, cubic-bezier(0.65, 0, 0.35, 1)) out of the toggle's center. With reduced motion or no API the switch is instant. `.cc-twinkle` pulses opacity between 0.55 and 1 over 3.2s, only when motion is allowed.
 
 ### Named Rules
-**The Day/Night Eclipse Rule.** The two themes differ in ground, ink, accent and grain, never in meaning. Switching always goes through `setTheme`, with the circle origin at the toggle.
+**The Day/Night Eclipse Rule.** The two themes differ in ground, ink, accent and grain, never in meaning. Switching always goes through `setThemePreference` (`src/state/theme.ts`), with the circle origin at the control that was pressed (the ☾/☀ toggle or the Ajustes option).
+
+**The Theme Preference Rule.** The preference is «Automático» (default: follows the system's light/dark mode live, e.g. macOS switching at sunset), «Día» or «Noche»; it is chosen in Ajustes ⚙ → Tema and remembered per browser. The ☾/☀ toggle fixes the opposite theme; choosing «Automático» again forgets the fixed choice. Live system changes swap instantly, without the eclipse.
 
 ## Do's and Don'ts
 

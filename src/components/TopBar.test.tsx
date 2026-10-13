@@ -86,6 +86,24 @@ describe('top bar', () => {
   })
 })
 
+describe('theme preference in Ajustes', () => {
+  it('chooses Automático, Día or Noche and can go back to following the system', () => {
+    renderApp()
+    fireEvent.click(screen.getByRole('button', { name: 'Ajustes' }))
+    const group = screen.getByRole('group', { name: 'Tema' })
+    const option = (name: string) => within(group).getByRole('button', { name })
+    fireEvent.click(option('Noche'))
+    expect(document.documentElement.dataset.theme).toBe('night')
+    expect(option('Noche').getAttribute('aria-pressed')).toBe('true')
+    expect(localStorage.getItem('serendipia.theme')).toBe('night')
+    fireEvent.click(option('Día'))
+    expect(document.documentElement.dataset.theme).toBe('day')
+    fireEvent.click(option('Automático'))
+    expect(option('Automático').getAttribute('aria-pressed')).toBe('true')
+    expect(localStorage.getItem('serendipia.theme')).toBeNull()
+  })
+})
+
 describe('folded top bar on phones', () => {
   it('starts folded and opens on demand', () => {
     renderApp()

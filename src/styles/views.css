@@ -1381,3 +1381,140 @@
     transform: scaleY(0);
   }
 }
+
+/* ---------- Práctica · Grabar ---------- */
+.rec-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.9rem;
+  text-align: center;
+}
+
+.rec-stage .cc-label {
+  align-self: flex-start;
+}
+
+.rec-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 9rem;
+  height: 9rem;
+  border: 2px solid var(--cc-line-strong);
+  border-radius: 50%;
+  background: var(--cc-ground-3);
+  color: var(--cc-ink);
+  font: 600 1rem / 1.2 var(--font-ui);
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.2s ease;
+}
+
+.rec-button:active {
+  transform: scale(0.96);
+}
+
+.rec-button__dot {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  background: var(--cc-danger);
+}
+
+.rec-button[aria-pressed='true'] {
+  border-color: var(--cc-danger);
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--cc-danger) 22%, transparent);
+}
+
+.rec-button[aria-pressed='true'] .rec-button__dot {
+  border-radius: 4px;
+}
+
+.rec-status {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 1.0625rem;
+  color: var(--cc-ink-soft);
+}
+
+.rec-status b {
+  color: var(--cc-danger);
+}
+
+.rec-hint {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--cc-ink-faint);
+}
+
+.rec-takes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0.7rem 0.9rem;
+  min-height: 0;
+}
+
+.rec-takes ul {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  list-style: none;
+}
+
+.rec-takes li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem 0.75rem;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--cc-line);
+  border-radius: 6px;
+  background: var(--cc-ground);
+}
+
+.rec-take__when {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--cc-ink-soft);
+}
+
+.rec-take__title {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.rec-take__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+@media (min-width: 1024px) {
+  .rec {
+    display: grid !important;
+    grid-template-columns: minmax(18rem, 1fr) minmax(0, 1.6fr);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .rec-button[aria-pressed='true'] .rec-button__dot {
+    animation: rec-pulse 1.2s ease-in-out infinite;
+  }
+}
+
+@keyframes rec-pulse {
+  50% {
+    opacity: 0.45;
+  }
+}

@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import 'fake-indexeddb/auto'
 import { act, cleanup, fireEvent, screen } from '@testing-library/react'
 import axe from 'axe-core'
 import { afterEach, describe, expect, it } from 'vitest'
@@ -22,6 +23,7 @@ describe('accessibility (axe)', () => {
     ['Teoría · Escalas', '#theory', 'Escalas'],
     ['Práctica', '#practice', null],
     ['Práctica · Oído', '#practice', 'Oído'],
+    ['Práctica · Grabar', '#practice', 'Grabar'],
     ['Práctica · Progreso', '#practice', 'Progreso'],
   ])('%s has no violations', async (_, hash, tab) => {
     renderApp(hash)

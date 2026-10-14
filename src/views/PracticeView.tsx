@@ -19,6 +19,8 @@ import { useStore } from '../state/store'
 import { ChordSlot } from './practice/ChordSlot'
 import { EarTrainer } from './practice/EarTrainer'
 import { Progress } from './practice/Progress'
+import { Recorder } from './practice/Recorder'
+import { recorderText } from '../i18n/recorder'
 import { progressText } from '../i18n/progress'
 import { earText } from '../i18n/ear'
 import '../styles/views.css'
@@ -32,7 +34,7 @@ const BEAT_CHOICES = [4, 2, 1]
 export function PracticeView() {
   const { lang } = useStore()
   const x = earText[lang]
-  const [section, setSection] = useState<'changes' | 'ear' | 'progress'>('changes')
+  const [section, setSection] = useState<'changes' | 'ear' | 'record' | 'progress'>('changes')
   return (
     <div className="pv flex flex-col gap-3 desk:h-full desk:min-h-0 desk:gap-2">
       <div className="cc-seg pv-sections" role="group" aria-label={x.sections}>
@@ -42,11 +44,14 @@ export function PracticeView() {
         <button type="button" aria-pressed={section === 'ear'} onClick={() => setSection('ear')}>
           {x.ear}
         </button>
+        <button type="button" aria-pressed={section === 'record'} onClick={() => setSection('record')}>
+          {recorderText[lang].tab}
+        </button>
         <button type="button" aria-pressed={section === 'progress'} onClick={() => setSection('progress')}>
           {progressText[lang].tab}
         </button>
       </div>
-      {section === 'changes' ? <ChangeTrainer /> : section === 'ear' ? <EarTrainer /> : <Progress />}
+      {section === 'changes' ? <ChangeTrainer /> : section === 'ear' ? <EarTrainer /> : section === 'record' ? <Recorder /> : <Progress />}
     </div>
   )
 }

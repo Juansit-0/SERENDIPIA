@@ -1,3 +1,4 @@
+import { isBackingStyle, type BackingStyle } from '../audio/backing'
 import { DEFAULT_CUSTOM, isCustomPattern, isStrumId, type StrumId } from '../audio/strums'
 import { TIMBRES, type TimbreId } from '../audio/types'
 import type { Lang } from '../i18n'
@@ -24,6 +25,8 @@ export interface PersistedSettings {
   strum: StrumId
   /** «Mi patrón», e.g. "D.DU.UDU". */
   customStrum: string
+  /** The backing band's style ('none' for the guitar alone). */
+  backing: BackingStyle
   suggestFrom: SuggestFrom
   capo: number
 }
@@ -50,6 +53,7 @@ export const DEFAULT_SETTINGS: PersistedSettings = {
   timbre: 'nylon',
   strum: 'single',
   customStrum: DEFAULT_CUSTOM,
+  backing: 'none',
   suggestFrom: 'progression',
   capo: 0,
 }
@@ -80,6 +84,7 @@ export function sanitizeSettings(raw: unknown): PersistedSettings {
     timbre: oneOf(input.timbre, TIMBRES.map((timbre) => timbre.id), d.timbre),
     strum: isStrumId(input.strum) ? input.strum : d.strum,
     customStrum: isCustomPattern(input.customStrum) ? input.customStrum : d.customStrum,
+    backing: isBackingStyle(input.backing) ? input.backing : d.backing,
     suggestFrom: oneOf(input.suggestFrom, ['progression', 'chord'] as SuggestFrom[], d.suggestFrom),
     capo: intIn(input.capo, 0, MAX_CAPO, d.capo),
   }

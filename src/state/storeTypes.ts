@@ -1,3 +1,4 @@
+import type { BackingStyle } from '../audio/backing'
 import type { StrumId } from '../audio/strums'
 import type { PlayPattern, TimbreId } from '../audio/types'
 import type { Lang, TKey } from '../i18n'
@@ -75,6 +76,9 @@ export interface StoreValue {
   /** «Mi patrón», e.g. "D.DU.UDU". */
   customStrum: string
   setCustomStrum: (pattern: string) => void
+  /** Bass and drums under the progression ('none': the guitar alone). */
+  backing: BackingStyle
+  setBacking: (style: BackingStyle) => void
   /** Plays one bar of a strum pattern on the chord in view, at the current tempo. */
   previewStrum: (strum: StrumId) => void
   setStepStrum: (index: number, strum: StrumId | null) => void

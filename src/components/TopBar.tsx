@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { BACKING_STYLES, type BackingStyle } from '../audio/backing'
 import { patternGlyph, STRUMS, type StrumId } from '../audio/strums'
 import { TIMBRES, type TimbreId } from '../audio/types'
 import { MAX_CAPO } from '../music/capo'
@@ -67,6 +68,8 @@ export function TopBar() {
     customStrum,
     setCustomStrum,
     previewStrum,
+    backing,
+    setBacking,
     setStrum,
     capo,
     setCapo,
@@ -299,6 +302,18 @@ export function TopBar() {
                     {STRUMS.map((item) => (
                       <option key={item.id} value={item.id}>
                         {lang === 'es' ? item.nameEs : item.nameEn} {item.id === 'custom' ? patternGlyph(customStrum) : item.glyph}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="cc-pop__row">
+                  <label className="cc-label cc-pop__title" htmlFor="topbar-backing" title={x.backingHint}>
+                    {x.backing}
+                  </label>
+                  <select id="topbar-backing" className="cc-select" value={backing} title={x.backingHint} onChange={(event) => setBacking(event.target.value as BackingStyle)}>
+                    {BACKING_STYLES.map((item) => (
+                      <option key={item.id} value={item.id}>
+                        {lang === 'es' ? item.nameEs : item.nameEn}
                       </option>
                     ))}
                   </select>

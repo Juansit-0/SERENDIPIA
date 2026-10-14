@@ -1,3 +1,4 @@
+import type { BackingStyle } from './backing'
 import type { StrumId } from './strums'
 
 export type PlayPattern = 'strum-down' | 'strum-up' | 'arpeggio' | 'block'
@@ -23,4 +24,8 @@ export interface ProgressionOptions {
   onBeat?: (beat: number) => void
   /** Strumming pattern for each step; a single strum when absent. */
   getStrum?: (index: number) => StrumId
+  /** The backing band's style, read at every step so it can change while playing. */
+  getBacking?: () => BackingStyle
+  /** The pitch class the bass plays under each step (the chord's bass, else its root). */
+  getBass?: (index: number) => number | null
 }

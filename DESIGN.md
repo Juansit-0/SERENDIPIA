@@ -303,6 +303,8 @@ The ⋯ menu holds Vaciar, Guardar, Transponer (±1 semitone or «Llevar a» any
 ### Top bar
 One row, 52px: views, Correr plus moon-phase beat and tempo, capo, key popover, Reproducción, Sonido, Afinador, settings, theme toggle. Below 1500px wide the popover triggers show icons only, so the row never overflows.
 
+Reproducción also holds «Acompañamiento»: Sin / Pop / Balada / Rock / Bossa nova — synthesized drums (kick, snare, hat, rim) whose groove runs on across chord changes, and a round saw bass under each chord's bass note (E1–D#2) with a line per style; it joins the master after the guitar's high-pass so the low notes survive, and a change applies from the next chord. Logic: `src/audio/backing.ts`.
+
 Reproducción's Ritmo list ends with «Mi patrón»: choosing it opens eight eighth-note slots (1 y 2 y 3 y 4 y, downbeats with a stronger rim), each tapped through rest «·» → down «↓» → up «↑»; struck slots fill in the accent. «Probar» strums one bar on the chord in view (and the fretboard strings ring). The pattern is a string like "D.DU.UDU" in the settings, travels in share links (`cs=`) and saved progressions when used, and any step can take it in the step picker.
 
 The Afinador popover holds the tuning choice (it sets the tuning for the whole app), a ±50-cent gauge whose needle carries a star (turquoise/lilac when within ±5 cents), the note in IM Fell English, the peg advice (tensa/afloja) and six string buttons: tapping one fixes it as the target and plays its reference note. The microphone opens only on «Activar micrófono» and closes with the popover. The beat is shown as moon phases advancing per beat.

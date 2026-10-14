@@ -1,6 +1,7 @@
 import * as Tone from 'tone'
 import { midiToFreq } from '../music/notes'
 import { beatsToNotation, isAccentBeat, progressionTicks } from './timing'
+import { bassLine, drumsAt, type BackingStyle, type DrumPart } from './backing'
 import { strumHits, type StrumId } from './strums'
 import { SAMPLE_FILES } from '../assets/samples/generated'
 
@@ -45,6 +46,9 @@ class AudioEngine {
   private beat = 0
   private cursor = 0
   private options: ProgressionOptions | null = null
+  private band: { drums: Record<DrumPart, (time: number, velocity: number) => void>; bass: Tone.MonoSynth } | null = null
+  /** Eighths played since playback started: the groove runs on across chord changes. */
+  private bandEighth = 0
   private loadingTimbre: TimbreId | null = null
   private loadedTimbres = new Set<TimbreId>()
   private failed = false
@@ -360,6 +364,7 @@ class AudioEngine {
     transport.loopStart = 0
     transport.loopEnd = options.stepCount === 0 ? '1m' : `${progressionTicks(options.stepCount, options.beatsPerChord, transport.PPQ)}i`
     this.cursor = 0
+    this.bandEighth = 0
     this.options = options
     if (options.metronome) this.startMetronomeLoop()
 
@@ -372,6 +377,8 @@ class AudioEngine {
         if (index > 0 || this.cursor > 0) this.triggerFretNoise(time - 0.09)
         this.playStrum(frets, current.tuning, time, current.getStrum?.(index) ?? 'single', current.beatsPerChord)
       }
+      const backing = current.getBacking?.() ?? 'none'
+      if (backing !== 'none') this.playBand(backing, current.getBass?.(index) ?? null, time, current.beatsPerChord)
       Tone.getDraw().schedule(() => current.onStep(index), time)
       this.cursor = (this.cursor + 1) % current.stepCount
     }, beatsToNotation(options.beatsPerChord))
@@ -421,6 +428,56 @@ class AudioEngine {
     }
   }
 
+  /** Bass and drums are built the first time a backing style plays. They go to the master after the guitar's high-pass. */
+  private ensureBand() {
+    if (this.band || !this.master) return this.band
+    const out = new Tone.Gain(0.9).connect(this.master)
+    const kick = new Tone.MembraneSynth({ pitchDecay: 0.03, octaves: 6, envelope: { attack: 0.001, decay: 0.32, sustain: 0, release: 0.1 } }).connect(out)
+    kick.volume.value = -7
+    const snareTone = new Tone.Filter(1600, 'highpass').connect(out)
+    const snare = new Tone.NoiseSynth({ noise: { type: 'white' }, envelope: { attack: 0.001, decay: 0.15, sustain: 0 } }).connect(snareTone)
+    snare.volume.value = -15
+    const hatTone = new Tone.Filter(7500, 'highpass').connect(out)
+    const hat = new Tone.NoiseSynth({ noise: { type: 'white' }, envelope: { attack: 0.001, decay: 0.035, sustain: 0 } }).connect(hatTone)
+    hat.volume.value = -20
+    const rim = new Tone.Synth({ oscillator: { type: 'triangle' }, envelope: { attack: 0.001, decay: 0.045, sustain: 0, release: 0.01 } }).connect(out)
+    rim.volume.value = -17
+    const bass = new Tone.MonoSynth({
+      oscillator: { type: 'sawtooth' },
+      filter: { Q: 1, type: 'lowpass', rolloff: -24 },
+      envelope: { attack: 0.005, decay: 0.3, sustain: 0.6, release: 0.12 },
+      filterEnvelope: { attack: 0.005, decay: 0.25, sustain: 0.3, release: 0.2, baseFrequency: 110, octaves: 2.4 },
+    }).connect(out)
+    bass.volume.value = -9
+    this.band = {
+      drums: {
+        kick: (time, velocity) => kick.triggerAttackRelease('C1', '8n', time, velocity),
+        snare: (time, velocity) => snare.triggerAttackRelease('16n', time, velocity),
+        hat: (time, velocity) => hat.triggerAttackRelease('32n', time, velocity),
+        rim: (time, velocity) => rim.triggerAttackRelease('D6', '32n', time, velocity),
+      },
+      bass,
+    }
+    return this.band
+  }
+
+  /** One step of the band: the groove continues from the running eighth count; the bass follows this chord. */
+  private playBand(style: BackingStyle, bassPc: number | null, time: number, beats: number): void {
+    const band = this.ensureBand()
+    if (!band) return
+    const eighth = Tone.Time('8n').toSeconds()
+    const count = Math.max(1, Math.round(beats * 2))
+    for (let step = 0; step < count; step += 1) {
+      for (const hit of drumsAt(style, this.bandEighth + step)) band.drums[hit.part](time + step * eighth, hit.velocity)
+    }
+    if (bassPc !== null) {
+      for (const note of bassLine(style, count, bassPc)) {
+        band.bass.triggerAttackRelease(midiToFreq(note.midi), note.length * eighth * 0.92, time + note.eighth * eighth, 0.9)
+      }
+    }
+    this.bandEighth += count
+  }
+
   stopProgression(): void {
     const transport = Tone.getTransport()
     this.stopMetronomeLoop()
@@ -433,6 +490,7 @@ class AudioEngine {
       this.endEvent = null
     }
     this.options = null
+    this.band?.bass.triggerRelease()
     transport.stop()
     transport.position = 0
   }

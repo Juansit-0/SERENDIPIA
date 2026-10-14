@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from 'react'
 import { loadedAudioEngine } from '../audio/loader'
+import type { BackingStyle } from '../audio/backing'
 import { setCustomPattern, type StrumId } from '../audio/strums'
 import type { PlayPattern, TimbreId } from '../audio/types'
 import { translate, type Lang, type TKey } from '../i18n'
@@ -81,6 +82,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setCustomPattern(pattern)
     setCustomStrumState(pattern)
   }, [])
+  const [backing, setBacking] = useState<BackingStyle>(initial.backing)
+  // The engine asks for the style at every step, so a change applies from the next chord on.
+  const backingRef = useRef(backing)
+  useEffect(() => {
+    backingRef.current = backing
+  }, [backing])
+  const getBacking = useCallback(() => backingRef.current, [])
   const [suggestFrom, setSuggestFrom] = useState<SuggestFrom>(initial.suggestFrom)
   const [capo, setCapoState] = useState(shared?.capo ?? initial.capo)
   const [manualKeyRootPc, setManualKeyRootPc] = useState(initial.keyRootPc)
@@ -157,11 +165,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       timbre,
       strum,
       customStrum,
+      backing,
       suggestFrom,
       capo,
     }
     saveSettings(payload)
-  }, [lang, notation, tuningId, tempo, volume, manualKeyRootPc, manualKeyMode, keyAuto, loop, metronome, beatsPerChord, timbre, strum, customStrum, suggestFrom, capo])
+  }, [lang, notation, tuningId, tempo, volume, manualKeyRootPc, manualKeyMode, keyAuto, loop, metronome, beatsPerChord, timbre, strum, customStrum, backing, suggestFrom, capo])
 
 
   const tuning = useMemo(
@@ -348,6 +357,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const getStrumForStep = useCallback((index: number): StrumId => progression[index]?.strum ?? strum, [progression, strum])
 
+  const getBassForStep = useCallback(
+    (index: number): number | null => {
+      const step = progression[index]
+      return step ? (step.bassPc ?? step.rootPc) : null
+    },
+    [progression],
+  )
+
   const setStepStrum = useCallback((index: number, next: StrumId | null) => {
     setProgression((current) =>
       current.map((step, position) => (position === index ? { ...step, strum: next ?? undefined } : step)),
@@ -372,6 +389,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         metronome,
         getFrets: getFretsForStep,
         getStrum: getStrumForStep,
+        getBass: getBassForStep,
+        getBacking,
         onStep: playhead.setStep,
         onBeat: playhead.setBeat,
         onEnd: () => {
@@ -393,6 +412,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     soundingTuning,
     getFretsForStep,
     getStrumForStep,
+    getBassForStep,
+    getBacking,
   ])
 
   useEffect(() => {
@@ -411,8 +432,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       stepCount: progression.length,
       getFrets: getFretsForStep,
       getStrum: getStrumForStep,
+      getBass: getBassForStep,
     })
-  }, [playing, progression.length, metronome, tempo, loop, beatsPerChord, soundingTuning, getFretsForStep, getStrumForStep])
+  }, [playing, progression.length, metronome, tempo, loop, beatsPerChord, soundingTuning, getFretsForStep, getStrumForStep, getBassForStep])
 
 
 
@@ -534,6 +556,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           metronome,
           getFrets: (index) => (flat[index] ? resolveStepFrets(flat[index].step, tuning) : null),
           getStrum: (index) => flat[index]?.step.strum ?? strum,
+          getBass: (index) => (flat[index] ? (flat[index].step.bassPc ?? flat[index].step.rootPc) : null),
+          getBacking,
           onStep: (index) => {
             const item = flat[index]
             if (!item || !songRef.current) return
@@ -554,7 +578,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         setPlaying(true)
       })
     },
-    [stopPlayback, progression, enableAudio, tempo, loop, beatsPerChord, soundingTuning, metronome, tuning, strum, endSong],
+    [stopPlayback, progression, enableAudio, tempo, loop, beatsPerChord, soundingTuning, metronome, tuning, strum, endSong, getBacking],
   )
 
   const chainProgression = useCallback(() => {
@@ -675,6 +699,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     previewStrum,
     customStrum,
     setCustomStrum,
+    backing,
+    setBacking,
     transposeProgression,
     progression,
     loadProgression,
@@ -708,7 +734,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     metronome, setMetronome, beatsPerChord, timbre, setTimbre, strum, setStepStrum, stopPlayback, keyRootPc, setKeyRootPc, keyMode, setKeyMode, keyAuto,
     detectedKey, analysis, nextSteps, suggestFrom, panelSuggestions, panelFollowsProgression, undo, redo, history.past.length, history.future.length, shareLink, library,
     saveProgressionToLibrary, importLibrary, songs, saveSongToList, deleteSong, playSong, songPlay, loadFromLibrary, deleteFromLibrary, chainProgression, capoSuggestion, applyCapoSuggestion, chord, chordInput, chordError, setChordInput,
-    setChord, stepCursor, moveStepCursor, voicings, selectedVoicing, selectVoicing, playVoicing, playFrets, playOpenString, playNotes, previewStrum, customStrum, setCustomStrum, transposeProgression, progression, loadProgression,
+    setChord, stepCursor, moveStepCursor, voicings, selectedVoicing, selectVoicing, playVoicing, playFrets, playOpenString, playNotes, previewStrum, customStrum, setCustomStrum, backing, transposeProgression, progression, loadProgression,
     addToProgression, moveStep, setStepVoicing, removeFromProgression, markedVoicing, setMarkedVoicing,
     clearProgression, playing, togglePlay, audioReady, audioLoading, audioFallback, enableAudio, suggestions,
     addSuggestion, detectorFrets, setDetectorFrets, toggleDetectorString, chartSource, chartFrets, detection, toggleChartFret,

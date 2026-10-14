@@ -1,4 +1,4 @@
-import { isStrumId, type StrumId } from '../audio/strums'
+import { DEFAULT_CUSTOM, isCustomPattern, isStrumId, type StrumId } from '../audio/strums'
 import { TIMBRES, type TimbreId } from '../audio/types'
 import type { Lang } from '../i18n'
 import { MAX_CAPO } from '../music/capo'
@@ -22,6 +22,8 @@ export interface PersistedSettings {
   beatsPerChord: number
   timbre: TimbreId
   strum: StrumId
+  /** «Mi patrón», e.g. "D.DU.UDU". */
+  customStrum: string
   suggestFrom: SuggestFrom
   capo: number
 }
@@ -47,6 +49,7 @@ export const DEFAULT_SETTINGS: PersistedSettings = {
   beatsPerChord: 4,
   timbre: 'nylon',
   strum: 'single',
+  customStrum: DEFAULT_CUSTOM,
   suggestFrom: 'progression',
   capo: 0,
 }
@@ -76,6 +79,7 @@ export function sanitizeSettings(raw: unknown): PersistedSettings {
     beatsPerChord: oneOf(input.beatsPerChord, BEAT_OPTIONS, d.beatsPerChord),
     timbre: oneOf(input.timbre, TIMBRES.map((timbre) => timbre.id), d.timbre),
     strum: isStrumId(input.strum) ? input.strum : d.strum,
+    customStrum: isCustomPattern(input.customStrum) ? input.customStrum : d.customStrum,
     suggestFrom: oneOf(input.suggestFrom, ['progression', 'chord'] as SuggestFrom[], d.suggestFrom),
     capo: intIn(input.capo, 0, MAX_CAPO, d.capo),
   }

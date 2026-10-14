@@ -277,6 +277,13 @@ class AudioEngine {
     )
   }
 
+  /** One bar of `strum` on `frets` right now (the pattern editor's «Probar»), outside any progression. */
+  previewStrum(frets: (number | null)[], tuning: number[], strum: StrumId, tempo: number): void {
+    if (!this.started) return
+    if (!this.options) Tone.getTransport().bpm.value = tempo
+    this.playStrum(frets, tuning, Tone.now() + 0.05, strum, 4)
+  }
+
   /** Any notes, low to high: together (a soft strum) or one after another. For ear training. */
   playNotes(midi: number[], arpeggio = false): void {
     if (!this.started) return

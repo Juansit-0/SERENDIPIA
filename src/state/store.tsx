@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from 'react'
 import { loadAudioEngine, loadedAudioEngine, prefetchAudioEngine } from '../audio/loader'
-import type { StrumId } from '../audio/strums'
+import { setCustomPattern, type StrumId } from '../audio/strums'
 import type { PlayPattern, TimbreId } from '../audio/types'
 import { translate, type Lang, type TKey } from '../i18n'
 import { QualityId } from '../music/chords'
@@ -110,6 +110,11 @@ interface StoreValue {
   setTimbre: (timbre: TimbreId) => void
   strum: StrumId
   setStrum: (strum: StrumId) => void
+  /** «Mi patrón», e.g. "D.DU.UDU". */
+  customStrum: string
+  setCustomStrum: (pattern: string) => void
+  /** Plays one bar of a strum pattern on the chord in view, at the current tempo. */
+  previewStrum: (strum: StrumId) => void
   setStepStrum: (index: number, strum: StrumId | null) => void
   stopPlayback: () => void
   keyRootPc: number
@@ -236,6 +241,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [beatsPerChord, setBeatsPerChord] = useState(shared?.beatsPerChord ?? initial.beatsPerChord)
   const [timbre, setTimbreState] = useState<TimbreId>(initial.timbre)
   const [strum, setStrum] = useState<StrumId>(shared?.strum ?? initial.strum)
+  const [customStrum, setCustomStrumState] = useState(() => {
+    const pattern = shared?.customStrum ?? initial.customStrum
+    setCustomPattern(pattern)
+    return pattern
+  })
+  const setCustomStrum = useCallback((pattern: string) => {
+    setCustomPattern(pattern)
+    setCustomStrumState(pattern)
+  }, [])
   const [suggestFrom, setSuggestFrom] = useState<SuggestFrom>(initial.suggestFrom)
   const [capo, setCapoState] = useState(shared?.capo ?? initial.capo)
   const [manualKeyRootPc, setManualKeyRootPc] = useState(initial.keyRootPc)
@@ -335,11 +349,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       beatsPerChord,
       timbre,
       strum,
+      customStrum,
       suggestFrom,
       capo,
     }
     saveSettings(payload)
-  }, [lang, notation, tuningId, tempo, volume, manualKeyRootPc, manualKeyMode, keyAuto, loop, metronome, beatsPerChord, timbre, strum, suggestFrom, capo])
+  }, [lang, notation, tuningId, tempo, volume, manualKeyRootPc, manualKeyMode, keyAuto, loop, metronome, beatsPerChord, timbre, strum, customStrum, suggestFrom, capo])
 
   useEffect(() => {
     volumeRef.current = volume
@@ -434,6 +449,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (!keyAuto) setManualKeyRootPc((current) => (((current + semitones) % 12) + 12) % 12)
     },
     [setProgression, keyAuto],
+  )
+
+  const previewStrum = useCallback(
+    (pattern: StrumId) => {
+      const frets = voicings[selectedVoicing]?.frets ?? (progression[0] ? resolveStepFrets(progression[0], tuning) : null)
+      if (!frets) return
+      emitPluck(frets)
+      void enableAudio().then(() => loadedAudioEngine()?.previewStrum(frets, soundingTuning, pattern, tempo))
+    },
+    [voicings, selectedVoicing, progression, tuning, soundingTuning, tempo, enableAudio],
   )
 
   const playNotes = useCallback(
@@ -739,8 +764,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       beatsPerChord,
       capo,
       strum,
+      // «Mi patrón» travels only when something uses it.
+      ...(strum === 'custom' || progression.some((step) => step.strum === 'custom') ? { customStrum } : {}),
     }),
-    [progression, tempo, beatsPerChord, capo, strum],
+    [progression, tempo, beatsPerChord, capo, strum, customStrum],
   )
 
   const shareLink = useCallback(() => shareUrl(snapshot(), window.location), [snapshot])
@@ -770,8 +797,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (savedBeats !== undefined) setBeatsPerChord(savedBeats)
       if (savedCapo !== undefined) setCapoState(savedCapo)
       if (savedStrum !== undefined) setStrum(savedStrum)
+      if (entry.progression.customStrum) setCustomStrum(entry.progression.customStrum)
     },
-    [stopPlayback, setProgression],
+    [stopPlayback, setProgression, setCustomStrum],
   )
 
   const deleteFromLibrary = useCallback((id: string) => setLibrary(removeFromLibrary(id)), [])
@@ -945,6 +973,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     playFrets,
     playOpenString,
     playNotes,
+    previewStrum,
+    customStrum,
+    setCustomStrum,
     transposeProgression,
     progression,
     loadProgression,
@@ -978,7 +1009,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     metronome, setMetronome, beatsPerChord, timbre, setTimbre, strum, setStepStrum, stopPlayback, keyRootPc, setKeyRootPc, keyMode, setKeyMode, keyAuto,
     detectedKey, analysis, nextSteps, suggestFrom, panelSuggestions, panelFollowsProgression, undo, redo, history.past.length, history.future.length, shareLink, library,
     saveProgressionToLibrary, importLibrary, songs, saveSongToList, deleteSong, playSong, songPlay, loadFromLibrary, deleteFromLibrary, chainProgression, capoSuggestion, applyCapoSuggestion, chord, chordInput, chordError, setChordInput,
-    setChord, stepCursor, moveStepCursor, voicings, selectedVoicing, selectVoicing, playVoicing, playFrets, playOpenString, playNotes, transposeProgression, progression, loadProgression,
+    setChord, stepCursor, moveStepCursor, voicings, selectedVoicing, selectVoicing, playVoicing, playFrets, playOpenString, playNotes, previewStrum, customStrum, setCustomStrum, transposeProgression, progression, loadProgression,
     addToProgression, moveStep, setStepVoicing, removeFromProgression, markedVoicing, setMarkedVoicing,
     clearProgression, playing, togglePlay, audioReady, audioLoading, audioFallback, enableAudio, suggestions,
     addSuggestion, detectorFrets, toggleDetectorString, chartSource, chartFrets, detection, toggleChartFret,

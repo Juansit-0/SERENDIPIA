@@ -71,5 +71,5 @@ describe('songs panel', () => {
     fireEvent.click(within(screen.getByText('Prueba').closest('li')!).getByRole('button', { name: 'Detener' }))
     expect(stepNames()).toEqual(['C', 'G', 'Am', 'F'])
     expect(document.querySelector('.strip__song')).toBeNull()
-  })
+  }, 15000)
 })

@@ -500,3 +500,68 @@
   font: 600 0.6875rem / 1.4 var(--font-ui);
   white-space: nowrap;
 }
+
+/* «Mi patrón»: eight eighth-note slots, each tapped through rest → down → up. */
+.cc-pattern {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 3px;
+}
+
+.cc-pattern__slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  min-height: 46px;
+  padding: 2px 0;
+  border: 1px solid var(--cc-line-strong);
+  border-radius: 4px;
+  background: var(--cc-ground-3);
+  color: var(--cc-ink);
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.12s ease;
+}
+
+/* Downbeats (1 2 3 4) stand a little apart from their «y». */
+.cc-pattern__slot:nth-child(odd) {
+  border-color: var(--cc-ink-soft);
+}
+
+.cc-pattern__slot[data-slot='D'],
+.cc-pattern__slot[data-slot='U'] {
+  background: var(--cc-accent);
+  border-color: var(--cc-accent-deep);
+  color: var(--cc-accent-ink);
+}
+
+.cc-pattern__stroke {
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.cc-pattern__slot small {
+  font-size: 0.625rem;
+  opacity: 0.8;
+}
+
+.cc-pattern__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.cc-pattern__hint {
+  font-size: 0.6875rem;
+  color: var(--cc-ink-faint);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .cc-pattern__slot:active {
+    transform: scale(0.92);
+  }
+}

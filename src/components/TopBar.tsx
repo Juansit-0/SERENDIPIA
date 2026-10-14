@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { STRUMS, type StrumId } from '../audio/strums'
+import { patternGlyph, STRUMS, type StrumId } from '../audio/strums'
 import { TIMBRES, type TimbreId } from '../audio/types'
 import { MAX_CAPO } from '../music/capo'
 import { LATIN_SHARP, PITCH_SHARP } from '../music/notes'
@@ -64,6 +64,9 @@ export function TopBar() {
     timbre,
     setTimbre,
     strum,
+    customStrum,
+    setCustomStrum,
+    previewStrum,
     setStrum,
     capo,
     setCapo,
@@ -295,11 +298,45 @@ export function TopBar() {
                   >
                     {STRUMS.map((item) => (
                       <option key={item.id} value={item.id}>
-                        {lang === 'es' ? item.nameEs : item.nameEn} {item.glyph}
+                        {lang === 'es' ? item.nameEs : item.nameEn} {item.id === 'custom' ? patternGlyph(customStrum) : item.glyph}
                       </option>
                     ))}
                   </select>
                 </div>
+                {strum === 'custom' && (
+                  <div className="cc-pop__row">
+                    <span className="cc-label cc-pop__title">{x.pattern}</span>
+                    <div className="cc-pattern" role="group" aria-label={x.pattern} title={x.patternHint}>
+                      {[...customStrum].map((slot, index) => {
+                        const count = index % 2 === 0 ? String(index / 2 + 1) : lang === 'es' ? 'y' : '&'
+                        return (
+                          <button
+                            key={index}
+                            type="button"
+                            className="cc-pattern__slot"
+                            data-slot={slot}
+                            aria-label={x.patternSlot(count, x.patternStates[slot])}
+                            onClick={() => {
+                              const next = slot === '.' ? 'D' : slot === 'D' ? 'U' : '.'
+                              setCustomStrum(customStrum.slice(0, index) + next + customStrum.slice(index + 1))
+                            }}
+                          >
+                            <span className="cc-pattern__stroke" aria-hidden="true">
+                              {slot === 'D' ? '↓' : slot === 'U' ? '↑' : '·'}
+                            </span>
+                            <small aria-hidden="true">{count}</small>
+                          </button>
+                        )
+                      })}
+                    </div>
+                    <div className="cc-pattern__foot">
+                      <span className="cc-pattern__hint">{x.patternHint}</span>
+                      <button type="button" className="cc-btn" onClick={() => previewStrum('custom')}>
+                        {x.patternTry}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </Popover>

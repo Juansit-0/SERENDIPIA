@@ -1,7 +1,7 @@
-export type StrumId = 'single' | 'quarters' | 'folk' | 'ballad' | 'eighths' | 'offbeat' | 'arpeggio'
+export type StrumId = 'single' | 'quarters' | 'folk' | 'ballad' | 'eighths' | 'offbeat' | 'arpeggio' | 'custom'
 
 /** One bar of 4/4 in eighth-note slots: D = downstroke, U = upstroke, A = arpeggio note, null = rest. */
-type Slot = 'D' | 'U' | 'A' | null
+export type Slot = 'D' | 'U' | 'A' | null
 
 export interface StrumPattern {
   id: StrumId
@@ -20,9 +20,37 @@ export const STRUMS: StrumPattern[] = [
   { id: 'eighths', nameEs: 'Corcheas', nameEn: 'Eighth notes', glyph: '↓↑↓↑↓↑↓↑', slots: ['D', 'U', 'D', 'U', 'D', 'U', 'D', 'U'] },
   { id: 'offbeat', nameEs: 'Contratiempo', nameEn: 'Offbeat', glyph: '·↑·↑·↑·↑', slots: [null, 'U', null, 'U', null, 'U', null, 'U'] },
   { id: 'arpeggio', nameEs: 'Arpegio', nameEn: 'Arpeggio', glyph: '♪♪♪♪♪♪♪♪', slots: ['A', 'A', 'A', 'A', 'A', 'A', 'A', 'A'] },
+  { id: 'custom', nameEs: 'Mi patrón', nameEn: 'My pattern', glyph: '↓·↓↑·↑↓↑', slots: ['D', null, 'D', 'U', null, 'U', 'D', 'U'] },
 ]
 
 export const STRUM_BY_ID = Object.fromEntries(STRUMS.map((strum) => [strum.id, strum])) as Record<StrumId, StrumPattern>
+
+/*
+ * «Mi patrón»: the player's own bar, eight eighths written as a string ('D' down, 'U' up, '.' rest),
+ * e.g. "D.DU.UDU". It lives in the settings and in share links; the engine reads it from here.
+ */
+export const DEFAULT_CUSTOM = 'D.DU.UDU'
+
+export function isCustomPattern(value: unknown): value is string {
+  return typeof value === 'string' && /^[DU.]{8}$/.test(value)
+}
+
+export function patternSlots(pattern: string): Slot[] {
+  return [...(isCustomPattern(pattern) ? pattern : DEFAULT_CUSTOM)].map((char) => (char === 'D' ? 'D' : char === 'U' ? 'U' : null))
+}
+
+export function patternGlyph(pattern: string): string {
+  return patternSlots(pattern)
+    .map((slot) => (slot === 'D' ? '↓' : slot === 'U' ? '↑' : '·'))
+    .join('')
+}
+
+/** Sets «Mi patrón» for everything that plays from now on (the engine reads it at each hit). */
+export function setCustomPattern(pattern: string): void {
+  const custom = STRUM_BY_ID.custom
+  custom.slots = patternSlots(pattern)
+  custom.glyph = patternGlyph(pattern)
+}
 
 export function isStrumId(value: unknown): value is StrumId {
   return typeof value === 'string' && value in STRUM_BY_ID

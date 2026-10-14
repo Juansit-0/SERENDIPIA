@@ -1,4 +1,4 @@
-import { isStrumId, type StrumId } from '../audio/strums'
+import { isCustomPattern, isStrumId, type StrumId } from '../audio/strums'
 import { MAX_CAPO } from '../music/capo'
 import { parseChord } from '../music/parseChord'
 import { isPlayableFrets, type StepVoicingSource } from '../music/stepVoicing'
@@ -13,6 +13,8 @@ export interface SharedProgression {
   beatsPerChord?: number
   capo?: number
   strum?: StrumId
+  /** «Mi patrón», when the progression uses it. */
+  customStrum?: string
 }
 
 /*
@@ -60,6 +62,7 @@ export function encodeShare(shared: SharedProgression): string {
   if (shared.beatsPerChord !== undefined) params.set('b', String(shared.beatsPerChord))
   if (shared.capo !== undefined) params.set('c', String(shared.capo))
   if (shared.strum !== undefined) params.set('s', shared.strum)
+  if (shared.customStrum !== undefined) params.set('cs', shared.customStrum)
   return params.toString()
 }
 
@@ -83,6 +86,8 @@ export function decodeShare(search: string): SharedProgression | null {
   if (capoRaw !== null && Number.isInteger(capo) && capo >= 0 && capo <= MAX_CAPO) shared.capo = capo
   const strum = params.get('s')
   if (isStrumId(strum)) shared.strum = strum
+  const custom = params.get('cs')
+  if (isCustomPattern(custom)) shared.customStrum = custom
   return shared
 }
 

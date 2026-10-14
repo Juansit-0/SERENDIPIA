@@ -14,6 +14,11 @@ export const topbarText = {
     themeDay: 'Día',
     themeNight: 'Noche',
     welcomeAgain: 'Ver la bienvenida',
+    pattern: 'Mi patrón',
+    patternHint: 'Toca cada corchea para cambiarla: silencio, abajo, arriba.',
+    patternTry: 'Probar',
+    patternSlot: (count: string, state: string) => `Corchea ${count}: ${state}`,
+    patternStates: { D: 'abajo', U: 'arriba', '.': 'silencio' } as Record<string, string>,
     shortcuts: 'Atajos',
     shortcutsList: [
       ['Espacio', 'Correr / parar'],
@@ -52,6 +57,11 @@ export const topbarText = {
     themeDay: 'Day',
     themeNight: 'Night',
     welcomeAgain: 'Show the welcome',
+    pattern: 'My pattern',
+    patternHint: 'Tap each eighth to change it: rest, down, up.',
+    patternTry: 'Try it',
+    patternSlot: (count: string, state: string) => `Eighth ${count}: ${state}`,
+    patternStates: { D: 'down', U: 'up', '.': 'rest' } as Record<string, string>,
     shortcuts: 'Shortcuts',
     shortcutsList: [
       ['Space', 'Run / stop'],

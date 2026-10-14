@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react'
-import { STRUMS, isStrumId } from '../audio/strums'
+import { STRUMS, isStrumId, patternGlyph } from '../audio/strums'
 import { qualityById } from '../music/chords'
 import { absoluteLabel, autoVoicing, voicingLabel, voicingSignature } from '../music/stepVoicing'
 import { voicingsFor, type Voicing } from '../music/voicings'
@@ -24,7 +24,7 @@ export function StepVoicingPicker({
   onMove: (to: number) => void
   onClose: () => void
 }) {
-  const { tuning, capo, setStepVoicing, removeFromProgression, moveStep, notation, lang, strum, setStepStrum, t } = useStore()
+  const { tuning, capo, setStepVoicing, removeFromProgression, moveStep, notation, lang, strum, customStrum, setStepStrum, t } = useStore()
   const move = (to: number) => {
     moveStep(index, to)
     onMove(to)
@@ -215,7 +215,7 @@ export function StepVoicingPicker({
           </option>
           {STRUMS.map((item) => (
             <option key={item.id} value={item.id}>
-              {lang === 'es' ? item.nameEs : item.nameEn} {item.glyph}
+              {lang === 'es' ? item.nameEs : item.nameEn} {item.id === 'custom' ? patternGlyph(customStrum) : item.glyph}
             </option>
           ))}
         </select>

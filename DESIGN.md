@@ -303,6 +303,8 @@ The ⋯ menu holds Vaciar, Guardar, Transponer (±1 semitone or «Llevar a» any
 ### Top bar
 One row, 52px: views, Correr plus moon-phase beat and tempo, capo, key popover, Reproducción, Sonido, Afinador, settings, theme toggle. Below 1500px wide the popover triggers show icons only, so the row never overflows.
 
+Reproducción's Ritmo list ends with «Mi patrón»: choosing it opens eight eighth-note slots (1 y 2 y 3 y 4 y, downbeats with a stronger rim), each tapped through rest «·» → down «↓» → up «↑»; struck slots fill in the accent. «Probar» strums one bar on the chord in view (and the fretboard strings ring). The pattern is a string like "D.DU.UDU" in the settings, travels in share links (`cs=`) and saved progressions when used, and any step can take it in the step picker.
+
 The Afinador popover holds the tuning choice (it sets the tuning for the whole app), a ±50-cent gauge whose needle carries a star (turquoise/lilac when within ±5 cents), the note in IM Fell English, the peg advice (tensa/afloja) and six string buttons: tapping one fixes it as the target and plays its reference note. The microphone opens only on «Activar micrófono» and closes with the popover. The beat is shown as moon phases advancing per beat.
 
 ### Eclipse (theme switch)

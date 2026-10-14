@@ -35,3 +35,14 @@ describe('strumHits', () => {
     expect(isStrumId('samba')).toBe(false)
   })
 })
+
+describe('«Mi patrón»', () => {
+  it('plays the bar the player wrote', async () => {
+    const { setCustomPattern, strumHits, patternGlyph } = await import('./strums')
+    setCustomPattern('D..UD.DU')
+    expect(strumHits('custom', 4).map((hit) => `${hit.eighth}${hit.kind[0]}`)).toEqual(['0d', '3u', '4d', '6d', '7u'])
+    expect(patternGlyph('D..UD.DU')).toBe('↓··↑↓·↓↑')
+    setCustomPattern('nonsense')
+    expect(strumHits('custom', 4).map((hit) => hit.eighth)).toEqual([0, 2, 3, 5, 6, 7])
+  })
+})

@@ -52,3 +52,26 @@ describe('progressionTicks', () => {
     expect(progressionTicks(0, 4, 192)).toBe(768)
   })
 })
+
+describe('tap tempo', () => {
+  it('reads the tempo from the median gap and ignores one stray tap', async () => {
+    const { tapTempo } = await import('./timing')
+    expect(tapTempo([0])).toBeNull()
+    expect(tapTempo([0, 500, 1000, 1500])).toBe(120)
+    expect(tapTempo([0, 500, 1000, 1700, 2200, 2700])).toBe(120)
+  })
+
+  it('starts over after a pause and stays in range', async () => {
+    const { tapTempo } = await import('./timing')
+    expect(tapTempo([0, 500, 5000, 5600])).toBe(100)
+    expect(tapTempo([0, 100])).toBe(208)
+    expect(tapTempo([0, 1900])).toBe(40)
+  })
+
+  it('subdivides a beat', async () => {
+    const { subdivisionOffsets } = await import('./timing')
+    expect(subdivisionOffsets(1)).toEqual([])
+    expect(subdivisionOffsets(2)).toEqual([0.5])
+    expect(subdivisionOffsets(3).map((x) => +x.toFixed(3))).toEqual([0.333, 0.667])
+  })
+})

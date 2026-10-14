@@ -70,6 +70,9 @@ export function TopBar() {
     previewStrum,
     backing,
     setBacking,
+    subdivision,
+    setSubdivision,
+    tapTempo,
     setStrum,
     capo,
     setCapo,
@@ -306,6 +309,24 @@ export function TopBar() {
                     ))}
                   </select>
                 </div>
+                <div className="cc-pop__row">
+                  <span className="cc-label cc-pop__title">{x.tap}</span>
+                  <button type="button" className="cc-btn cc-tap" title={x.tapHint} onClick={() => tapTempo()}>
+                    {x.tapButton} · <span className="cc-num">{tempo}</span> bpm
+                  </button>
+                </div>
+                {metronome && (
+                  <div className="cc-pop__row">
+                    <span className="cc-label cc-pop__title">{x.subdivision}</span>
+                    <div className="cc-seg" role="group" aria-label={x.subdivision}>
+                      {([1, 2, 3] as const).map((value) => (
+                        <button key={value} type="button" aria-pressed={subdivision === value} onClick={() => setSubdivision(value)}>
+                          {x.subdivisions[value - 1]}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <div className="cc-pop__row">
                   <label className="cc-label cc-pop__title" htmlFor="topbar-backing" title={x.backingHint}>
                     {x.backing}

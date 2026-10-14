@@ -11,7 +11,7 @@ import { Welcome } from './welcome/Welcome'
 import { useWelcomeOpen } from './welcome/state'
 
 function Shell() {
-  const { view, togglePlay, undo, redo, playing, moveStepCursor } = useStore()
+  const { view, togglePlay, undo, redo, playing, moveStepCursor, tapTempo } = useStore()
   const welcome = useWelcomeOpen()
   // The screen stays on while music plays or while practising.
   useWakeLock(playing || view === 'practice')
@@ -48,6 +48,18 @@ function Shell() {
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [togglePlay, view, welcome])
+
+  // T taps the tempo, anywhere but in a text field.
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key.toLowerCase() !== 't' || event.metaKey || event.ctrlKey || event.altKey || event.repeat || welcome) return
+      const target = event.target as HTMLElement | null
+      if (target && (['INPUT', 'SELECT', 'TEXTAREA'].includes(target.tagName) || target.isContentEditable)) return
+      tapTempo()
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [tapTempo, welcome])
 
   // ⌘Z / Ctrl+Z undoes a progression edit; ⌘⇧Z / Ctrl+Y redoes it. Text fields keep their own undo.
   useEffect(() => {

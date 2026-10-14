@@ -11,6 +11,7 @@ import {
 import { loadedAudioEngine } from '../audio/loader'
 import type { BackingStyle } from '../audio/backing'
 import { setCustomPattern, type StrumId } from '../audio/strums'
+import { tapTempo as tapTempoFrom } from '../audio/timing'
 import type { PlayPattern, TimbreId } from '../audio/types'
 import { translate, type Lang, type TKey } from '../i18n'
 import { parseChord } from '../music/parseChord'
@@ -81,6 +82,21 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const setCustomStrum = useCallback((pattern: string) => {
     setCustomPattern(pattern)
     setCustomStrumState(pattern)
+  }, [])
+  const [subdivision, setSubdivision] = useState<1 | 2 | 3>(initial.subdivision)
+  const subdivisionRef = useRef(subdivision)
+  useEffect(() => {
+    subdivisionRef.current = subdivision
+  }, [subdivision])
+  const getSubdivision = useCallback(() => subdivisionRef.current, [])
+  // «Marcar el tempo»: the recent taps, kept between renders.
+  const taps = useRef<number[]>([])
+  const tapTempo = useCallback(() => {
+    const now = performance.now()
+    taps.current = [...taps.current.filter((tap) => now - tap < 8000), now].slice(-9)
+    const bpm = tapTempoFrom(taps.current)
+    if (bpm !== null) setTempo(bpm)
+    return bpm
   }, [])
   const [backing, setBacking] = useState<BackingStyle>(initial.backing)
   // The engine asks for the style at every step, so a change applies from the next chord on.
@@ -166,11 +182,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       strum,
       customStrum,
       backing,
+      subdivision,
       suggestFrom,
       capo,
     }
     saveSettings(payload)
-  }, [lang, notation, tuningId, tempo, volume, manualKeyRootPc, manualKeyMode, keyAuto, loop, metronome, beatsPerChord, timbre, strum, customStrum, backing, suggestFrom, capo])
+  }, [lang, notation, tuningId, tempo, volume, manualKeyRootPc, manualKeyMode, keyAuto, loop, metronome, beatsPerChord, timbre, strum, customStrum, backing, subdivision, suggestFrom, capo])
 
 
   const tuning = useMemo(
@@ -391,6 +408,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         getStrum: getStrumForStep,
         getBass: getBassForStep,
         getBacking,
+        getSubdivision,
         onStep: playhead.setStep,
         onBeat: playhead.setBeat,
         onEnd: () => {
@@ -414,6 +432,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     getStrumForStep,
     getBassForStep,
     getBacking,
+    getSubdivision,
   ])
 
   useEffect(() => {
@@ -558,6 +577,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           getStrum: (index) => flat[index]?.step.strum ?? strum,
           getBass: (index) => (flat[index] ? (flat[index].step.bassPc ?? flat[index].step.rootPc) : null),
           getBacking,
+          getSubdivision,
           onStep: (index) => {
             const item = flat[index]
             if (!item || !songRef.current) return
@@ -578,7 +598,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         setPlaying(true)
       })
     },
-    [stopPlayback, progression, enableAudio, tempo, loop, beatsPerChord, soundingTuning, metronome, tuning, strum, endSong, getBacking],
+    [stopPlayback, progression, enableAudio, tempo, loop, beatsPerChord, soundingTuning, metronome, tuning, strum, endSong, getBacking, getSubdivision],
   )
 
   const chainProgression = useCallback(() => {
@@ -701,6 +721,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setCustomStrum,
     backing,
     setBacking,
+    subdivision,
+    setSubdivision,
+    tapTempo,
     transposeProgression,
     progression,
     loadProgression,
@@ -734,7 +757,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     metronome, setMetronome, beatsPerChord, timbre, setTimbre, strum, setStepStrum, stopPlayback, keyRootPc, setKeyRootPc, keyMode, setKeyMode, keyAuto,
     detectedKey, analysis, nextSteps, suggestFrom, panelSuggestions, panelFollowsProgression, undo, redo, history.past.length, history.future.length, shareLink, library,
     saveProgressionToLibrary, importLibrary, songs, saveSongToList, deleteSong, playSong, songPlay, loadFromLibrary, deleteFromLibrary, chainProgression, capoSuggestion, applyCapoSuggestion, chord, chordInput, chordError, setChordInput,
-    setChord, stepCursor, moveStepCursor, voicings, selectedVoicing, selectVoicing, playVoicing, playFrets, playOpenString, playNotes, previewStrum, customStrum, setCustomStrum, backing, transposeProgression, progression, loadProgression,
+    setChord, stepCursor, moveStepCursor, voicings, selectedVoicing, selectVoicing, playVoicing, playFrets, playOpenString, playNotes, previewStrum, customStrum, setCustomStrum, backing, subdivision, tapTempo, transposeProgression, progression, loadProgression,
     addToProgression, moveStep, setStepVoicing, removeFromProgression, markedVoicing, setMarkedVoicing,
     clearProgression, playing, togglePlay, audioReady, audioLoading, audioFallback, enableAudio, suggestions,
     addSuggestion, detectorFrets, setDetectorFrets, toggleDetectorString, chartSource, chartFrets, detection, toggleChartFret,

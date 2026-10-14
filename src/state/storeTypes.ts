@@ -76,6 +76,11 @@ export interface StoreValue {
   /** «Mi patrón», e.g. "D.DU.UDU". */
   customStrum: string
   setCustomStrum: (pattern: string) => void
+  /** Metronome clicks per beat: quarters, eighths or triplets. */
+  subdivision: 1 | 2 | 3
+  setSubdivision: (subdivision: 1 | 2 | 3) => void
+  /** One tap of «Marcar el tempo»: sets the tempo once there are two taps in a row; returns it. */
+  tapTempo: () => number | null
   /** Bass and drums under the progression ('none': the guitar alone). */
   backing: BackingStyle
   setBacking: (style: BackingStyle) => void

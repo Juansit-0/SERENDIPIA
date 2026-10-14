@@ -27,6 +27,8 @@ export interface PersistedSettings {
   customStrum: string
   /** The backing band's style ('none' for the guitar alone). */
   backing: BackingStyle
+  /** Metronome clicks per beat. */
+  subdivision: 1 | 2 | 3
   suggestFrom: SuggestFrom
   capo: number
 }
@@ -54,6 +56,7 @@ export const DEFAULT_SETTINGS: PersistedSettings = {
   strum: 'single',
   customStrum: DEFAULT_CUSTOM,
   backing: 'none',
+  subdivision: 1,
   suggestFrom: 'progression',
   capo: 0,
 }
@@ -85,6 +88,7 @@ export function sanitizeSettings(raw: unknown): PersistedSettings {
     strum: isStrumId(input.strum) ? input.strum : d.strum,
     customStrum: isCustomPattern(input.customStrum) ? input.customStrum : d.customStrum,
     backing: isBackingStyle(input.backing) ? input.backing : d.backing,
+    subdivision: oneOf(input.subdivision, [1, 2, 3] as Array<1 | 2 | 3>, d.subdivision),
     suggestFrom: oneOf(input.suggestFrom, ['progression', 'chord'] as SuggestFrom[], d.suggestFrom),
     capo: intIn(input.capo, 0, MAX_CAPO, d.capo),
   }

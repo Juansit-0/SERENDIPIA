@@ -1,6 +1,6 @@
 import * as Tone from 'tone'
 import { midiToFreq } from '../music/notes'
-import { beatsToNotation, isAccentBeat, progressionTicks } from './timing'
+import { beatsToNotation, isAccentBeat, progressionTicks, subdivisionOffsets } from './timing'
 import { bassLine, drumsAt, type BackingStyle, type DrumPart } from './backing'
 import { strumHits, type StrumId } from './strums'
 import { SAMPLE_FILES } from '../assets/samples/generated'
@@ -338,6 +338,11 @@ class AudioEngine {
     this.metronomeEvent = new Tone.Loop((time) => {
       const accent = isAccentBeat(this.beat)
       this.click?.triggerAttackRelease(accent ? 'C6' : 'C5', 0.04, time, accent ? 1 : 0.42)
+      // Subdivisions: softer, lower clicks between the beats.
+      const beatSeconds = Tone.Time('4n').toSeconds()
+      for (const offset of subdivisionOffsets(this.options?.getSubdivision?.() ?? 1)) {
+        this.click?.triggerAttackRelease('G4', 0.03, time + offset * beatSeconds, 0.22)
+      }
       const beat = this.beat
       this.beat += 1
       const onBeat = this.options?.onBeat

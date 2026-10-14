@@ -565,3 +565,10 @@
     transform: scale(0.92);
   }
 }
+
+/* «Marcar el tempo»: a wide target to tap along with. */
+.cc-tap {
+  width: 100%;
+  min-height: 44px;
+  font-weight: 600;
+}

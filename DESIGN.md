@@ -303,6 +303,8 @@ The ⋯ menu holds Vaciar, Guardar, Transponer (±1 semitone or «Llevar a» any
 ### Top bar
 One row, 52px: views, Correr plus moon-phase beat and tempo, capo, key popover, Reproducción, Sonido, Afinador, settings, theme toggle. Below 1500px wide the popover triggers show icons only, so the row never overflows.
 
+Reproducción opens with «Marcar el tempo»: a wide «Toca al ritmo · N bpm» button (also the T key) setting the tempo from the median gap of the last taps, starting over after a 2s pause; with the click on, «Subdivisión» adds softer, lower clicks for eighths or triplets.
+
 Reproducción also holds «Acompañamiento»: Sin / Pop / Balada / Rock / Bossa nova — synthesized drums (kick, snare, hat, rim) whose groove runs on across chord changes, and a round saw bass under each chord's bass note (E1–D#2) with a line per style; it joins the master after the guitar's high-pass so the low notes survive, and a change applies from the next chord. Logic: `src/audio/backing.ts`.
 
 Reproducción's Ritmo list ends with «Mi patrón»: choosing it opens eight eighth-note slots (1 y 2 y 3 y 4 y, downbeats with a stronger rim), each tapped through rest «·» → down «↓» → up «↑»; struck slots fill in the accent. «Probar» strums one bar on the chord in view (and the fretboard strings ring). The pattern is a string like "D.DU.UDU" in the settings, travels in share links (`cs=`) and saved progressions when used, and any step can take it in the step picker.

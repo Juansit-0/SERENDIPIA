@@ -67,7 +67,14 @@ export function StepRow() {
 
       <div className="strip__bar">
         <h2 className="strip__title" title={t('progression.reorderHint')}>
-          {t('progression.title')} <span className="cc-num strip__count" aria-label={`${progression.length} / ${SLOTS}`}>{progression.length}/{SLOTS}</span>
+          {t('progression.title')} <span className="cc-num strip__count">
+            <span aria-hidden="true">
+              {progression.length}/{SLOTS}
+            </span>
+            <span className="sr-only">
+              {progression.length} / {SLOTS}
+            </span>
+          </span>
         </h2>
         {playing && songPlay && <SongBadge />}
         {progression.length > 1 && (

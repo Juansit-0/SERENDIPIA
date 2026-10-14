@@ -8,12 +8,11 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import { loadAudioEngine, loadedAudioEngine, prefetchAudioEngine } from '../audio/loader'
+import { loadedAudioEngine } from '../audio/loader'
 import { setCustomPattern, type StrumId } from '../audio/strums'
 import type { PlayPattern, TimbreId } from '../audio/types'
 import { translate, type Lang, type TKey } from '../i18n'
-import { QualityId } from '../music/chords'
-import { ParsedChord, parseChord } from '../music/parseChord'
+import { parseChord } from '../music/parseChord'
 import {
   moveStep as reorderSteps,
   nextChordSuggestions,
@@ -27,217 +26,29 @@ import {
   analyzeTransition,
   detectProgressionKey,
   suggestNextChords,
-  type ChordAnalysis,
-  type DetectedKey,
-  type TransitionAnalysis,
 } from '../music/analysis'
-import { clampCapo, shapeChord, withCapo } from '../music/capo'
-import { detectChord, type DetectionResult } from '../music/detectChord'
-import { resolveStepFrets, type StepVoicingRef, type StepVoicingSource } from '../music/stepVoicing'
-import { STANDARD_TUNING, TUNINGS, Voicing, voicingFromFrets, voicingsFor } from '../music/voicings'
+import { clampCapo, withCapo } from '../music/capo'
+import { resolveStepFrets, type StepVoicingRef } from '../music/stepVoicing'
+import { STANDARD_TUNING, TUNINGS } from '../music/voicings'
 import { playhead } from './playhead'
 import { chainVoicings, recommendCapo, type CapoOption } from '../music/playability'
 import { voicingLabel } from '../music/stepVoicing'
-import { appendStep, applyStepVoicing, MAX_STEPS, removeStep, stepId, toggleDetectorFret, transposeSteps } from './progressionOps'
+import { appendStep, applyStepVoicing, MAX_STEPS, removeStep, stepId, transposeSteps } from './progressionOps'
 import { createHistory, pushHistory, redoHistory, undoHistory, type History } from './history'
-import {
-  importLibrary as mergeBackup,
-  isLibraryFull,
-  loadLibrary,
-  removeFromLibrary,
-  saveToLibrary as storeInLibrary,
-  type LibraryEntry,
-} from './library'
+import type { LibraryEntry } from './library'
 import { emitPluck } from './pluck'
 import { loadSessionSteps, saveSessionSteps } from './session'
 import { decodeShare, shareUrl, type SharedProgression } from './share'
-import { decodeSongLink, encodeSong, flattenSong, loadSongs, mergeSongs, removeSong, saveSong as storeSong, type Song, type SongStep } from './songs'
-import { showNotice } from './notice'
-import { songsText } from '../i18n/songs'
+import { flattenSong, type Song, type SongStep } from './songs'
 import { loadSettings, saveSettings, type Notation, type PersistedSettings, type SuggestFrom } from './settings'
 
-export type { Notation } from './settings'
-export type ViewId = 'chord' | 'theory' | 'practice'
+import type { ProgressionAnalysis, ProgressionStep, StoreValue, ViewId } from './storeTypes'
+import { useAudio } from './useAudio'
+import { useChordChart } from './useChordChart'
+import { useCollections } from './useCollections'
 
-/** Where the Acorde fretboard reads its notes from: the selected voicing, or the user's own marks. */
-export type ChartSource = 'voicing' | 'marks'
-
-export interface ProgressionStep {
-  id: string
-  rootPc: number
-  qualityId: QualityId
-  anglo: string
-  latin: string
-  bassPc?: number | null
-  frets?: (number | null)[] | null
-  voicingLabel?: string
-  voicingSource?: StepVoicingSource
-  /** Strumming pattern for this step; follows the global one when absent. */
-  strum?: StrumId
-}
-
-export interface MarkedVoicing {
-  rootPc: number
-  qualityId: QualityId
-  frets: (number | null)[]
-  label: string
-  capo: number
-}
-
-interface StoreValue {
-  t: (key: TKey) => string
-  lang: Lang
-  setLang: (lang: Lang) => void
-  notation: Notation
-  setNotation: (notation: Notation) => void
-  view: ViewId
-  setView: (view: ViewId) => void
-  tuningId: string
-  setTuningId: (id: string) => void
-  tuning: number[]
-  soundingTuning: number[]
-  capo: number
-  setCapo: (capo: number) => void
-  tempo: number
-  setTempo: (tempo: number) => void
-  volume: number
-  setVolume: (volume: number) => void
-  loop: boolean
-  setLoop: (loop: boolean) => void
-  metronome: boolean
-  setMetronome: (metronome: boolean) => void
-  beatsPerChord: number
-  setBeatsPerChord: (beats: number) => void
-  timbre: TimbreId
-  setTimbre: (timbre: TimbreId) => void
-  strum: StrumId
-  setStrum: (strum: StrumId) => void
-  /** «Mi patrón», e.g. "D.DU.UDU". */
-  customStrum: string
-  setCustomStrum: (pattern: string) => void
-  /** Plays one bar of a strum pattern on the chord in view, at the current tempo. */
-  previewStrum: (strum: StrumId) => void
-  setStepStrum: (index: number, strum: StrumId | null) => void
-  stopPlayback: () => void
-  keyRootPc: number
-  setKeyRootPc: (pc: number) => void
-  keyMode: Mode
-  setKeyMode: (mode: Mode) => void
-  /** When true the key follows the progression (once it has two or more chords). */
-  keyAuto: boolean
-  setKeyAuto: (auto: boolean) => void
-  detectedKey: DetectedKey | null
-  analysis: ProgressionAnalysis
-  /** Next-chord ideas from the last chords of the progression (or the selected chord when empty). */
-  nextSteps: Suggestion[]
-  /** What the "Puede seguir" panels follow: the progression's last chords or the selected chord. */
-  suggestFrom: SuggestFrom
-  setSuggestFrom: (from: SuggestFrom) => void
-  /** Suggestions for the panels, honouring `suggestFrom` (falls back to the chord with no progression). */
-  panelSuggestions: Suggestion[]
-  panelFollowsProgression: boolean
-  undo: () => void
-  redo: () => void
-  canUndo: boolean
-  canRedo: boolean
-  /** A link that opens this progression (with tempo, beats, capo and strum). */
-  shareLink: () => string
-  library: LibraryEntry[]
-  songs: Song[]
-  saveSong: (song: Song) => void
-  deleteSong: (id: string) => void
-  /** Plays a song section after section (the strip shows the section playing); stopping restores the progression. */
-  playSong: (song: Song) => void
-  /** Which song, section and repeat is playing; null when no song is. */
-  songPlay: { songId: string; section: number; pass: number } | null
-  /** False when the library is full and `name` is new. */
-  saveToLibrary: (name: string) => boolean
-  /** Merges a backup file; null when it is not one. */
-  importLibrary: (text: string) => { added: number; skipped: number; songsAdded: number } | null
-  loadFromLibrary: (entry: LibraryEntry) => void
-  deleteFromLibrary: (id: string) => void
-  /** Re-voice every step to minimise hand movement across the progression. */
-  chainProgression: () => void
-  capoSuggestion: CapoOption | null
-  applyCapoSuggestion: (option: CapoOption) => void
-  chord: ParsedChord
-  chordInput: string
-  chordError: boolean
-  setChordInput: (value: string) => void
-  setChord: (chord: ParsedChord) => void
-  /** The step a pedal or the arrow keys point at while stopped (-1: none). */
-  stepCursor: number
-  /** Moves the cursor to the next/previous step, shows that chord and strums it. */
-  moveStepCursor: (delta: number) => void
-  voicings: Voicing[]
-  selectedVoicing: number
-  selectVoicing: (index: number, play?: boolean) => void
-  playVoicing: (index?: number, pattern?: PlayPattern) => void
-  playFrets: (frets: (number | null)[], pattern?: PlayPattern) => void
-  /** The open string's target pitch in the chosen tuning (no capo): the tuner's reference tone. */
-  playOpenString: (stringIndex: number) => void
-  /** Plays any notes (ear training): together, or one after another. */
-  playNotes: (midi: number[], arpeggio?: boolean) => void
-  /** Moves the whole progression (and a fixed key) by semitones; one undo step. */
-  transposeProgression: (semitones: number) => void
-  progression: ProgressionStep[]
-  loadProgression: (steps: Array<Omit<ProgressionStep, 'id'>>) => void
-  addToProgression: (step: Omit<ProgressionStep, 'id'>) => void
-  moveStep: (from: number, to: number) => void
-  setStepVoicing: (index: number, voicing: StepVoicingRef | null) => void
-  removeFromProgression: (index: number) => void
-  markedVoicing: MarkedVoicing | null
-  setMarkedVoicing: (voicing: MarkedVoicing | null) => void
-  clearProgression: () => void
-  playing: boolean
-  togglePlay: () => void
-  audioReady: boolean
-  audioLoading: TimbreId | null
-  audioFallback: boolean
-  enableAudio: () => Promise<void>
-  suggestions: Suggestion[]
-  addSuggestion: (suggestion: Suggestion) => void
-  detectorFrets: (number | null)[]
-  setDetectorFrets: (frets: (number | null)[]) => void
-  toggleDetectorString: (stringIndex: number, fret: number) => void
-  /** Acorde view: one fretboard, two sources (see ChartSource). */
-  chartSource: ChartSource
-  /** Shape frets currently drawn on the Acorde fretboard. */
-  chartFrets: (number | null)[]
-  /** Detection of the user's marks (null while the chart shows a catalogue voicing). */
-  detection: DetectionResult | null
-  /** Toggle a fret on the Acorde fretboard: switches to marks, detects and names the chord. */
-  toggleChartFret: (stringIndex: number, fret: number) => void
-  /** Pick one of the detector's alternative names, keeping the marks. */
-  pickDetectedName: (anglo: string) => void
-  /** Empty the user's marks ("Borrar marcas"). */
-  clearChartMarks: () => void
-  /** The Acorde input reports focus so detection never rewrites what the user is typing. */
-  setChordInputFocused: (focused: boolean) => void
-}
-
-export interface ProgressionAnalysis {
-  chords: ChordAnalysis[]
-  transitions: TransitionAnalysis[]
-}
-
-/** Reads ?song=… once per page load (StrictMode may ask twice) and merges it into the saved songs. */
-let songLink: { songs: Song[]; notice: string } | null | undefined
-function songLinkImport(lang: Lang): { songs: Song[]; notice: string } | null {
-  if (songLink !== undefined || typeof window === 'undefined') return songLink ?? null
-  const raw = new URLSearchParams(window.location.search).get('song')
-  if (!raw) return (songLink = null)
-  const x = songsText[lang]
-  const song = decodeSongLink(raw)
-  if (!song) return (songLink = { songs: loadSongs(), notice: x.linkBroken })
-  const result = mergeSongs([encodeSong(song)])
-  return (songLink = { songs: result.songs, notice: result.added > 0 ? `${x.linkAdded}: «${song.name}»` : `${x.linkAlready}: «${song.name}»` })
-}
-
-/** Tests load the app many times in one module: start each from the current address. */
-export function resetSongLinkForTests(): void {
-  songLink = undefined
-}
+export type { ChartSource, MarkedVoicing, Notation, ProgressionAnalysis, ProgressionStep, StoreValue, ViewId } from './storeTypes'
+export { resetSongLinkForTests } from './songLink'
 
 const StoreContext = createContext<StoreValue | null>(null)
 
@@ -275,10 +86,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [manualKeyRootPc, setManualKeyRootPc] = useState(initial.keyRootPc)
   const [manualKeyMode, setManualKeyMode] = useState<Mode>(initial.keyMode)
   const [keyAuto, setKeyAuto] = useState(initial.keyAuto)
-  const [chordInput, setChordInputState] = useState('Am7')
-  const [chord, setChordState] = useState<ParsedChord>(() => parseChord('Am7')!)
-  const [chordError, setChordError] = useState(false)
-  const [selectedVoicing, setSelectedVoicing] = useState(0)
   const [history, setHistory] = useState<History<ProgressionStep[]>>(() =>
     createHistory(
       shared
@@ -311,33 +118,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (shared) window.history.replaceState(null, '', `${window.location.pathname}${window.location.hash}`)
   }, [shared])
 
-  const [library, setLibrary] = useState<LibraryEntry[]>(loadLibrary)
-  const [songs, setSongs] = useState<Song[]>(() => songLinkImport(initial.lang)?.songs ?? loadSongs())
-
-  // A shared song link (?song=…) joins the song list as the list is created; the notice and the clean address follow.
-  useEffect(() => {
-    const result = songLinkImport(initial.lang)
-    if (!result) return
-    const params = new URLSearchParams(window.location.search)
-    params.delete('song')
-    const query = params.toString()
-    window.history.replaceState(null, '', `${window.location.pathname}${query ? `?${query}` : ''}${window.location.hash}`)
-    showNotice(result.notice)
-  }, [initial.lang])
 
   // Keep the progression being worked on, so a reload (or a crash) never loses it.
   useEffect(() => {
     if (!songRef.current) saveSessionSteps(progression.map(({ id: _id, ...step }) => step))
   }, [progression])
   const [playing, setPlaying] = useState(false)
-  const [detectorFrets, setDetectorFrets] = useState<(number | null)[]>([0, 0, 0, 0, 0, 0])
-  const [chartSource, setChartSource] = useState<ChartSource>('voicing')
-  const chordInputFocused = useRef(false)
-  const [markedVoicing, setMarkedVoicingState] = useState<MarkedVoicing | null>(null)
-  const [audioReady, setAudioReady] = useState(false)
-  const [audioLoading, setAudioLoading] = useState<TimbreId | null>(null)
-  const [audioFallback, setAudioFallback] = useState(false)
 
+  const { audioReady, audioLoading, audioFallback, enableAudio } = useAudio(volume, timbre)
   const t = useCallback((key: TKey) => translate(lang, key), [lang])
 
   useEffect(() => {
@@ -352,18 +140,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  const volumeRef = useRef(volume)
-
-  useEffect(() => {
-    prefetchAudioEngine()
-    return () => {
-      const engine = loadedAudioEngine()
-      if (engine) {
-        engine.onLoadingChange = null
-        engine.onFallback = null
-      }
-    }
-  }, [])
 
   useEffect(() => {
     const payload: PersistedSettings = {
@@ -387,10 +163,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     saveSettings(payload)
   }, [lang, notation, tuningId, tempo, volume, manualKeyRootPc, manualKeyMode, keyAuto, loop, metronome, beatsPerChord, timbre, strum, customStrum, suggestFrom, capo])
 
-  useEffect(() => {
-    volumeRef.current = volume
-    loadedAudioEngine()?.setVolume(volume)
-  }, [volume])
 
   const tuning = useMemo(
     () => TUNINGS.find((item) => item.id === tuningId)?.midi ?? STANDARD_TUNING,
@@ -399,69 +171,50 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const soundingTuning = useMemo(() => withCapo(tuning, capo), [tuning, capo])
 
+  const {
+    chord,
+    chordInput,
+    chordError,
+    setChordInput,
+    setChord,
+    voicings,
+    selectedVoicing,
+    setSelectedVoicing,
+    selectVoicing,
+    playVoicing,
+    markedVoicing,
+    setMarkedVoicing,
+    detectorFrets,
+    setDetectorFrets,
+    toggleDetectorString,
+    chartSource,
+    chartFrets,
+    detection,
+    toggleChartFret,
+    pickDetectedName,
+    clearChartMarks,
+    setChordInputFocused,
+  } = useChordChart({ tuning, capo, soundingTuning, enableAudio })
+
   const setCapo = useCallback((next: number) => {
     setCapoState(clampCapo(next))
   }, [])
 
-  const voicings = useMemo(() => {
-    const shapes = voicingsFor(chord.rootPc, chord.quality, tuning, { bassPc: chord.bassPc, limit: 9 })
-    const shift = (voicing: Voicing): Voicing =>
-      capo === 0 ? voicing : { ...voicing, midi: voicing.midi.map((midi) => midi + capo) }
-    if (!markedVoicing || markedVoicing.rootPc !== chord.rootPc || markedVoicing.qualityId !== chord.quality.id) {
-      return shapes.map(shift)
-    }
-    const marked = voicingFromFrets(markedVoicing.frets, tuning, chord.rootPc, chord.quality, 'marked')
-    if (!marked) return shapes.map(shift)
-    return [shift(marked), ...shapes.filter((voicing) => voicing.signature !== marked.signature).map(shift)]
-  }, [chord, tuning, capo, markedVoicing])
 
-  const setTuningId = useCallback((id: string) => {
-    setTuningIdState(id)
-    setSelectedVoicing(0)
-  }, [])
+  const setTuningId = useCallback(
+    (id: string) => {
+      setTuningIdState(id)
+      setSelectedVoicing(0)
+    },
+    [setSelectedVoicing],
+  )
 
-  const enableAudio = useCallback(async () => {
-    try {
-      const engine = await loadAudioEngine()
-      engine.onLoadingChange = setAudioLoading
-      engine.onFallback = setAudioFallback
-      engine.setVolume(volumeRef.current)
-      await engine.start()
-      setAudioReady(engine.isStarted)
-      await engine.setTimbre(timbre)
-    } catch {
-      setAudioReady(false)
-    }
-  }, [timbre])
-
-  useEffect(() => {
-    if (audioReady) void loadedAudioEngine()?.setTimbre(timbre)
-  }, [timbre, audioReady])
 
   const setTimbre = useCallback((next: TimbreId) => {
     setTimbreState(next)
   }, [])
 
-  const playVoicing = useCallback(
-    (index?: number, pattern: PlayPattern = 'strum-down') => {
-      const target = voicings[index ?? selectedVoicing]
-      if (!target) return
-      emitPluck(target.frets)
-      void enableAudio().then(() => {
-        loadedAudioEngine()?.playFrets(target.frets, soundingTuning, pattern)
-      })
-    },
-    [voicings, selectedVoicing, soundingTuning, enableAudio],
-  )
 
-  const selectVoicing = useCallback(
-    (index: number, play = true) => {
-      setSelectedVoicing(index)
-      setChartSource('voicing')
-      if (play) playVoicing(index)
-    },
-    [playVoicing],
-  )
 
   const playFrets = useCallback(
     (frets: (number | null)[], pattern: PlayPattern = 'strum-down') => {
@@ -506,30 +259,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [enableAudio, tuning],
   )
 
-  const setChordInput = useCallback((value: string) => {
-    setChordInputState(value)
-    const parsed = parseChord(value)
-    if (parsed) {
-      setChordState(parsed)
-      setSelectedVoicing(0)
-      setChartSource('voicing')
-      setChordError(false)
-    } else {
-      setChordError(value.trim().length > 0)
-    }
-  }, [])
 
-  const setMarkedVoicing = useCallback((voicing: MarkedVoicing | null) => {
-    setMarkedVoicingState(voicing)
-  }, [])
 
-  const setChord = useCallback((next: ParsedChord) => {
-    setChordState(next)
-    setSelectedVoicing(0)
-    setChartSource('voicing')
-    setChordInputState(next.anglo)
-    setChordError(false)
-  }, [])
 
   const [stepCursor, setStepCursor] = useState(-1)
   const moveStepCursor = useCallback(
@@ -683,63 +414,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     })
   }, [playing, progression.length, metronome, tempo, loop, beatsPerChord, soundingTuning, getFretsForStep, getStrumForStep])
 
-  const toggleDetectorString = useCallback((stringIndex: number, fret: number) => {
-    setDetectorFrets((previous) => toggleDetectorFret(previous, stringIndex, fret, capo))
-  }, [capo])
 
-  // ---- Acorde view: one fretboard, name <-> marks in both directions ----
-  const chartFrets = useMemo<(number | null)[]>(
-    () => (chartSource === 'marks' ? detectorFrets : (voicings[selectedVoicing]?.frets ?? [null, null, null, null, null, null])),
-    [chartSource, detectorFrets, voicings, selectedVoicing],
-  )
-
-  const detection = useMemo(
-    () => (chartSource === 'marks' ? detectChord(detectorFrets, soundingTuning) : null),
-    [chartSource, detectorFrets, soundingTuning],
-  )
-
-  /** Name the chord the marks make (as the shape played behind the capo) without touching the marks. */
-  const adoptMarks = useCallback(
-    (marks: (number | null)[], anglo: string | null) => {
-      const sounding = anglo ? parseChord(anglo) : null
-      if (!sounding) return
-      const shape = shapeChord(sounding, capo)
-      setChordState(shape)
-      setSelectedVoicing(0)
-      setChordError(false)
-      setMarkedVoicingState({ rootPc: shape.rootPc, qualityId: shape.quality.id, frets: marks, label: voicingLabel(marks), capo })
-      if (!chordInputFocused.current) setChordInputState(shape.anglo)
-    },
-    [capo],
-  )
-
-  const toggleChartFret = useCallback(
-    (stringIndex: number, fret: number) => {
-      const next = toggleDetectorFret(chartFrets, stringIndex, fret, capo)
-      setDetectorFrets(next)
-      setChartSource('marks')
-      adoptMarks(next, detectChord(next, soundingTuning).candidates[0]?.anglo ?? null)
-    },
-    [chartFrets, capo, soundingTuning, adoptMarks],
-  )
-
-  const pickDetectedName = useCallback(
-    (anglo: string) => {
-      setChartSource('marks')
-      adoptMarks(detectorFrets, anglo)
-    },
-    [detectorFrets, adoptMarks],
-  )
-
-  const clearChartMarks = useCallback(() => {
-    setDetectorFrets([null, null, null, null, null, null])
-    setChartSource('marks')
-    setMarkedVoicingState(null)
-  }, [])
-
-  const setChordInputFocused = useCallback((focused: boolean) => {
-    chordInputFocused.current = focused
-  }, [])
 
   const addSuggestion = useCallback(
     (suggestion: Suggestion) => {
@@ -803,21 +478,17 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const shareLink = useCallback(() => shareUrl(snapshot(), window.location), [snapshot])
 
-  const saveProgressionToLibrary = useCallback(
-    (name: string) => {
-      if (isLibraryFull(loadLibrary(), name)) return false
-      setLibrary(storeInLibrary(name, snapshot()))
-      return true
-    },
-    [snapshot],
-  )
+  const {
+    library,
+    songs,
+    saveToLibrary: saveProgressionToLibrary,
+    importLibrary,
+    deleteFromLibrary,
+    saveSong: saveSongToList,
+    deleteSong,
+  } = useCollections(initial.lang, snapshot)
 
-  const importLibrary = useCallback((text: string) => {
-    const result = mergeBackup(text)
-    if (result) setLibrary(result.entries)
-    if (result?.songs) setSongs(result.songs)
-    return result ? { added: result.added, skipped: result.skipped, songsAdded: result.songsAdded } : null
-  }, [])
+
 
   const loadFromLibrary = useCallback(
     (entry: LibraryEntry) => {
@@ -833,10 +504,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [stopPlayback, setProgression, setCustomStrum],
   )
 
-  const deleteFromLibrary = useCallback((id: string) => setLibrary(removeFromLibrary(id)), [])
 
-  const saveSongToList = useCallback((song: Song) => setSongs(storeSong(song)), [])
-  const deleteSong = useCallback((id: string) => setSongs(removeSong(id)), [])
 
   const playSong = useCallback(
     (song: Song) => {
@@ -1043,7 +711,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setChord, stepCursor, moveStepCursor, voicings, selectedVoicing, selectVoicing, playVoicing, playFrets, playOpenString, playNotes, previewStrum, customStrum, setCustomStrum, transposeProgression, progression, loadProgression,
     addToProgression, moveStep, setStepVoicing, removeFromProgression, markedVoicing, setMarkedVoicing,
     clearProgression, playing, togglePlay, audioReady, audioLoading, audioFallback, enableAudio, suggestions,
-    addSuggestion, detectorFrets, toggleDetectorString, chartSource, chartFrets, detection, toggleChartFret,
+    addSuggestion, detectorFrets, setDetectorFrets, toggleDetectorString, chartSource, chartFrets, detection, toggleChartFret,
     pickDetectedName, clearChartMarks, setChordInputFocused,
   ])
 

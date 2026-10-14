@@ -13,12 +13,13 @@ import type { StepVoicingRef, StepVoicingSource } from '../music/stepVoicing'
 import type { Voicing } from '../music/voicings'
 import type { LibraryEntry } from './library'
 import type { Notation, SuggestFrom } from './settings'
+import type { Sheet } from './sheets'
 import type { Song } from './songs'
 
 /* Everything the app reads from the store: the shape of `useStore()`. */
 
 export type { Notation } from './settings'
-export type ViewId = 'chord' | 'theory' | 'practice'
+export type ViewId = 'chord' | 'theory' | 'practice' | 'songbook'
 
 /** Where the Acorde fretboard reads its notes from: the selected voicing, or the user's own marks. */
 export type ChartSource = 'voicing' | 'marks'
@@ -112,6 +113,14 @@ export interface StoreValue {
   /** A link that opens this progression (with tempo, beats, capo and strum). */
   shareLink: () => string
   library: LibraryEntry[]
+  /** The Cancionero: lyrics with chords (ChordPro). */
+  sheets: Sheet[]
+  saveSheet: (sheet: Sheet) => void
+  deleteSheet: (id: string) => void
+  /** Plays a sheet's chords in order (transposed by `semitones`), with the backing when it is on. */
+  playSheet: (sheet: Sheet, semitones: number) => void
+  /** Which sheet and which chord of it is playing; null when none is. */
+  sheetPlay: { sheetId: string; index: number } | null
   songs: Song[]
   saveSong: (song: Song) => void
   deleteSong: (id: string) => void

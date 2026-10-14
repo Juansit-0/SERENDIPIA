@@ -25,6 +25,7 @@ describe('accessibility (axe)', () => {
     ['Práctica · Oído', '#practice', 'Oído'],
     ['Práctica · Grabar', '#practice', 'Grabar'],
     ['Práctica · Progreso', '#practice', 'Progreso'],
+    ['Cancionero', '#songbook', 'Crear mi primera canción'],
   ])('%s has no violations', async (_, hash, tab) => {
     renderApp(hash)
     if (tab) fireEvent.click(screen.getByRole('button', { name: tab }))

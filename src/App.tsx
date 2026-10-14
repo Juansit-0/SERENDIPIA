@@ -6,6 +6,7 @@ import { StoreProvider, useStore } from './state/store'
 import { useWakeLock } from './state/wakeLock'
 import { ChordView } from './views/ChordView'
 import { PracticeView } from './views/PracticeView'
+import { SongbookView } from './views/SongbookView'
 import { TheoryView } from './views/TheoryView'
 import { Welcome } from './welcome/Welcome'
 import { useWelcomeOpen } from './welcome/state'
@@ -19,7 +20,7 @@ function Shell() {
   // A page-turner pedal (PageDown/PageUp) or the arrow keys walk the progression chord by chord while stopped.
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (welcome || playing || view === 'practice' || event.defaultPrevented || event.metaKey || event.ctrlKey || event.altKey) return
+      if (welcome || playing || view === 'practice' || view === 'songbook' || event.defaultPrevented || event.metaKey || event.ctrlKey || event.altKey) return
       const target = event.target as HTMLElement | null
       const tag = target?.tagName
       if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA' || target?.isContentEditable) return
@@ -90,9 +91,10 @@ function Shell() {
           {view === 'chord' && <ChordView />}
           {view === 'theory' && <TheoryView />}
           {view === 'practice' && <PracticeView />}
+          {view === 'songbook' && <SongbookView />}
         </main>
       </div>
-      {view !== 'practice' && <StepRow />}
+      {view !== 'practice' && view !== 'songbook' && <StepRow />}
       <Notice />
       {welcome && <Welcome />}
     </div>

@@ -42,6 +42,8 @@ import { emitPluck } from './pluck'
 import { loadSessionSteps, saveSessionSteps } from './session'
 import { decodeShare, shareUrl, type SharedProgression } from './share'
 import { flattenSong, type Song, type SongStep } from './songs'
+import type { Sheet } from './sheets'
+import { parseSheet } from '../music/chordpro'
 import { loadSettings, saveSettings, type Notation, type PersistedSettings, type SuggestFrom } from './settings'
 
 import type { ProgressionAnalysis, ProgressionStep, StoreValue, ViewId } from './storeTypes'
@@ -64,7 +66,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (typeof window === 'undefined') return 'chord'
     const hash = window.location.hash.replace('#', '')
     // Old links (#dictionary, #detector) land on the merged Acorde view.
-    return hash === 'theory' || hash === 'practice' ? hash : 'chord'
+    return hash === 'theory' || hash === 'practice' || hash === 'songbook' ? hash : 'chord'
   })
   const [tuningId, setTuningIdState] = useState(initial.tuningId)
   const [tempo, setTempo] = useState(shared?.tempo ?? initial.tempo)
@@ -134,6 +136,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   // While a song plays, the strip shows its current section; the player's own progression waits here.
   const songRef = useRef<{ flat: SongStep[]; saved: ProgressionStep[] } | null>(null)
   const [songPlay, setSongPlay] = useState<{ songId: string; section: number; pass: number } | null>(null)
+  const [sheetPlay, setSheetPlay] = useState<{ sheetId: string; index: number } | null>(null)
   const undo = useCallback(() => setHistory(undoHistory), [])
   const redo = useCallback(() => setHistory(redoHistory), [])
 
@@ -323,6 +326,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     loadedAudioEngine()?.stopProgression()
     setPlaying(false)
     playhead.reset()
+    setSheetPlay(null)
     endSong()
   }, [endSong])
 
@@ -527,6 +531,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     deleteFromLibrary,
     saveSong: saveSongToList,
     deleteSong,
+    sheets,
+    saveSheet,
+    deleteSheet,
   } = useCollections(initial.lang, snapshot)
 
 
@@ -599,6 +606,42 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       })
     },
     [stopPlayback, progression, enableAudio, tempo, loop, beatsPerChord, soundingTuning, metronome, tuning, strum, endSong, getBacking, getSubdivision],
+  )
+
+  const playSheet = useCallback(
+    (sheet: Sheet, semitones: number) => {
+      stopPlayback()
+      const chords = parseSheet(sheet.text, semitones).chords
+      if (chords.length === 0) return
+      const steps = chords.map((chord) => ({ rootPc: chord.rootPc, qualityId: chord.quality.id, bassPc: chord.bassPc }))
+      void enableAudio().then(() => {
+        const engine = loadedAudioEngine()
+        if (!engine?.isStarted) return
+        setSheetPlay({ sheetId: sheet.id, index: 0 })
+        engine.playProgression({
+          stepCount: steps.length,
+          tempo,
+          loop: false,
+          beatsPerChord,
+          tuning: soundingTuning,
+          metronome,
+          getFrets: (index) => (steps[index] ? resolveStepFrets(steps[index], tuning) : null),
+          getStrum: () => strum,
+          getBass: (index) => (steps[index] ? (steps[index].bassPc ?? steps[index].rootPc) : null),
+          getBacking,
+          getSubdivision,
+          onStep: (index) => setSheetPlay({ sheetId: sheet.id, index }),
+          onBeat: playhead.setBeat,
+          onEnd: () => {
+            setPlaying(false)
+            setSheetPlay(null)
+            playhead.reset()
+          },
+        })
+        setPlaying(true)
+      })
+    },
+    [stopPlayback, enableAudio, tempo, beatsPerChord, soundingTuning, metronome, tuning, strum, getBacking, getSubdivision],
   )
 
   const chainProgression = useCallback(() => {
@@ -690,6 +733,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     canRedo: history.future.length > 0,
     shareLink,
     library,
+    sheets,
+    saveSheet,
+    deleteSheet,
+    playSheet,
+    sheetPlay,
     songs,
     saveSong: saveSongToList,
     deleteSong,
@@ -756,7 +804,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     t, lang, notation, view, setView, tuningId, setTuningId, tuning, soundingTuning, capo, setCapo, tempo, volume, loop,
     metronome, setMetronome, beatsPerChord, timbre, setTimbre, strum, setStepStrum, stopPlayback, keyRootPc, setKeyRootPc, keyMode, setKeyMode, keyAuto,
     detectedKey, analysis, nextSteps, suggestFrom, panelSuggestions, panelFollowsProgression, undo, redo, history.past.length, history.future.length, shareLink, library,
-    saveProgressionToLibrary, importLibrary, songs, saveSongToList, deleteSong, playSong, songPlay, loadFromLibrary, deleteFromLibrary, chainProgression, capoSuggestion, applyCapoSuggestion, chord, chordInput, chordError, setChordInput,
+    saveProgressionToLibrary, importLibrary, sheets, saveSheet, deleteSheet, playSheet, sheetPlay, songs, saveSongToList, deleteSong, playSong, songPlay, loadFromLibrary, deleteFromLibrary, chainProgression, capoSuggestion, applyCapoSuggestion, chord, chordInput, chordError, setChordInput,
     setChord, stepCursor, moveStepCursor, voicings, selectedVoicing, selectVoicing, playVoicing, playFrets, playOpenString, playNotes, previewStrum, customStrum, setCustomStrum, backing, subdivision, tapTempo, transposeProgression, progression, loadProgression,
     addToProgression, moveStep, setStepVoicing, removeFromProgression, markedVoicing, setMarkedVoicing,
     clearProgression, playing, togglePlay, audioReady, audioLoading, audioFallback, enableAudio, suggestions,

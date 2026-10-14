@@ -36,6 +36,9 @@ export const songsText = {
     linkAdded: 'Canción añadida a ⋯ → Canciones',
     linkAlready: 'Ya tenías esta canción',
     linkBroken: 'Ese enlace de canción no se pudo leer.',
+    sheetAdded: 'Añadida al Cancionero',
+    sheetAlready: 'Ya la tenías en el Cancionero',
+    sheetBroken: 'Ese enlace del cancionero no se pudo leer.',
     labels: { intro: 'Intro', verse: 'Verso', prechorus: 'Pre-coro', chorus: 'Coro', bridge: 'Puente', solo: 'Solo', outro: 'Outro' },
   },
   en: {
@@ -74,6 +77,9 @@ export const songsText = {
     linkAdded: 'Song added to ⋯ → Songs',
     linkAlready: 'You already had this song',
     linkBroken: 'That song link could not be read.',
+    sheetAdded: 'Added to the Songbook',
+    sheetAlready: 'You already had it in the Songbook',
+    sheetBroken: 'That songbook link could not be read.',
     labels: { intro: 'Intro', verse: 'Verse', prechorus: 'Pre-chorus', chorus: 'Chorus', bridge: 'Bridge', solo: 'Solo', outro: 'Outro' },
   },
 } as const

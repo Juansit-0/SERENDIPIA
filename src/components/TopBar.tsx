@@ -17,7 +17,7 @@ import { BrandMark } from './topbar/Brand'
 import { Popover } from './topbar/Popover'
 import { ChevronDownIcon, LoopIcon, MinusIcon, MoonIcon, PlayIcon, PlusIcon, SettingsIcon, SoundIcon, StopIcon, SunIcon, TunerIcon } from './icons'
 
-const VIEWS: ViewId[] = ['chord', 'theory', 'practice']
+const VIEWS: ViewId[] = ['chord', 'theory', 'practice', 'songbook']
 const NOTATIONS: Notation[] = ['anglo', 'both', 'latin']
 const OPEN_KEY = 'serendipia.transportOpen'
 
@@ -126,12 +126,15 @@ export function TopBar() {
 
         <button
           type="button"
-          className="cc-btn cc-btn--primary min-w-[6.25rem] justify-center"
+          className="cc-btn cc-btn--primary cc-run justify-center"
           onClick={togglePlay}
           disabled={progression.length === 0 && !metronome}
+          aria-label={playing ? t('transport.stop') : t('transport.run')}
         >
           {playing ? <StopIcon size={16} /> : <PlayIcon size={16} />}
-          {playing ? t('transport.stop') : t('transport.run')}
+          <span className="cc-run__label" aria-hidden="true">
+            {playing ? t('transport.stop') : t('transport.run')}
+          </span>
         </button>
 
         <span className="max-sm:hidden desk:max-[1199px]:hidden">

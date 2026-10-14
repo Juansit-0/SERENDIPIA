@@ -233,8 +233,8 @@
   }
 }
 
-/* Narrow desk (up to 1499px, where the full row no longer fits): monogram only, icon buttons, tighter gaps. */
-@media (min-width: 1024px) and (max-width: 1499px) {
+/* Narrow desk (up to 1559px, where the full row no longer fits): monogram only, icon buttons, tighter gaps. */
+@media (min-width: 1024px) and (max-width: 1559px) {
   .cc-brand__word,
   .cc-top .cc-btn__label--wide {
     display: none;
@@ -571,4 +571,31 @@
   width: 100%;
   min-height: 44px;
   font-weight: 600;
+}
+
+/* Smallest desk widths: the beat moons step aside (the strip's playhead still shows the beat) and the view tabs tighten. */
+@media (min-width: 1024px) and (max-width: 1179px) {
+  .cc-top .cc-moons {
+    display: none;
+  }
+
+  .cc-top nav .cc-btn {
+    padding-inline: 0.45rem;
+  }
+}
+
+.cc-run {
+  min-width: 6.25rem;
+}
+
+/* Smallest desk widths: Run keeps its icon (and its name for screen readers), the label steps aside. */
+@media (min-width: 1024px) and (max-width: 1179px) {
+  .cc-run {
+    min-width: 0;
+    padding-inline: 0.75rem;
+  }
+
+  .cc-run__label {
+    display: none;
+  }
 }

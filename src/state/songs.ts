@@ -1,3 +1,4 @@
+import { fromBase64Url, toBase64Url } from './base64url'
 import { decodeShare, encodeShare, type SharedProgression, type SharedStep } from './share'
 
 export const SECTION_LABELS = ['intro', 'verse', 'prechorus', 'chorus', 'bridge', 'solo', 'outro'] as const
@@ -153,22 +154,6 @@ export function flattenSong(song: Song): SongStep[] {
  * Sharing a song by link: «?song=» carries the name and every section (label, repeats, source, chords)
  * as base64url JSON, so the song arrives whole even if the other person has none of its progressions.
  */
-function toBase64Url(text: string): string {
-  const bytes = new TextEncoder().encode(text)
-  let binary = ''
-  for (const byte of bytes) binary += String.fromCharCode(byte)
-  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
-}
-
-function fromBase64Url(text: string): string | null {
-  try {
-    const binary = atob(text.replace(/-/g, '+').replace(/_/g, '/'))
-    return new TextDecoder().decode(Uint8Array.from(binary, (char) => char.charCodeAt(0)))
-  } catch {
-    return null
-  }
-}
-
 export function encodeSongLink(song: Song): string {
   const stored = encodeSong(song)
   return toBase64Url(JSON.stringify({ n: stored.name, s: stored.sections.map((section) => [section.label, section.repeats, section.source, section.data]) }))

@@ -1,6 +1,7 @@
 import { decodeShare, encodeShare, type SharedProgression } from './share'
 import { encodeSong, mergeSongs, type Song } from './songs'
 import { loadHistory, mergeHistory } from '../music/history'
+import { loadSheets, mergeSheets, type Sheet } from './sheets'
 
 export interface LibraryEntry {
   id: string
@@ -103,6 +104,7 @@ export function exportLibrary(entries: LibraryEntry[], songs: Song[] = [], now =
     entries: entries.map((entry) => ({ name: entry.name, savedAt: entry.savedAt, data: encodeShare(entry.progression) })),
     songs: songs.map(encodeSong),
     history: loadHistory(),
+    sheets: loadSheets(),
   }
   return JSON.stringify(backup, null, 2)
 }
@@ -115,14 +117,14 @@ export function exportLibrary(entries: LibraryEntry[], songs: Song[] = [], now =
 export function importLibrary(
   text: string,
   now = new Date(),
-): { entries: LibraryEntry[]; added: number; skipped: number; songs: Song[] | null; songsAdded: number } | null {
+): { entries: LibraryEntry[]; added: number; skipped: number; songs: Song[] | null; songsAdded: number; sheets: Sheet[] | null; sheetsAdded: number } | null {
   let parsed: unknown
   try {
     parsed = JSON.parse(text)
   } catch {
     return null
   }
-  const backup = parsed as { app?: unknown; entries?: unknown; songs?: unknown; history?: unknown } | null
+  const backup = parsed as { app?: unknown; entries?: unknown; songs?: unknown; history?: unknown; sheets?: unknown } | null
   if (!backup || backup.app !== BACKUP_APP || !Array.isArray(backup.entries)) return null
 
   const entries = loadLibrary()
@@ -155,5 +157,6 @@ export function importLibrary(
   if (added > 0) persist(entries)
   const merged = Array.isArray(backup.songs) ? mergeSongs(backup.songs, now) : null
   if (backup.history && typeof backup.history === 'object') mergeHistory(backup.history)
-  return { entries, added, skipped, songs: merged?.songs ?? null, songsAdded: merged?.added ?? 0 }
+  const sheets = Array.isArray(backup.sheets) ? mergeSheets(backup.sheets) : null
+  return { entries, added, skipped, songs: merged?.songs ?? null, songsAdded: merged?.added ?? 0, sheets: sheets?.sheets ?? null, sheetsAdded: sheets?.added ?? 0 }
 }

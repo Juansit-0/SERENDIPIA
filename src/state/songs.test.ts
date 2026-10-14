@@ -50,3 +50,18 @@ describe('songs', () => {
     expect(importLibrary(file)!.songsAdded).toBe(0)
   })
 })
+
+describe('song links', () => {
+  it('carries the whole song, accents included', async () => {
+    const { encodeSongLink, decodeSongLink } = await import('./songs')
+    const original = song('Canción de cuna ñ')
+    const back = decodeSongLink(encodeSongLink(original))!
+    expect(back.name).toBe('Canción de cuna ñ')
+    expect(back.sections.map((section) => [section.label, section.repeats, section.progression.steps.map((step) => step.anglo).join(' ')])).toEqual([
+      ['verse', 2, 'Am F'],
+      ['chorus', 1, 'C G Am'],
+    ])
+    expect(encodeSongLink(original)).toMatch(/^[A-Za-z0-9_-]+$/)
+    expect(decodeSongLink('###')).toBeNull()
+  })
+})

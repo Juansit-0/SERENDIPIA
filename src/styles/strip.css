@@ -693,7 +693,11 @@
 }
 
 .songs .strip-menu__library li {
-  grid-template-columns: minmax(0, 1fr) auto auto auto;
+  grid-template-columns: minmax(0, 1fr) auto auto auto auto;
+}
+
+.songs__link {
+  grid-column: 1 / -1;
 }
 
 .songs__sections {

@@ -148,3 +148,53 @@ export function flattenSong(song: Song): SongStep[] {
     ).flat(),
   )
 }
+
+/*
+ * Sharing a song by link: «?song=» carries the name and every section (label, repeats, source, chords)
+ * as base64url JSON, so the song arrives whole even if the other person has none of its progressions.
+ */
+function toBase64Url(text: string): string {
+  const bytes = new TextEncoder().encode(text)
+  let binary = ''
+  for (const byte of bytes) binary += String.fromCharCode(byte)
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+}
+
+function fromBase64Url(text: string): string | null {
+  try {
+    const binary = atob(text.replace(/-/g, '+').replace(/_/g, '/'))
+    return new TextDecoder().decode(Uint8Array.from(binary, (char) => char.charCodeAt(0)))
+  } catch {
+    return null
+  }
+}
+
+export function encodeSongLink(song: Song): string {
+  const stored = encodeSong(song)
+  return toBase64Url(JSON.stringify({ n: stored.name, s: stored.sections.map((section) => [section.label, section.repeats, section.source, section.data]) }))
+}
+
+export function decodeSongLink(text: string): Song | null {
+  const json = fromBase64Url(text)
+  if (!json) return null
+  try {
+    const raw = JSON.parse(json) as { n?: unknown; s?: unknown }
+    if (typeof raw.n !== 'string' || !Array.isArray(raw.s)) return null
+    const song = decodeSong({
+      id: songId(),
+      name: raw.n.slice(0, 60),
+      savedAt: '',
+      sections: raw.s.slice(0, MAX_SECTIONS).map((item: unknown) => {
+        const [label, repeats, source, data] = Array.isArray(item) ? item : []
+        return { id: songId('sec'), label, repeats, source, data } as StoredSection
+      }),
+    })
+    return song && song.sections.length > 0 ? song : null
+  } catch {
+    return null
+  }
+}
+
+export function songUrl(song: Song, location: { origin: string; pathname: string; hash: string }): string {
+  return `${location.origin}${location.pathname}?song=${encodeSongLink(song)}${location.hash}`
+}

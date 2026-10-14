@@ -51,7 +51,9 @@ import {
 import { emitPluck } from './pluck'
 import { loadSessionSteps, saveSessionSteps } from './session'
 import { decodeShare, shareUrl, type SharedProgression } from './share'
-import { flattenSong, loadSongs, removeSong, saveSong as storeSong, type Song, type SongStep } from './songs'
+import { decodeSongLink, encodeSong, flattenSong, loadSongs, mergeSongs, removeSong, saveSong as storeSong, type Song, type SongStep } from './songs'
+import { showNotice } from './notice'
+import { songsText } from '../i18n/songs'
 import { loadSettings, saveSettings, type Notation, type PersistedSettings, type SuggestFrom } from './settings'
 
 export type { Notation } from './settings'
@@ -219,6 +221,24 @@ export interface ProgressionAnalysis {
   transitions: TransitionAnalysis[]
 }
 
+/** Reads ?song=… once per page load (StrictMode may ask twice) and merges it into the saved songs. */
+let songLink: { songs: Song[]; notice: string } | null | undefined
+function songLinkImport(lang: Lang): { songs: Song[]; notice: string } | null {
+  if (songLink !== undefined || typeof window === 'undefined') return songLink ?? null
+  const raw = new URLSearchParams(window.location.search).get('song')
+  if (!raw) return (songLink = null)
+  const x = songsText[lang]
+  const song = decodeSongLink(raw)
+  if (!song) return (songLink = { songs: loadSongs(), notice: x.linkBroken })
+  const result = mergeSongs([encodeSong(song)])
+  return (songLink = { songs: result.songs, notice: result.added > 0 ? `${x.linkAdded}: «${song.name}»` : `${x.linkAlready}: «${song.name}»` })
+}
+
+/** Tests load the app many times in one module: start each from the current address. */
+export function resetSongLinkForTests(): void {
+  songLink = undefined
+}
+
 const StoreContext = createContext<StoreValue | null>(null)
 
 export function StoreProvider({ children }: { children: ReactNode }) {
@@ -292,7 +312,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [shared])
 
   const [library, setLibrary] = useState<LibraryEntry[]>(loadLibrary)
-  const [songs, setSongs] = useState<Song[]>(loadSongs)
+  const [songs, setSongs] = useState<Song[]>(() => songLinkImport(initial.lang)?.songs ?? loadSongs())
+
+  // A shared song link (?song=…) joins the song list as the list is created; the notice and the clean address follow.
+  useEffect(() => {
+    const result = songLinkImport(initial.lang)
+    if (!result) return
+    const params = new URLSearchParams(window.location.search)
+    params.delete('song')
+    const query = params.toString()
+    window.history.replaceState(null, '', `${window.location.pathname}${query ? `?${query}` : ''}${window.location.hash}`)
+    showNotice(result.notice)
+  }, [initial.lang])
 
   // Keep the progression being worked on, so a reload (or a crash) never loses it.
   useEffect(() => {

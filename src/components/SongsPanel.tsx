@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { songsText } from '../i18n/songs'
-import { MAX_REPEATS, MAX_SECTIONS, SECTION_LABELS, SONGS_LIMIT, songId, type SectionLabel, type Song, type SongSection } from '../state/songs'
+import { MAX_REPEATS, MAX_SECTIONS, SECTION_LABELS, SONGS_LIMIT, songId, songUrl, type SectionLabel, type Song, type SongSection } from '../state/songs'
 import type { SharedProgression } from '../state/share'
+import { showNotice } from '../state/notice'
 import { useStore } from '../state/store'
 import { CloseIcon, MinusIcon, PlusIcon } from './icons'
 
@@ -14,6 +15,20 @@ export function SongsPanel({ onAnnounce }: { onAnnounce: (message: string) => vo
   const [draft, setDraft] = useState<Song | null>(null)
   const [source, setSource] = useState(CURRENT)
   const [confirmId, setConfirmId] = useState<string | null>(null)
+  const [link, setLink] = useState<{ id: string; url: string } | null>(null)
+
+  /** Copies the song's link; where the clipboard is not allowed, shows it to copy by hand. */
+  const share = async (song: Song) => {
+    const url = songUrl(song, window.location)
+    try {
+      await navigator.clipboard.writeText(url)
+      onAnnounce(x.copied)
+      setLink(null)
+      showNotice(x.copied)
+    } catch {
+      setLink({ id: song.id, url })
+    }
+  }
 
   const chords = (progression: SharedProgression) => progression.steps.map((step) => (notation === 'latin' ? step.latin : step.anglo)).join(' · ')
   const summary = (song: Song) => song.sections.map((section) => `${x.labels[section.label]}${section.repeats > 1 ? ` ×${section.repeats}` : ''}`).join(' · ')
@@ -180,6 +195,9 @@ export function SongsPanel({ onAnnounce }: { onAnnounce: (message: string) => vo
                 >
                   {live ? x.stop : x.play}
                 </button>
+                <button type="button" className="cc-btn cc-btn--ghost strip__btn" onClick={() => void share(song)} aria-label={`${x.shareLabel}: ${song.name}`} title={x.shareLabel}>
+                  {x.share}
+                </button>
                 <button type="button" className="cc-btn cc-btn--ghost strip__btn" onClick={() => setDraft(song)} aria-label={`${x.edit}: ${song.name}`}>
                   {x.edit}
                 </button>
@@ -201,6 +219,9 @@ export function SongsPanel({ onAnnounce }: { onAnnounce: (message: string) => vo
                 >
                   {confirmId === song.id ? x.removeConfirm : x.remove}
                 </button>
+                {link?.id === song.id && (
+                  <input className="strip-field songs__link" value={link.url} readOnly aria-label={x.copyHere} onFocus={(event) => event.currentTarget.select()} autoFocus />
+                )}
               </li>
             )
           })}

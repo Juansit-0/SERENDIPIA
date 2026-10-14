@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { Notice } from './components/Notice'
 import { StepRow } from './components/StepRow'
 import { TopBar } from './components/TopBar'
 import { StoreProvider, useStore } from './state/store'
@@ -80,6 +81,7 @@ function Shell() {
         </main>
       </div>
       {view !== 'practice' && <StepRow />}
+      <Notice />
       {welcome && <Welcome />}
     </div>
   )

@@ -12,7 +12,7 @@ function seen(): boolean {
 
 /** First visit (and not arriving through a shared link, which should open straight on its chords). */
 let open: boolean | null = null
-const isOpen = () => (open ??= typeof window !== 'undefined' && !seen() && !new URLSearchParams(window.location.search).has('p'))
+const isOpen = () => (open ??= typeof window !== 'undefined' && !seen() && !['p', 'song'].some((key) => new URLSearchParams(window.location.search).has(key)))
 const listeners = new Set<() => void>()
 
 function set(next: boolean): void {

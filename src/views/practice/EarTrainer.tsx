@@ -3,6 +3,7 @@ import { ListenIcon } from '../../components/icons'
 import { earText } from '../../i18n/ear'
 import { chordTones, qualityById, type QualityId } from '../../music/chords'
 import { INTERVAL_NAMES, levelCount, loadEarRecords, makeQuestion, recordKey, saveEarStreak, type EarMode, type EarQuestion } from '../../music/ear'
+import { logPractice } from '../../music/history'
 import { useStore } from '../../state/store'
 
 /** Ear training: the app plays a chord or an interval, the player names it; streaks are kept per mode and level. */
@@ -19,6 +20,7 @@ export function EarTrainer() {
   const [records, setRecords] = useState(loadEarRecords)
   const [newBest, setNewBest] = useState(false)
   const nextTimer = useRef<number | undefined>(undefined)
+  const askedAt = useRef(0)
   useEffect(() => () => window.clearTimeout(nextTimer.current), [])
 
   const label = useCallback(
@@ -33,6 +35,7 @@ export function EarTrainer() {
       window.clearTimeout(nextTimer.current)
       const next = makeQuestion(mode, level, Math.random, previous ?? undefined)
       setQuestion(next)
+      askedAt.current = Date.now()
       setAnswered(null)
       setNewBest(false)
       play(next)
@@ -55,6 +58,8 @@ export function EarTrainer() {
       if (!question || answered) return
       const correct = choice === question.answer
       setAnswered({ choice, correct })
+      // Time listening counts as practice, up to half a minute per question.
+      logPractice({ seconds: Math.min(30, (Date.now() - askedAt.current) / 1000), ear: { right: correct } })
       setScore((current) => ({ right: current.right + (correct ? 1 : 0), total: current.total + 1 }))
       if (correct) {
         const nextStreak = streak + 1

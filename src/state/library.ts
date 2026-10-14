@@ -1,5 +1,6 @@
 import { decodeShare, encodeShare, type SharedProgression } from './share'
 import { encodeSong, mergeSongs, type Song } from './songs'
+import { loadHistory, mergeHistory } from '../music/history'
 
 export interface LibraryEntry {
   id: string
@@ -101,6 +102,7 @@ export function exportLibrary(entries: LibraryEntry[], songs: Song[] = [], now =
     exportedAt: now.toISOString(),
     entries: entries.map((entry) => ({ name: entry.name, savedAt: entry.savedAt, data: encodeShare(entry.progression) })),
     songs: songs.map(encodeSong),
+    history: loadHistory(),
   }
   return JSON.stringify(backup, null, 2)
 }
@@ -120,7 +122,7 @@ export function importLibrary(
   } catch {
     return null
   }
-  const backup = parsed as { app?: unknown; entries?: unknown; songs?: unknown } | null
+  const backup = parsed as { app?: unknown; entries?: unknown; songs?: unknown; history?: unknown } | null
   if (!backup || backup.app !== BACKUP_APP || !Array.isArray(backup.entries)) return null
 
   const entries = loadLibrary()
@@ -152,5 +154,6 @@ export function importLibrary(
   }
   if (added > 0) persist(entries)
   const merged = Array.isArray(backup.songs) ? mergeSongs(backup.songs, now) : null
+  if (backup.history && typeof backup.history === 'object') mergeHistory(backup.history)
   return { entries, added, skipped, songs: merged?.songs ?? null, songsAdded: merged?.added ?? 0 }
 }

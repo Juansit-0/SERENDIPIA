@@ -13,10 +13,13 @@ import {
   saveRecord,
   type PracticeRecord,
 } from '../music/practice'
+import { logPractice } from '../music/history'
 import { TEMPO_MAX, TEMPO_MIN } from '../state/settings'
 import { useStore } from '../state/store'
 import { ChordSlot } from './practice/ChordSlot'
 import { EarTrainer } from './practice/EarTrainer'
+import { Progress } from './practice/Progress'
+import { progressText } from '../i18n/progress'
 import { earText } from '../i18n/ear'
 import '../styles/views.css'
 
@@ -29,7 +32,7 @@ const BEAT_CHOICES = [4, 2, 1]
 export function PracticeView() {
   const { lang } = useStore()
   const x = earText[lang]
-  const [section, setSection] = useState<'changes' | 'ear'>('changes')
+  const [section, setSection] = useState<'changes' | 'ear' | 'progress'>('changes')
   return (
     <div className="pv flex flex-col gap-3 desk:h-full desk:min-h-0 desk:gap-2">
       <div className="cc-seg pv-sections" role="group" aria-label={x.sections}>
@@ -39,8 +42,11 @@ export function PracticeView() {
         <button type="button" aria-pressed={section === 'ear'} onClick={() => setSection('ear')}>
           {x.ear}
         </button>
+        <button type="button" aria-pressed={section === 'progress'} onClick={() => setSection('progress')}>
+          {progressText[lang].tab}
+        </button>
       </div>
-      {section === 'changes' ? <ChangeTrainer /> : <EarTrainer />}
+      {section === 'changes' ? <ChangeTrainer /> : section === 'ear' ? <EarTrainer /> : <Progress />}
     </div>
   )
 }
@@ -83,9 +89,14 @@ function ChangeTrainer() {
   const session = useRef({ changes: 0, base: startTempo, tempo: startTempo, top: 0, steps: 0 })
   const tapRef = useRef<HTMLButtonElement>(null)
 
+  const roundStarted = useRef(0)
   const finish = useCallback(
     (score: number, recordKey: string | null) => {
       setRunning(false)
+      // Every finished round counts towards the day's practice; one-minute rounds also chart the pair's progress.
+      const seconds = roundStarted.current ? (Date.now() - roundStarted.current) / 1000 : 0
+      roundStarted.current = 0
+      logPractice({ seconds, round: recordKey && !recordKey.endsWith('@tempo') ? { pair: recordKey, score } : true })
       if (!recordKey) return
       const newBest = saveRecord(recordKey, score)
       setRecords(loadRecords())
@@ -159,6 +170,7 @@ function ChangeTrainer() {
     setCount(0)
     setActive(0)
     countRef.current = 0
+    roundStarted.current = Date.now()
     if (mode === 'minute') {
       setRemaining(60)
       setRunning(true)

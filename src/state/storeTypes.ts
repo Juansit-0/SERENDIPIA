@@ -68,6 +68,9 @@ export interface StoreValue {
   setLoop: (loop: boolean) => void
   metronome: boolean
   setMetronome: (metronome: boolean) => void
+  /** One bar of clicks before the music starts. */
+  countIn: boolean
+  setCountIn: (countIn: boolean) => void
   beatsPerChord: number
   setBeatsPerChord: (beats: number) => void
   timbre: TimbreId
@@ -118,7 +121,8 @@ export interface StoreValue {
   saveSheet: (sheet: Sheet) => void
   deleteSheet: (id: string) => void
   /** Plays a sheet's chords in order (transposed by `semitones`), with the backing when it is on. */
-  playSheet: (sheet: Sheet, semitones: number) => void
+  /** The whole song once, or one part of it (chord indexes) on a loop. */
+  playSheet: (sheet: Sheet, semitones: number, part?: { from: number; to: number }) => void
   /** Which sheet and which chord of it is playing; null when none is. */
   sheetPlay: { sheetId: string; index: number } | null
   songs: Song[]

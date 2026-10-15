@@ -20,6 +20,8 @@ export interface PersistedSettings {
   keyAuto: boolean
   loop: boolean
   metronome: boolean
+  /** One bar of clicks before the music starts. */
+  countIn: boolean
   beatsPerChord: number
   timbre: TimbreId
   strum: StrumId
@@ -51,6 +53,7 @@ export const DEFAULT_SETTINGS: PersistedSettings = {
   keyAuto: true,
   loop: true,
   metronome: false,
+  countIn: true,
   beatsPerChord: 4,
   timbre: 'nylon',
   strum: 'single',
@@ -83,6 +86,7 @@ export function sanitizeSettings(raw: unknown): PersistedSettings {
     keyAuto: typeof input.keyAuto === 'boolean' ? input.keyAuto : d.keyAuto,
     loop: typeof input.loop === 'boolean' ? input.loop : d.loop,
     metronome: typeof input.metronome === 'boolean' ? input.metronome : d.metronome,
+    countIn: typeof input.countIn === 'boolean' ? input.countIn : d.countIn,
     beatsPerChord: oneOf(input.beatsPerChord, BEAT_OPTIONS, d.beatsPerChord),
     timbre: oneOf(input.timbre, TIMBRES.map((timbre) => timbre.id), d.timbre),
     strum: isStrumId(input.strum) ? input.strum : d.strum,

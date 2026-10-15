@@ -92,6 +92,9 @@ class AudioEngine {
   private drumTake = 0
   /** Eighths played since playback started: the groove runs on across chord changes. */
   private bandEighth = 0
+  /** The count-in before the first chord: beats, and the same in transport ticks (the loop starts after it). */
+  private countBeats = 0
+  private lead = 0
   private loadingTimbre: TimbreId | null = null
   private loadedTimbres = new Set<TimbreId>()
   private failed = false
@@ -377,7 +380,9 @@ class AudioEngine {
     if (this.metronomeEvent || !this.click) return
     this.beat = 0
     this.metronomeEvent = new Tone.Loop((time) => {
-      if (this.options?.metronome) {
+      // The count-in always clicks, whatever the metronome says: it is how the player knows when to come in.
+      const counting = this.beat < this.countBeats
+      if (counting || this.options?.metronome) {
         const accent = isAccentBeat(this.beat)
         this.click?.triggerAttackRelease(accent ? 'C6' : 'C5', 0.04, time, accent ? 1 : 0.42)
         // Subdivisions: softer, lower clicks between the beats.
@@ -390,6 +395,11 @@ class AudioEngine {
       this.beat += 1
       const onBeat = this.options?.onBeat
       if (onBeat) Tone.getDraw().schedule(() => onBeat(beat), time)
+      const onCount = this.options?.onCount
+      if (onCount && this.countBeats > 0 && beat <= this.countBeats) {
+        const remaining = this.countBeats - beat
+        Tone.getDraw().schedule(() => onCount(remaining), time)
+      }
     }, '4n')
     this.metronomeEvent.start(0)
   }
@@ -409,8 +419,12 @@ class AudioEngine {
     transport.bpm.value = options.tempo
     transport.timeSignature = 4
     transport.loop = options.stepCount === 0 ? true : options.loop
-    transport.loopStart = 0
-    transport.loopEnd = options.stepCount === 0 ? '1m' : `${progressionTicks(options.stepCount, options.beatsPerChord, transport.PPQ)}i`
+    // A count-in (only when there are chords) delays the first one; looping returns to the chords, not to it.
+    this.countBeats = options.stepCount > 0 ? Math.max(0, Math.round(options.countIn ?? 0)) : 0
+    this.lead = this.countBeats * transport.PPQ
+    transport.loopStart = `${this.lead}i`
+    transport.loopEnd =
+      options.stepCount === 0 ? '1m' : `${this.lead + progressionTicks(options.stepCount, options.beatsPerChord, transport.PPQ)}i`
     this.cursor = 0
     this.bandEighth = 0
     this.options = options
@@ -436,7 +450,7 @@ class AudioEngine {
       this.cursor = (this.cursor + 1) % current.stepCount
     }, beatsToNotation(options.beatsPerChord))
 
-    this.loopEvent.start(0)
+    this.loopEvent.start(this.lead > 0 ? `${this.lead}i` : 0)
     this.scheduleEnd()
     transport.start()
   }
@@ -449,7 +463,7 @@ class AudioEngine {
     }
     const options = this.options
     if (!options || options.loop || options.stepCount === 0) return
-    const endTicks = progressionTicks(options.stepCount, options.beatsPerChord, transport.PPQ)
+    const endTicks = this.lead + progressionTicks(options.stepCount, options.beatsPerChord, transport.PPQ)
     const at = Math.max(endTicks - 1, transport.ticks + 1)
     this.endEvent = transport.scheduleOnce((time) => {
       const onEnd = this.options?.onEnd
@@ -467,7 +481,7 @@ class AudioEngine {
     if (patch.tempo !== undefined) transport.bpm.rampTo(patch.tempo, 0.06)
     const { stepCount, beatsPerChord, loop } = this.options
     transport.loop = stepCount === 0 ? true : loop
-    transport.loopEnd = stepCount === 0 ? '1m' : `${progressionTicks(stepCount, beatsPerChord, transport.PPQ)}i`
+    transport.loopEnd = stepCount === 0 ? '1m' : `${this.lead + progressionTicks(stepCount, beatsPerChord, transport.PPQ)}i`
     if (stepCount > 0 && this.cursor >= stepCount) this.cursor = 0
     if (patch.beatsPerChord !== undefined && this.loopEvent) {
       this.loopEvent.interval = beatsToNotation(patch.beatsPerChord)

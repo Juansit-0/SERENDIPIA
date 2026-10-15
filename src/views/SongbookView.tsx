@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ClipboardEvent } from 'react'
 import { createPortal } from 'react-dom'
-import { MinusIcon, PlayIcon, PlusIcon, StageIcon, StopIcon } from '../components/icons'
+import { ChevronDownIcon, MinusIcon, PlayIcon, PlusIcon, StageIcon, StopIcon } from '../components/icons'
+import { Popover } from '../components/topbar/Popover'
 import { songbookText } from '../i18n/songbook'
 import { keyName } from '../music/analysis'
 import { chordsOverLyrics, parseSheet } from '../music/chordpro'
@@ -10,7 +11,17 @@ import { sheetId, sheetUrl, type Sheet } from '../state/sheets'
 import { useStore } from '../state/store'
 import { ChordPlacer } from './songbook/ChordPlacer'
 import { Lyrics } from './songbook/Lyrics'
+import { songParts } from './songbook/sections'
 import { Stage } from './songbook/Stage'
+import {
+  downloadText,
+  fileNameFor,
+  MAX_SONG_FILE_BYTES,
+  SONG_FILE_TYPES,
+  songbookToChordPro,
+  songsFromFile,
+  songToChordPro,
+} from './songbook/files'
 import { SongShapes } from './songbook/SongShapes'
 import { chordFunction, sheetKey, uniqueChords } from './songbook/sheetKey'
 import '../styles/songbook.css'
@@ -30,6 +41,10 @@ export function SongbookView() {
 
   const parsed = useMemo(() => (selected ? parseSheet(selected.text, semitones) : null), [selected, semitones])
   const key = useMemo(() => (parsed ? sheetKey(parsed.chords) : null), [parsed])
+  const parts = useMemo(() => (parsed ? songParts(parsed, { chorus: x.chorus, intro: x.introPart }) : []), [parsed, x.chorus, x.introPart])
+  const [partIndex, setPartIndex] = useState(-1)
+  const part = partIndex >= 0 ? parts[partIndex] : undefined
+  const play = () => selected && playSheet(selected, semitones, part)
   const live = playing && sheetPlay?.sheetId === selected?.id ? sheetPlay.index : -1
 
   // A new song starts with its lyrics: write or paste them, then place the chords by tapping words.
@@ -58,6 +73,7 @@ export function SongbookView() {
     if (playing && sheetPlay) stopPlayback()
     setSelectedId(id)
     setSemitones(0)
+    setPartIndex(-1)
     setConfirm(false)
     setLink(null)
   }
@@ -100,6 +116,44 @@ export function SongbookView() {
     }
   }
 
+  // Songs from files: ChordPro, or text with the chords above the lyrics; each becomes a new song.
+  const fileInput = useRef<HTMLInputElement | null>(null)
+  const importFiles = async (files: FileList | null) => {
+    if (!files || files.length === 0) return
+    const added: Sheet[] = []
+    for (const file of Array.from(files)) {
+      if (file.size > MAX_SONG_FILE_BYTES) continue
+      try {
+        added.push(...songsFromFile(file.name, await file.text()))
+      } catch {
+        // an unreadable file is skipped
+      }
+    }
+    for (const sheet of added) saveSheet(sheet)
+    if (added[0]) {
+      if (playing && sheetPlay) stopPlayback()
+      setSelectedId(added[0].id)
+      setMode('view')
+      setSemitones(0)
+      setPartIndex(-1)
+    }
+    showNotice(added.length === 0 ? x.importNone : added.length === 1 ? x.importedOne : x.importedMany.replace('{n}', String(added.length)))
+  }
+  const filePicker = (
+    <input
+      ref={fileInput}
+      type="file"
+      accept={SONG_FILE_TYPES}
+      multiple
+      hidden
+      onChange={(event) => {
+        void importFiles(event.target.files)
+        event.target.value = ''
+      }}
+    />
+  )
+  const pickFiles = () => fileInput.current?.click()
+
   if (!selected) {
     return (
       <section className="cc-module sb-empty">
@@ -110,6 +164,10 @@ export function SongbookView() {
         <button type="button" className="cc-btn cc-btn--primary cc-btn--lg" onClick={create}>
           <PlusIcon size={16} /> {x.first}
         </button>
+        <button type="button" className="cc-btn cc-btn--ghost" title={x.importHint} onClick={pickFiles}>
+          {x.orImport}
+        </button>
+        {filePicker}
       </section>
     )
   }
@@ -146,6 +204,20 @@ export function SongbookView() {
             )
           })}
         </ul>
+        <div className="sb-list__foot">
+          <button type="button" className="cc-btn cc-btn--ghost" title={x.importHint} onClick={pickFiles}>
+            {x.importSongs}
+          </button>
+          <button
+            type="button"
+            className="cc-btn cc-btn--ghost"
+            title={x.exportHint}
+            onClick={() => downloadText(fileNameFor(x.title), songbookToChordPro(sheets))}
+          >
+            {x.exportAll}
+          </button>
+          {filePicker}
+        </div>
       </section>
 
       <section className="cc-module sb-sheet" aria-label={selected.name}>
@@ -191,14 +263,29 @@ export function SongbookView() {
                 <StopIcon size={14} /> {x.stop}
               </button>
             ) : (
-              <button
-                type="button"
-                className="cc-btn cc-btn--primary"
-                disabled={!parsed?.chords.length}
-                onClick={() => playSheet(selected, semitones)}
-              >
+              <button type="button" className="cc-btn cc-btn--primary" disabled={!parsed?.chords.length} onClick={play}>
                 <PlayIcon size={14} /> {x.play}
               </button>
+            )}
+            {parts.length > 1 && (
+              <label className="sb-part">
+                <select
+                  className="cc-select"
+                  aria-label={x.part}
+                  value={partIndex}
+                  onChange={(event) => {
+                    if (live >= 0) stopPlayback()
+                    setPartIndex(Number(event.target.value))
+                  }}
+                >
+                  <option value={-1}>{x.wholeSong}</option>
+                  {parts.map((item, index) => (
+                    <option key={index} value={index}>
+                      {x.loopPart.replace('{part}', item.name)}
+                    </option>
+                  ))}
+                </select>
+              </label>
             )}
             <button
               type="button"
@@ -239,49 +326,90 @@ export function SongbookView() {
               </button>
             </div>
             <span className="sb-tools__spacer" aria-hidden="true" />
-            <button
-              type="button"
-              className="cc-btn cc-btn--ghost sb-tools__more"
-              title={x.toProgressionHint}
-              disabled={!parsed?.chords.length}
-              onClick={() => {
-                loadProgression(
-                  (parsed?.chords ?? []).slice(0, 16).map((chord) => ({
-                    rootPc: chord.rootPc,
-                    qualityId: chord.quality.id,
-                    anglo: chord.anglo,
-                    latin: chord.latin,
-                    bassPc: chord.bassPc,
-                  })),
-                )
-                showNotice(x.loaded)
-              }}
+            {/* The rest of what can be done with a song, out of the way in one menu. */}
+            <Popover
+              label={x.more}
+              triggerClassName="cc-btn--ghost sb-tools__more"
+              trigger={
+                <>
+                  {x.more} <ChevronDownIcon size={13} />
+                </>
+              }
             >
-              {x.toProgression}
-            </button>
-            <button type="button" className="cc-btn cc-btn--ghost sb-tools__more" onClick={() => setPrinting(true)}>
-              {x.print}
-            </button>
-            <button type="button" className="cc-btn cc-btn--ghost sb-tools__more" onClick={() => void share()}>
-              {x.share}
-            </button>
-            <button
-              type="button"
-              className={`cc-btn cc-btn--ghost sb-tools__more ${confirm ? 'is-confirm' : ''}`}
-              onBlur={() => setConfirm(false)}
-              onClick={() => {
-                if (!confirm) {
-                  setConfirm(true)
-                  return
-                }
-                if (live >= 0) stopPlayback()
-                deleteSheet(selected.id)
-                setSelectedId(null)
-                setConfirm(false)
-              }}
-            >
-              {confirm ? x.removeConfirm : x.remove}
-            </button>
+              {({ close }) => (
+                <div className="sb-menu" role="group" aria-label={x.more}>
+                  <button
+                    type="button"
+                    className="cc-btn cc-btn--ghost"
+                    title={x.toProgressionHint}
+                    disabled={!parsed?.chords.length}
+                    onClick={() => {
+                      loadProgression(
+                        (parsed?.chords ?? []).slice(0, 16).map((chord) => ({
+                          rootPc: chord.rootPc,
+                          qualityId: chord.quality.id,
+                          anglo: chord.anglo,
+                          latin: chord.latin,
+                          bassPc: chord.bassPc,
+                        })),
+                      )
+                      close()
+                      showNotice(x.loaded)
+                    }}
+                  >
+                    {x.toProgression}
+                  </button>
+                  <button
+                    type="button"
+                    className="cc-btn cc-btn--ghost"
+                    onClick={() => {
+                      close()
+                      setPrinting(true)
+                    }}
+                  >
+                    {x.print}
+                  </button>
+                  <button
+                    type="button"
+                    className="cc-btn cc-btn--ghost"
+                    onClick={() => {
+                      close()
+                      void share()
+                    }}
+                  >
+                    {x.share}
+                  </button>
+                  <button
+                    type="button"
+                    className="cc-btn cc-btn--ghost"
+                    title={x.downloadHint}
+                    onClick={() => {
+                      close()
+                      downloadText(fileNameFor(selected.name), songToChordPro(selected))
+                    }}
+                  >
+                    {x.download}
+                  </button>
+                  <button
+                    type="button"
+                    className={`cc-btn cc-btn--ghost ${confirm ? 'is-confirm' : ''}`}
+                    onClick={() => {
+                      if (!confirm) {
+                        setConfirm(true)
+                        return
+                      }
+                      close()
+                      if (live >= 0) stopPlayback()
+                      deleteSheet(selected.id)
+                      setSelectedId(null)
+                      setConfirm(false)
+                    }}
+                  >
+                    {confirm ? x.removeConfirm : x.remove}
+                  </button>
+                </div>
+              )}
+            </Popover>
           </div>
           {link && (
             <input
@@ -334,7 +462,8 @@ export function SongbookView() {
           sheet={parsed}
           live={live}
           canPlay={parsed.chords.length > 0}
-          onPlay={() => playSheet(selected, semitones)}
+          onPlay={play}
+          partName={part?.name}
           onStop={stopPlayback}
           onClose={() => setStage(false)}
         />

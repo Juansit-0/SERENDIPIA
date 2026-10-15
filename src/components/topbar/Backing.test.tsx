@@ -46,10 +46,14 @@ describe('Acompañamiento', () => {
       fireEvent.click(screen.getByRole('button', { name: /Correr/ }))
     })
     expect(options?.getBacking?.()).toBe('bossa')
+    // A bar of count-in clicks comes first, unless it is switched off in Reproducción.
+    expect(options?.countIn).toBe(4)
     // C G Am F: roots C, G, A, F.
     expect([0, 1, 2, 3].map((index) => options?.getBass?.(index))).toEqual([0, 7, 9, 5])
     // Changing the style while playing applies from the next chord: the engine reads it each step.
     fireEvent.change(screen.getByLabelText('Acompañamiento'), { target: { value: 'rock' } })
     expect(options?.getBacking?.()).toBe('rock')
+    fireEvent.click(screen.getByRole('button', { name: 'Cuenta atrás' }))
+    expect(JSON.parse(localStorage.getItem('serendipia.settings.v2')!).countIn).toBe(false)
   }, 20000)
 })

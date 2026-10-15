@@ -55,6 +55,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [volume, setVolume] = useState(initial.volume)
   const [loop, setLoop] = useState(initial.loop)
   const [metronome, setMetronomeState] = useState(initial.metronome)
+  const [countIn, setCountIn] = useState(initial.countIn)
+  const countInRef = useRef(countIn)
+  useEffect(() => {
+    countInRef.current = countIn
+  }, [countIn])
   const [beatsPerChord, setBeatsPerChord] = useState(shared?.beatsPerChord ?? initial.beatsPerChord)
   const [timbre, setTimbreState] = useState<TimbreId>(initial.timbre)
   const [strum, setStrum] = useState<StrumId>(shared?.strum ?? initial.strum)
@@ -162,6 +167,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       keyAuto,
       loop,
       metronome,
+      countIn,
       beatsPerChord,
       timbre,
       strum,
@@ -183,6 +189,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     keyAuto,
     loop,
     metronome,
+    countIn,
     beatsPerChord,
     timbre,
     strum,
@@ -416,6 +423,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         getSubdivision,
         onStep: playhead.setStep,
         onBeat: playhead.setBeat,
+        countIn: countInRef.current ? 4 : 0,
+        onCount: playhead.setCount,
         onEnd: () => {
           setPlaying(false)
           playhead.reset()
@@ -588,6 +597,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             playhead.setStep(item.local)
           },
           onBeat: playhead.setBeat,
+          countIn: countInRef.current ? 4 : 0,
+          onCount: playhead.setCount,
           onEnd: () => {
             setPlaying(false)
             playhead.reset()
@@ -615,19 +626,21 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   )
 
   const playSheet = useCallback(
-    (sheet: Sheet, semitones: number) => {
+    (sheet: Sheet, semitones: number, part?: { from: number; to: number }) => {
       stopPlayback()
-      const chords = parseSheet(sheet.text, semitones).chords
+      // A part plays on a loop (to practise it); the whole song plays once.
+      const offset = part ? part.from : 0
+      const chords = parseSheet(sheet.text, semitones).chords.slice(offset, part ? part.to : undefined)
       if (chords.length === 0) return
       const steps = chords.map((chord) => ({ rootPc: chord.rootPc, qualityId: chord.quality.id, bassPc: chord.bassPc }))
       void enableAudio().then(() => {
         const engine = loadedAudioEngine()
         if (!engine?.isStarted) return
-        setSheetPlay({ sheetId: sheet.id, index: 0 })
+        setSheetPlay({ sheetId: sheet.id, index: offset })
         engine.playProgression({
           stepCount: steps.length,
           tempo,
-          loop: false,
+          loop: Boolean(part),
           beatsPerChord,
           tuning: soundingTuning,
           metronome,
@@ -636,8 +649,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           getBass: (index) => (steps[index] ? (steps[index].bassPc ?? steps[index].rootPc) : null),
           getBacking,
           getSubdivision,
-          onStep: (index) => setSheetPlay({ sheetId: sheet.id, index }),
+          onStep: (index) => setSheetPlay({ sheetId: sheet.id, index: offset + index }),
           onBeat: playhead.setBeat,
+          countIn: countInRef.current ? 4 : 0,
+          onCount: playhead.setCount,
           onEnd: () => {
             setPlaying(false)
             setSheetPlay(null)
@@ -721,6 +736,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setLoop,
       metronome,
       setMetronome,
+      countIn,
+      setCountIn,
       beatsPerChord,
       setBeatsPerChord,
       timbre,
@@ -833,6 +850,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       loop,
       metronome,
       setMetronome,
+      countIn,
       beatsPerChord,
       timbre,
       setTimbre,

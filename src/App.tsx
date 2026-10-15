@@ -1,4 +1,5 @@
 import { Suspense, useEffect } from 'react'
+import { CountIn } from './components/CountIn'
 import { HelpDialog } from './components/HelpDialog'
 import { Notice } from './components/Notice'
 import { StepRow } from './components/StepRow'
@@ -136,6 +137,7 @@ function Shell() {
       </div>
       {view !== 'tuner' && view !== 'songbook' && <StepRow />}
       <Notice />
+      <CountIn />
       <HelpDialog />
       {welcome && (
         <Suspense fallback={null}>

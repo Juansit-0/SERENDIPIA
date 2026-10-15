@@ -463,3 +463,40 @@
     transform: translate(-50%, 12px) scale(0.96);
   }
 }
+
+/* The count-in: a big numeral in the middle of the screen, one per beat, over everything but out of the way. */
+.cc-countin {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+.cc-countin__num {
+  display: grid;
+  place-items: center;
+  width: min(42vmin, 18rem);
+  aspect-ratio: 1;
+  border: 2px solid var(--cc-accent);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--cc-ground) 72%, transparent);
+  box-shadow: 0 0 0 10px var(--cc-accent-soft);
+  font: 400 min(26vmin, 11rem) / 1 var(--font-display);
+  color: var(--cc-accent);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .cc-countin__num {
+    animation: cc-count 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+}
+@keyframes cc-count {
+  from {
+    transform: scale(1.25);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

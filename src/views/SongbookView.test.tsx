@@ -79,6 +79,7 @@ describe('Cancionero', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Subir un semitono' }))
     fireEvent.click(screen.getByRole('button', { name: 'Subir un semitono' }))
     expect(chordsShown()).toEqual(['D', 'A', 'Bm', 'G'])
+    fireEvent.click(within(document.querySelector('.sb-tools') as HTMLElement).getByRole('button', { name: 'Más' }))
     fireEvent.click(screen.getByRole('button', { name: 'A la progresión' }))
     expect(localStorage.getItem('serendipia.session.v1')).toContain('D_A_Bm_G')
   }, 20000)
@@ -156,5 +157,39 @@ describe('Cancionero', () => {
     expect(scroll.getAttribute('aria-pressed')).toBe('true')
     fireEvent.keyDown(stage, { key: 'Escape' })
     expect(screen.queryByRole('dialog', { name: /Modo escenario/ })).toBeNull()
+  }, 20000)
+
+  it('imports songs from a ChordPro file', async () => {
+    await open()
+    const input = document.querySelector<HTMLInputElement>('input[type="file"]')!
+    const file = new File(['{title: Importada}\n[C]Hoy el [G]cielo\n{new_song}\n{title: Otra}\n[Am]luz'], 'canciones.cho', {
+      type: 'text/plain',
+    })
+    await act(async () => {
+      fireEvent.change(input, { target: { files: [file] } })
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+    expect(
+      JSON.parse(localStorage.getItem('serendipia.sheets.v1')!)
+        .map((sheet: { name: string }) => sheet.name)
+        .sort(),
+    ).toEqual(['Importada', 'Otra'])
+    expect(document.querySelector('.cc-notice')?.textContent).toContain('2 canciones importadas')
+  }, 20000)
+
+  it('loops one part of the song', async () => {
+    await open()
+    fireEvent.click(screen.getByRole('button', { name: /Crear mi primera canción/ }))
+    fireEvent.change(screen.getByLabelText('Letra con acordes (ChordPro)'), {
+      target: { value: '{comment: Verso}\n[C]Hoy el [G]cielo\n{soc}\n[F]Canta [Am]conmigo [G]ya\n{eoc}' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Ver' }))
+    fireEvent.change(screen.getByRole('combobox'), { target: { value: '1' } })
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Tocar/ }))
+    })
+    expect(options?.stepCount).toBe(3)
+    expect(options?.loop).toBe(true)
+    expect(options?.getBass?.(0)).toBe(5)
   }, 20000)
 })

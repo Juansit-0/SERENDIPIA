@@ -31,4 +31,8 @@ export interface ProgressionOptions {
   getBacking?: () => BackingStyle
   /** The pitch class the bass plays under each step (the chord's bass, else its root). */
   getBass?: (index: number) => number | null
+  /** Beats of clicks before the first chord (4 = one bar of 4/4); none when absent. */
+  countIn?: number
+  /** During the count-in: the beats still to go (4, 3, 2, 1), then 0 as the first chord sounds. */
+  onCount?: (remaining: number) => void
 }

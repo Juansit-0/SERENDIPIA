@@ -41,6 +41,8 @@ export const en: Dictionary = {
   'transport.capo': 'Capo',
   'transport.loop': 'Loop',
   'transport.metronome': 'Click',
+  'transport.countIn': 'Count-in',
+  'transport.countInHint': 'One bar of clicks before the music starts, to come in on time',
   'transport.key': 'Key',
   'transport.notation': 'Notation',
   'transport.lang': 'Language',

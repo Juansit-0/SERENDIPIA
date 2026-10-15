@@ -39,6 +39,8 @@ export const es = {
   'transport.capo': 'Capo',
   'transport.loop': 'Loop',
   'transport.metronome': 'Click',
+  'transport.countIn': 'Cuenta atrás',
+  'transport.countInHint': 'Un compás de clics antes de que empiece a sonar, para entrar a tiempo',
   'transport.key': 'Tonalidad',
   'transport.notation': 'Notación',
   'transport.lang': 'Idioma',

@@ -49,7 +49,9 @@ const tone = vi.hoisted(() => {
       public callback: (time: number) => void,
       public interval: string,
     ) {}
-    start() {
+    startedAt: unknown = undefined
+    start(at?: unknown) {
+      this.startedAt = at
       return this
     }
     dispose() {}
@@ -357,5 +359,34 @@ describe('backing band', () => {
     const lastFreq = bass[bass.length - 1][0]
     const midi = Math.round(69 + 12 * Math.log2(lastFreq / 440))
     expect(Math.abs((midi % 12) - 7)).toBe(1)
+  })
+})
+
+describe('count-in', () => {
+  it('clicks one bar before the first chord, even with the metronome off, and loops back to the chords only', async () => {
+    const engine = await freshEngine()
+    await engine.start()
+    const counts: number[] = []
+    engine.playProgression({ ...baseOptions, loop: true, countIn: 4, onCount: (remaining) => counts.push(remaining) })
+    const internals = engine as unknown as {
+      loopEvent: { startedAt: unknown }
+      metronomeEvent: { callback: (time: number) => void }
+    }
+    // 4 beats × 192 ticks: the chords start after the count-in, and the loop returns there.
+    expect(internals.loopEvent.startedAt).toBe('768i')
+    expect(tone.transport.loopStart).toBe('768i')
+    expect(tone.transport.loopEnd).toBe(`${768 + 4 * 4 * 192}i`)
+    tone.state.notes = []
+    for (let beat = 0; beat < 6; beat += 1) internals.metronomeEvent.callback(beat * 0.5)
+    // Four count-in clicks, then silence (the metronome is off); the count goes 4, 3, 2, 1, 0.
+    expect(tone.state.notes.filter(([note]) => note === 'C6' || note === 'C5')).toHaveLength(4)
+    expect(counts).toEqual([4, 3, 2, 1, 0])
+  })
+
+  it('has no count-in unless asked', async () => {
+    const engine = await freshEngine()
+    await engine.start()
+    engine.playProgression({ ...baseOptions, loop: true })
+    expect(tone.transport.loopStart).toBe('0i')
   })
 })

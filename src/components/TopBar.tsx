@@ -63,6 +63,8 @@ export function TopBar() {
     loop,
     setLoop,
     metronome,
+    countIn,
+    setCountIn,
     setMetronome,
     timbre,
     setTimbre,
@@ -297,6 +299,9 @@ export function TopBar() {
                   </button>
                   <button type="button" className="cc-btn" aria-pressed={metronome} onClick={() => setMetronome(!metronome)}>
                     {t('transport.metronome')}
+                  </button>
+                  <button type="button" className="cc-btn" aria-pressed={countIn} title={t('transport.countInHint')} onClick={() => setCountIn(!countIn)}>
+                    {t('transport.countIn')}
                   </button>
                 </div>
                 <div className="cc-pop__row">

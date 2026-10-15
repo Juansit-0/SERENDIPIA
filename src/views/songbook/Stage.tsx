@@ -34,6 +34,7 @@ export function Stage({
   sheet,
   live,
   canPlay,
+  partName,
   onPlay,
   onStop,
   onClose,
@@ -42,6 +43,8 @@ export function Stage({
   sheet: ParsedSheet
   live: number
   canPlay: boolean
+  /** The part playing on a loop, if one was chosen. */
+  partName?: string
   onPlay: () => void
   onStop: () => void
   onClose: () => void
@@ -157,7 +160,10 @@ export function Stage({
       style={{ ['--stage-size' as string]: `${SIZES[prefs.size]}rem` }}
     >
       <header className="sb-stage__bar">
-        <h2 className="sb-stage__title">{name}</h2>
+        <h2 className="sb-stage__title">
+          {name}
+          {partName && <span className="sb-stage__part"> · {partName} ↻</span>}
+        </h2>
         <div className="sb-stage__tools">
           {live >= 0 ? (
             <button type="button" className="cc-btn cc-btn--primary" onClick={onStop}>

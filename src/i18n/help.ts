@@ -10,6 +10,21 @@ interface Section {
 /** Newest first. Each entry is one published version with what a player would notice. */
 export const CHANGELOG: Array<{ version: string; es: string[]; en: string[] }> = [
   {
+    version: '2.32',
+    es: [
+      'Modo escenario en el Cancionero: la canción sola en pantalla completa, letra grande, se desplaza sola a la velocidad que elijas o con el pedal.',
+      'Cada canción muestra los diagramas de sus acordes; tócalos para oírlos.',
+      'Seis afinaciones nuevas: un tono abajo, Drop C, DADGAD, Open D, Open E y Open C. Las posiciones ya no cuelan notas ajenas en afinaciones abiertas.',
+      'Abre más rápido: cada pestaña se carga cuando hace falta.',
+    ],
+    en: [
+      'Stage mode in the Songbook: the song alone in full screen, big lyrics, scrolling by itself at your speed or with a pedal.',
+      'Each song shows its chord diagrams; tap them to hear them.',
+      'Six new tunings: whole step down, Drop C, DADGAD, Open D, Open E and Open C. Shapes no longer ring stray notes in open tunings.',
+      'Opens faster: each tab loads when it is needed.',
+    ],
+  },
+  {
     version: '2.31',
     es: ['Instálala como app desde Ajustes → App: icono propio, accesos directos a Teoría, Cancionero y Afinador, y aviso cuando hay versión nueva.'],
     en: ['Install it as an app from Settings → App: its own icon, shortcuts to Theory, Songbook and Tuner, and a notice when a new version is ready.'],
@@ -179,6 +194,7 @@ export const helpText: Record<
           'En «Letra» escribe o pega la letra. Si la pegas de internet con los acordes en la línea de arriba, se colocan solos.',
           'En «Acordes» toca una palabra y elige su acorde: primero salen los que ya usa la canción y luego los de su tonalidad (suenan al elegirlos). Toca un acorde puesto para cambiarlo o quitarlo.',
           'Tocar hace sonar los acordes en orden y la letra avanza sola. También se transpone, imprime y comparte.',
+          'Escenario: la canción en pantalla completa para leer desde el atril. Espacio la desplaza sola (elige la velocidad), el pedal o las flechas pasan página, + y − cambian el tamaño, Esc sale.',
         ],
       },
       {
@@ -268,6 +284,7 @@ export const helpText: Record<
           'In «Lyrics» write or paste the lyrics. Pasted from the web with the chords on the line above, they place themselves.',
           'In «Chords» tap a word and pick its chord: the song’s own chords first, then its key’s (they sound as you pick). Tap a placed chord to change or remove it.',
           'Play sounds the chords in order and the lyrics move on by themselves. It also transposes, prints and shares.',
+          'Stage: the song in full screen to read from the music stand. Space scrolls it by itself (pick the speed), the pedal or arrows turn the page, + and − change the size, Esc leaves.',
         ],
       },
       {

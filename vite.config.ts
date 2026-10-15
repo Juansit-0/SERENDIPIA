@@ -14,5 +14,7 @@ export default defineConfig(({ mode }) => ({
   test: {
     environment: 'node',
     include: ['src/**/*.test.{ts,tsx}'],
+    // The tabs load lazily in the app; tests use the same views imported directly (src/views/eager.ts).
+    alias: [{ find: /^\.\/views\/lazy$/, replacement: '/src/views/eager.ts' }],
   },
 }))

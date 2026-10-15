@@ -3,10 +3,12 @@ import { pitchName } from './notes'
 
 export const STANDARD_TUNING = [40, 45, 50, 55, 59, 64]
 
+/** The open strings' names, spelled as the tuning is named (Open D's F♯, the half-step-down tuning's E♭). */
 export function stringLabels(tuning: number[]): string[] {
+  const spelled = TUNINGS.find((item) => item.midi.every((midi, index) => midi === tuning[index]))?.accidental
   return tuning.map((midi) => {
     const pc = ((midi % 12) + 12) % 12
-    const accidental = FLAT_STRING_ROOTS.has(pc) ? 'flat' : 'sharp'
+    const accidental = spelled ?? (FLAT_STRING_ROOTS.has(pc) ? 'flat' : 'sharp')
     const name = pitchName(pc, accidental)
     return midi >= 60 ? name.toLowerCase() : name
   })
@@ -18,13 +20,21 @@ export interface Tuning {
   id: string
   name: string
   midi: number[]
+  /** How its altered strings are spelled (only for tunings that have one). */
+  accidental?: 'flat' | 'sharp'
 }
 
 export const TUNINGS: Tuning[] = [
   { id: 'standard', name: 'Estándar (E A D G B e)', midi: STANDARD_TUNING },
   { id: 'drop-d', name: 'Drop D (D A D G B e)', midi: [38, 45, 50, 55, 59, 64] },
-  { id: 'half-step', name: 'Medio tono abajo (E♭ A♭ D♭ G♭ B♭ e♭)', midi: [39, 44, 49, 54, 58, 63] },
+  { id: 'half-step', name: 'Medio tono abajo (E♭ A♭ D♭ G♭ B♭ e♭)', midi: [39, 44, 49, 54, 58, 63], accidental: 'flat' },
   { id: 'open-g', name: 'Open G (D G D G B D)', midi: [38, 43, 50, 55, 59, 62] },
+  { id: 'whole-step', name: 'Un tono abajo (D G C F A D)', midi: [38, 43, 48, 53, 57, 62] },
+  { id: 'drop-c', name: 'Drop C (C G C F A D)', midi: [36, 43, 48, 53, 57, 62] },
+  { id: 'dadgad', name: 'DADGAD (D A D G A D)', midi: [38, 45, 50, 55, 57, 62] },
+  { id: 'open-d', name: 'Open D (D A D F♯ A D)', midi: [38, 45, 50, 54, 57, 62], accidental: 'sharp' },
+  { id: 'open-e', name: 'Open E (E B E G♯ B E)', midi: [40, 47, 52, 56, 59, 64], accidental: 'sharp' },
+  { id: 'open-c', name: 'Open C (C G C G C E)', midi: [36, 43, 48, 55, 60, 64] },
 ]
 
 export type Difficulty = 'easy' | 'medium' | 'hard'
@@ -61,15 +71,27 @@ export interface VoicingOptions {
 }
 
 export const COMMON_SHAPES: Record<string, (number | null)[][]> = {
-  '0:maj': [[-1, 3, 2, 0, 1, 0], [-1, 3, 5, 5, 5, 3]],
-  '0:min': [[-1, 3, 5, 5, 4, 3], [-1, 3, 1, 0, 1, 3]],
+  '0:maj': [
+    [-1, 3, 2, 0, 1, 0],
+    [-1, 3, 5, 5, 5, 3],
+  ],
+  '0:min': [
+    [-1, 3, 5, 5, 4, 3],
+    [-1, 3, 1, 0, 1, 3],
+  ],
   '0:7': [[-1, 3, 2, 3, 1, 0]],
-  '0:maj7': [[-1, 3, 2, 0, 0, 0], [-1, 3, 5, 4, 5, 3]],
+  '0:maj7': [
+    [-1, 3, 2, 0, 0, 0],
+    [-1, 3, 5, 4, 5, 3],
+  ],
   '0:m7': [[-1, 3, 5, 3, 4, 3]],
   '0:6': [[-1, 3, 2, 2, 1, 0]],
   '0:add9': [[-1, 3, 2, 0, 3, 0]],
   '0:maj9': [[-1, 3, 2, 4, 3, -1]],
-  '2:maj': [[-1, -1, 0, 2, 3, 2], [2, 5, 4, 2, 3, 2]],
+  '2:maj': [
+    [-1, -1, 0, 2, 3, 2],
+    [2, 5, 4, 2, 3, 2],
+  ],
   '2:min': [[-1, -1, 0, 2, 3, 1]],
   '2:7': [[-1, -1, 0, 2, 1, 2]],
   '2:maj7': [[-1, -1, 0, 2, 2, 2]],
@@ -77,25 +99,56 @@ export const COMMON_SHAPES: Record<string, (number | null)[][]> = {
   '2:6': [[-1, -1, 0, 2, 0, 2]],
   '2:sus2': [[-1, -1, 0, 2, 3, 0]],
   '2:sus4': [[-1, -1, 0, 2, 3, 3]],
-  '4:maj': [[0, 2, 2, 1, 0, 0], [-1, 7, 6, 4, 5, 4]],
-  '4:min': [[0, 2, 2, 0, 0, 0], [0, 2, 2, 0, 0, 3]],
-  '4:7': [[0, 2, 0, 1, 0, 0], [0, 2, 2, 1, 3, 0]],
+  '4:maj': [
+    [0, 2, 2, 1, 0, 0],
+    [-1, 7, 6, 4, 5, 4],
+  ],
+  '4:min': [
+    [0, 2, 2, 0, 0, 0],
+    [0, 2, 2, 0, 0, 3],
+  ],
+  '4:7': [
+    [0, 2, 0, 1, 0, 0],
+    [0, 2, 2, 1, 3, 0],
+  ],
   '4:maj7': [[0, 2, 1, 1, 0, 0]],
-  '4:m7': [[0, 2, 0, 0, 0, 0], [0, 2, 2, 0, 3, 0]],
+  '4:m7': [
+    [0, 2, 0, 0, 0, 0],
+    [0, 2, 2, 0, 3, 0],
+  ],
   '4:m6': [[0, 2, 2, 0, 2, 0]],
   '4:9': [[0, 2, 0, 1, 0, 2]],
   '4:sus4': [[0, 2, 2, 2, 0, 0]],
-  '5:maj': [[-1, -1, 3, 2, 1, 1], [1, 3, 3, 2, 1, 1]],
+  '5:maj': [
+    [-1, -1, 3, 2, 1, 1],
+    [1, 3, 3, 2, 1, 1],
+  ],
   '5:maj7': [[-1, -1, 3, 2, 1, 0]],
-  '7:maj': [[3, 2, 0, 0, 0, 3], [3, 2, 0, 0, 3, 3], [3, 5, 5, 4, 3, 3]],
+  '7:maj': [
+    [3, 2, 0, 0, 0, 3],
+    [3, 2, 0, 0, 3, 3],
+    [3, 5, 5, 4, 3, 3],
+  ],
   '7:min': [[3, 5, 5, 3, 3, 3]],
-  '7:7': [[3, 2, 0, 0, 0, 1], [3, 5, 3, 4, 3, 3]],
-  '7:maj7': [[3, 2, 0, 0, 0, 2], [3, 5, 4, 4, 3, 3]],
+  '7:7': [
+    [3, 2, 0, 0, 0, 1],
+    [3, 5, 3, 4, 3, 3],
+  ],
+  '7:maj7': [
+    [3, 2, 0, 0, 0, 2],
+    [3, 5, 4, 4, 3, 3],
+  ],
   '7:m7': [[3, 5, 3, 3, 3, 3]],
   '7:6': [[3, 2, 0, 0, 0, 0]],
   '7:add9': [[3, 0, 0, 2, 0, 3]],
-  '9:maj': [[-1, 0, 2, 2, 2, 0], [5, 7, 7, 6, 5, 5]],
-  '9:min': [[-1, 0, 2, 2, 1, 0], [5, 7, 7, 5, 5, 5]],
+  '9:maj': [
+    [-1, 0, 2, 2, 2, 0],
+    [5, 7, 7, 6, 5, 5],
+  ],
+  '9:min': [
+    [-1, 0, 2, 2, 1, 0],
+    [5, 7, 7, 5, 5, 5],
+  ],
   '9:7': [[-1, 0, 2, 0, 2, 0]],
   '9:maj7': [[-1, 0, 2, 1, 2, 0]],
   '9:m7': [[-1, 0, 2, 0, 1, 0]],
@@ -103,11 +156,23 @@ export const COMMON_SHAPES: Record<string, (number | null)[][]> = {
   '9:m9': [[-1, 0, 2, 4, 1, 3]],
   '9:sus4': [[-1, 0, 2, 2, 3, 0]],
   '9:7sus4': [[-1, 0, 2, 0, 3, 0]],
-  '11:maj': [[-1, 2, 4, 4, 4, 2], [7, 9, 9, 8, 7, 7]],
-  '11:min': [[-1, 2, 4, 4, 3, 2], [7, 9, 9, 7, 7, 7]],
-  '11:7': [[-1, 2, 1, 2, 0, 2], [7, 9, 7, 8, 7, 7]],
+  '11:maj': [
+    [-1, 2, 4, 4, 4, 2],
+    [7, 9, 9, 8, 7, 7],
+  ],
+  '11:min': [
+    [-1, 2, 4, 4, 3, 2],
+    [7, 9, 9, 7, 7, 7],
+  ],
+  '11:7': [
+    [-1, 2, 1, 2, 0, 2],
+    [7, 9, 7, 8, 7, 7],
+  ],
   '11:maj7': [[-1, 2, 4, 3, 4, 2]],
-  '11:m7': [[-1, 2, 0, 2, 0, 2], [7, 9, 7, 7, 7, 7]],
+  '11:m7': [
+    [-1, 2, 0, 2, 0, 2],
+    [7, 9, 7, 7, 7, 7],
+  ],
   '11:m7b5': [[-1, 2, 3, 2, 3, -1]],
   '11:dim7': [[-1, 2, 3, 1, 3, -1]],
   '1:maj7': [[-1, 4, 6, 5, 6, 4]],
@@ -194,6 +259,9 @@ function buildVoicing(
   if (midi.length < 2) return null
 
   const soundingPcs = new Set(midi.map((note) => ((note % 12) + 12) % 12))
+  // The curated shapes are written for standard tuning: in another tuning an open string can ring a note that is
+  // not in the chord, and then the shape is not this chord any more.
+  if (source === 'common' && [...soundingPcs].some((pc) => !chordPcSet.has(pc))) return null
   const essential = essentialTones(rootPc, quality)
   if (!essential.every((pc) => soundingPcs.has(pc))) return null
 
@@ -250,12 +318,7 @@ export function voicingFromFrets(
   return buildVoicing(frets, tuning, source, rootPc, quality, null, new Set(chordTones(rootPc, quality)))
 }
 
-export function voicingsFor(
-  rootPc: number,
-  quality: Quality,
-  tuning: number[] = STANDARD_TUNING,
-  options: VoicingOptions = {},
-): Voicing[] {
+export function voicingsFor(rootPc: number, quality: Quality, tuning: number[] = STANDARD_TUNING, options: VoicingOptions = {}): Voicing[] {
   const chordPcSet = new Set(chordTones(rootPc, quality))
   const maxFret = options.maxFret ?? 12
   const maxSpan = options.maxSpan ?? 4

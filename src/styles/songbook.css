@@ -2,22 +2,26 @@
 
 /* ---------- chord colours: the function of each chord in the song's key, like the strip's stars ---------- */
 .sb [data-fn='tonic'],
-.sb-empty [data-fn='tonic'] {
+.sb-empty [data-fn='tonic'],
+.sb-stage [data-fn='tonic'] {
   --sb-fn: var(--cc-fn-tonic);
   --sb-fill: var(--cc-fn-tonic-fill);
 }
 .sb [data-fn='subdominant'],
-.sb-empty [data-fn='subdominant'] {
+.sb-empty [data-fn='subdominant'],
+.sb-stage [data-fn='subdominant'] {
   --sb-fn: var(--cc-fn-sub);
   --sb-fill: var(--cc-fn-sub-fill);
 }
 .sb [data-fn='dominant'],
-.sb-empty [data-fn='dominant'] {
+.sb-empty [data-fn='dominant'],
+.sb-stage [data-fn='dominant'] {
   --sb-fn: var(--cc-fn-dom);
   --sb-fill: var(--cc-fn-dom-fill);
 }
 .sb [data-fn='borrowed'],
-.sb-empty [data-fn='borrowed'] {
+.sb-empty [data-fn='borrowed'],
+.sb-stage [data-fn='borrowed'] {
   --sb-fn: var(--cc-fn-borrowed);
   --sb-fill: var(--cc-fn-borrowed-fill);
 }
@@ -311,6 +315,11 @@
     background 0.3s ease,
     opacity 0.3s ease;
 }
+.sb-unit {
+  display: inline-flex;
+  align-items: flex-end;
+  white-space: pre;
+}
 .sb-seg {
   display: inline-flex;
   flex-direction: column;
@@ -327,6 +336,55 @@
 .sb-chord.is-unknown {
   color: var(--cc-ink-faint);
   text-decoration: underline dotted;
+}
+
+/* The song's chords as diagrams, in their function's colour; a tap plays the shape. */
+.sb-shapes {
+  display: flex;
+  gap: 6px;
+  margin: 0 0 1rem;
+  padding: 2px 2px 8px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+.sb-shape {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 62px;
+  padding: 6px 8px 5px;
+  border: 1px solid var(--cc-line);
+  border-top: 3px solid var(--sb-fill, var(--cc-line-strong));
+  border-radius: 6px;
+  background: var(--cc-ground-3);
+  color: var(--sb-fn, var(--cc-ink));
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease;
+}
+.sb-shape:hover:not(:disabled) {
+  border-color: var(--sb-fn, var(--cc-accent));
+}
+.sb-shape:active:not(:disabled) {
+  transform: scale(0.96);
+}
+.sb-shape__plate {
+  width: 44px;
+  height: 50px;
+  color: var(--cc-ink);
+}
+.sb-shape__none {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 50px;
+  color: var(--cc-ink-faint);
+}
+.sb-shape__name {
+  font: 700 0.875rem / 1.2 var(--font-ui);
 }
 
 /* Sections: a heading with a star and a hairline running out. */
@@ -438,8 +496,128 @@
   }
 }
 
+/* ---------- Modo escenario: the song alone on the screen, to read from the stand ---------- */
+.sb-stage {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  flex-direction: column;
+  background:
+    radial-gradient(ellipse at 50% -10%, var(--cc-accent-soft), transparent 55%),
+    var(--cc-ground);
+  color: var(--cc-ink);
+  outline: none;
+}
+.sb-stage__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  padding: max(10px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 10px max(16px, env(safe-area-inset-left));
+  border-bottom: 1px solid var(--cc-line);
+  background: color-mix(in srgb, var(--cc-ground-2) 88%, transparent);
+}
+.sb-stage__title {
+  margin: 0;
+  overflow: hidden;
+  font: 400 clamp(1.4rem, 2.6vw, 2rem) / 1.1 var(--font-display);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sb-stage__tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+.sb-stage__stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 2px 4px 2px 10px;
+  border: 1px solid var(--cc-line);
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cc-ink-soft);
+}
+.sb-stage__stepper .cc-btn {
+  border-color: transparent;
+}
+.sb-stage__stepper .cc-num {
+  min-width: 1.4em;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--cc-ink);
+  letter-spacing: 0;
+}
+.sb-stage__page {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 1.5rem max(1.25rem, 6vw) 40vh;
+  /* The page fades out under the bar and at the bottom, so lines slide in and out softly. */
+  mask-image: linear-gradient(transparent, #000 1.25rem, #000 calc(100% - 4rem), transparent);
+}
+.sb-stage .sb-lyrics,
+.sb-stage .sb-shapes {
+  max-width: 64rem;
+  margin-inline: auto;
+}
+.sb-stage .sb-line {
+  /* On a phone the chosen size is capped so a line still holds a few words. */
+  font-size: min(var(--stage-size, 2.2rem), 7.5vw);
+  line-height: 1.2;
+  margin-bottom: 0.6em;
+}
+.sb-stage .sb-chord {
+  font-size: 0.68em;
+}
+.sb-stage .sb-comment {
+  font-size: 0.875rem;
+  margin-top: 1.8rem;
+}
+.sb-stage .sb-chorus__label {
+  font-size: 1.125rem;
+}
+.sb-stage .sb-shapes {
+  margin-bottom: 1.5rem;
+}
+.sb-stage__end {
+  margin: 2rem 0 0;
+  text-align: center;
+  font-size: 1.5rem;
+  color: var(--cc-accent);
+}
+.sb-stage__hint {
+  margin: 0;
+  padding: 6px 16px max(8px, env(safe-area-inset-bottom));
+  border-top: 1px solid var(--cc-line);
+  font-size: 0.75rem;
+  text-align: center;
+  color: var(--cc-ink-soft);
+}
+@media (pointer: coarse) {
+  .sb-stage__hint {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .sb-stage {
+    animation: fade-in 260ms ease-out;
+  }
+}
+
 /* Printed: the chords stay over their syllables, in ink. */
 @media print {
+  .sb-stage {
+    display: none;
+  }
+
   .print-lyrics h1 {
     margin-bottom: 14pt;
   }

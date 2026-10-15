@@ -137,7 +137,11 @@ export const ShareIcon = (p: IconProps) => (
 /** 4-point sparkle star (inlay markers, root marks, brand). */
 export const SparkleIcon = (p: IconProps) => (
   <Icon {...p}>
-    <path d="M12 2.5c.6 4.8 2.7 6.9 9.5 9.5-6.8 2.6-8.9 4.7-9.5 9.5-.6-4.8-2.7-6.9-9.5-9.5 6.8-2.6 8.9-4.7 9.5-9.5z" fill="currentColor" stroke="none" />
+    <path
+      d="M12 2.5c.6 4.8 2.7 6.9 9.5 9.5-6.8 2.6-8.9 4.7-9.5 9.5-.6-4.8-2.7-6.9-9.5-9.5 6.8-2.6 8.9-4.7 9.5-9.5z"
+      fill="currentColor"
+      stroke="none"
+    />
   </Icon>
 )
 
@@ -206,5 +210,24 @@ export const MicIcon = (p: IconProps) => (
     <path d="M5.5 11a6.5 6.5 0 0 0 13 0" />
     <path d="M12 17.5V21" />
     <path d="M9 21h6" />
+  </Icon>
+)
+
+export const StageIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />
+  </Icon>
+)
+
+export const ScrollIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M12 4v13M7 12.5 12 17.5 17 12.5" />
+    <path d="M6 20.5h12" />
+  </Icon>
+)
+
+export const PauseIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M9 5.5v13M15 5.5v13" />
   </Icon>
 )

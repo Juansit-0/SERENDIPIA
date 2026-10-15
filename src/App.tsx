@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { Suspense, useEffect } from 'react'
 import { HelpDialog } from './components/HelpDialog'
 import { Notice } from './components/Notice'
 import { StepRow } from './components/StepRow'
@@ -9,10 +9,7 @@ import { hasNews, openHelp } from './state/help'
 import { showNotice } from './state/notice'
 import { helpText } from './i18n/help'
 import { ChordView } from './views/ChordView'
-import { TunerView } from './views/TunerView'
-import { SongbookView } from './views/SongbookView'
-import { TheoryView } from './views/TheoryView'
-import { Welcome } from './welcome/Welcome'
+import { preloadViews, SongbookView, TheoryView, TunerView, Welcome } from './views/lazy'
 import { useWelcomeOpen } from './welcome/state'
 
 function Shell() {
@@ -116,6 +113,12 @@ function Shell() {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [undo, redo])
 
+  // The other tabs load on their own; fetch them once the first screen is up and the browser is idle.
+  useEffect(() => {
+    const idle = window.requestIdleCallback ?? ((run: () => void) => window.setTimeout(run, 1500))
+    idle(() => void preloadViews().catch(() => undefined))
+  }, [])
+
   return (
     <div className="cc-ground min-h-dvh desk:flex desk:h-dvh desk:flex-col desk:overflow-hidden">
       <DistressFilter />
@@ -123,16 +126,22 @@ function Shell() {
       <TopBar />
       <div className="mx-auto flex w-full max-w-[1560px] min-[1600px]:max-w-[1840px] min-[1600px]:px-8 flex-col gap-4 px-3 py-3 sm:px-5 sm:py-4 desk:min-h-0 desk:flex-1 desk:gap-2 desk:py-2">
         <main className="flex min-w-0 flex-col desk:min-h-0 desk:flex-1">
-          {view === 'chord' && <ChordView />}
-          {view === 'theory' && <TheoryView />}
-          {view === 'tuner' && <TunerView />}
-          {view === 'songbook' && <SongbookView />}
+          <Suspense fallback={null}>
+            {view === 'chord' && <ChordView />}
+            {view === 'theory' && <TheoryView />}
+            {view === 'tuner' && <TunerView />}
+            {view === 'songbook' && <SongbookView />}
+          </Suspense>
         </main>
       </div>
       {view !== 'tuner' && view !== 'songbook' && <StepRow />}
       <Notice />
       <HelpDialog />
-      {welcome && <Welcome />}
+      {welcome && (
+        <Suspense fallback={null}>
+          <Welcome />
+        </Suspense>
+      )}
     </div>
   )
 }

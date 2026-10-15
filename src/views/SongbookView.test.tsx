@@ -31,7 +31,7 @@ beforeEach(() => {
   options = null
   localStorage.clear()
   localStorage.setItem('serendipia.welcome.v1', 'seen')
-    localStorage.setItem('serendipia.seen.v1', __APP_VERSION__)
+  localStorage.setItem('serendipia.seen.v1', __APP_VERSION__)
 })
 
 async function open(search = '') {
@@ -42,13 +42,18 @@ async function open(search = '') {
   render(<App />)
 }
 
-const chordsShown = () => Array.from(document.querySelectorAll('.sb-body .sb-chord')).map((node) => node.textContent?.trim()).filter((text) => text)
+const chordsShown = () =>
+  Array.from(document.querySelectorAll('.sb-body .sb-chord'))
+    .map((node) => node.textContent?.trim())
+    .filter((text) => text)
 
 describe('Cancionero', () => {
   it('starts with an invitation, then writes and shows chords over the lyrics', async () => {
     await open()
     fireEvent.click(screen.getByRole('button', { name: /Crear mi primera canción/ }))
-    fireEvent.change(screen.getByLabelText('Letra con acordes (ChordPro)'), { target: { value: '{title: Prueba}\n[C]Hoy el [G]cielo [Am]tiene [F]luz' } })
+    fireEvent.change(screen.getByLabelText('Letra con acordes (ChordPro)'), {
+      target: { value: '{title: Prueba}\n[C]Hoy el [G]cielo [Am]tiene [F]luz' },
+    })
     fireEvent.click(screen.getByRole('button', { name: 'Ver' }))
     expect(chordsShown()).toEqual(['C', 'G', 'Am', 'F'])
     expect(document.querySelector('.sb-body .sb-line')?.textContent).toContain('Hoy el')
@@ -57,7 +62,10 @@ describe('Cancionero', () => {
   }, 20000)
 
   it('plays chord by chord with the lyrics following, transposes and takes the chords to the progression', async () => {
-    localStorage.setItem('serendipia.sheets.v1', JSON.stringify([{ id: 's1', name: 'Luz', text: '[C]Hoy el [G]cielo\n[Am]tiene [F]luz', savedAt: '' }]))
+    localStorage.setItem(
+      'serendipia.sheets.v1',
+      JSON.stringify([{ id: 's1', name: 'Luz', text: '[C]Hoy el [G]cielo\n[Am]tiene [F]luz', savedAt: '' }]),
+    )
     await open()
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: /Tocar/ }))
@@ -98,7 +106,11 @@ describe('Cancionero', () => {
     expect(JSON.parse(localStorage.getItem('serendipia.sheets.v1')!)[0].text).toBe('[C]Hoy el [Em7]cielo tiene luz')
     // The song's own chords come first next time; a placed chord can be taken off.
     fireEvent.click(screen.getByRole('button', { name: 'Acorde para «cielo»: Em7' }))
-    expect(within(screen.getByRole('group', { name: 'En esta canción' })).getAllByRole('button').map((b) => b.textContent)).toEqual(['C', 'Em7'])
+    expect(
+      within(screen.getByRole('group', { name: 'En esta canción' }))
+        .getAllByRole('button')
+        .map((b) => b.textContent),
+    ).toEqual(['C', 'Em7'])
     fireEvent.click(screen.getByRole('button', { name: 'Quitar acorde' }))
     expect(JSON.parse(localStorage.getItem('serendipia.sheets.v1')!)[0].text).toBe('[C]Hoy el cielo tiene luz')
   }, 20000)
@@ -116,14 +128,33 @@ describe('Cancionero', () => {
     await open()
     fireEvent.click(screen.getByRole('button', { name: /Crear mi primera canción/ }))
     fireEvent.change(screen.getByLabelText('Letra con acordes (ChordPro)'), {
-      target: { value: '{title: Prueba}\n{comment: Verso}\n[C]Hoy el [G]cielo\n\n{soc}\n[F]Canta [Am]conmigo\n[G]noche de [C]marzo\n{eoc}' },
+      target: {
+        value: '{title: Prueba}\n{comment: Verso}\n[C]Hoy el [G]cielo\n\n{soc}\n[F]Canta [Am]conmigo\n[G]noche de [C]marzo\n{eoc}',
+      },
     })
     fireEvent.click(screen.getByRole('button', { name: 'Ver' }))
-    const fn = (name: string) => Array.from(document.querySelectorAll<HTMLElement>('.sb-body .sb-chord')).find((node) => node.textContent === name)?.dataset.fn
+    const fn = (name: string) =>
+      Array.from(document.querySelectorAll<HTMLElement>('.sb-body .sb-chord')).find((node) => node.textContent === name)?.dataset.fn
     expect([fn('C'), fn('F'), fn('G'), fn('Am')]).toEqual(['tonic', 'subdominant', 'dominant', 'tonic'])
     const chorus = document.querySelector('.sb-chorus')
     expect(chorus?.querySelectorAll('.sb-line')).toHaveLength(2)
     expect(chorus?.textContent).toContain('Coro')
     expect(document.querySelector('.sb-meta')?.textContent).toContain('C mayor')
+  }, 20000)
+
+  it('stage mode shows the song alone with its diagrams, scrolls on Space and leaves on Escape', async () => {
+    await open()
+    fireEvent.click(screen.getByRole('button', { name: /Crear mi primera canción/ }))
+    fireEvent.change(screen.getByLabelText('Letra con acordes (ChordPro)'), {
+      target: { value: '{title: Prueba}\n[C]Hoy el [G]cielo [Am]tiene [F]luz' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: /Escenario/ }))
+    const stage = screen.getByRole('dialog', { name: /Modo escenario/ })
+    expect(within(stage).getByRole('group', { name: 'Acordes de la canción' }).querySelectorAll('.sb-shape')).toHaveLength(4)
+    const scroll = within(stage).getByRole('button', { name: /Desplazar/ })
+    fireEvent.keyDown(stage, { key: ' ' })
+    expect(scroll.getAttribute('aria-pressed')).toBe('true')
+    fireEvent.keyDown(stage, { key: 'Escape' })
+    expect(screen.queryByRole('dialog', { name: /Modo escenario/ })).toBeNull()
   }, 20000)
 })

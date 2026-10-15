@@ -1,14 +1,17 @@
 import { useEffect, useMemo, useRef, useState, type ClipboardEvent } from 'react'
 import { createPortal } from 'react-dom'
-import { MinusIcon, PlayIcon, PlusIcon, StopIcon } from '../components/icons'
+import { MinusIcon, PlayIcon, PlusIcon, StageIcon, StopIcon } from '../components/icons'
 import { songbookText } from '../i18n/songbook'
 import { keyName } from '../music/analysis'
-import { chordsOverLyrics, parseSheet, type ParsedSheet, type SheetLine } from '../music/chordpro'
+import { chordsOverLyrics, parseSheet } from '../music/chordpro'
 import type { ParsedChord } from '../music/parseChord'
 import { showNotice } from '../state/notice'
 import { sheetId, sheetUrl, type Sheet } from '../state/sheets'
 import { useStore } from '../state/store'
 import { ChordPlacer } from './songbook/ChordPlacer'
+import { Lyrics } from './songbook/Lyrics'
+import { Stage } from './songbook/Stage'
+import { SongShapes } from './songbook/SongShapes'
 import { chordFunction, sheetKey, uniqueChords } from './songbook/sheetKey'
 import '../styles/songbook.css'
 
@@ -23,6 +26,7 @@ export function SongbookView() {
   const [confirm, setConfirm] = useState(false)
   const [link, setLink] = useState<string | null>(null)
   const [printing, setPrinting] = useState(false)
+  const [stage, setStage] = useState(false)
 
   const parsed = useMemo(() => (selected ? parseSheet(selected.text, semitones) : null), [selected, semitones])
   const key = useMemo(() => (parsed ? sheetKey(parsed.chords) : null), [parsed])
@@ -196,6 +200,18 @@ export function SongbookView() {
                 <PlayIcon size={14} /> {x.play}
               </button>
             )}
+            <button
+              type="button"
+              className="cc-btn"
+              disabled={!parsed?.chords.length && !selected.text.trim()}
+              title={x.stage}
+              onClick={() => {
+                setMode('view')
+                setStage(true)
+              }}
+            >
+              <StageIcon size={15} /> {x.stageOpen}
+            </button>
             <div className="sb-transpose" role="group" aria-label={x.transpose}>
               <span className="sb-transpose__label" aria-hidden="true">
                 {x.tone}
@@ -230,15 +246,13 @@ export function SongbookView() {
               disabled={!parsed?.chords.length}
               onClick={() => {
                 loadProgression(
-                  (parsed?.chords ?? [])
-                    .slice(0, 16)
-                    .map((chord) => ({
-                      rootPc: chord.rootPc,
-                      qualityId: chord.quality.id,
-                      anglo: chord.anglo,
-                      latin: chord.latin,
-                      bassPc: chord.bassPc,
-                    })),
+                  (parsed?.chords ?? []).slice(0, 16).map((chord) => ({
+                    rootPc: chord.rootPc,
+                    qualityId: chord.quality.id,
+                    anglo: chord.anglo,
+                    latin: chord.latin,
+                    bassPc: chord.bassPc,
+                  })),
                 )
                 showNotice(x.loaded)
               }}
@@ -308,10 +322,23 @@ export function SongbookView() {
         ) : (
           <div className="sb-body" ref={body}>
             {parsed && parsed.chords.length === 0 && <p className="sb-help">{x.noChords}</p>}
+            {parsed && <SongShapes chords={parsed.chords} />}
             {parsed && <Lyrics sheet={parsed} notation={notation} live={live} chorusLabel={x.chorus} />}
           </div>
         )}
       </section>
+
+      {stage && parsed && (
+        <Stage
+          name={selected.name}
+          sheet={parsed}
+          live={live}
+          canPlay={parsed.chords.length > 0}
+          onPlay={() => playSheet(selected, semitones)}
+          onStop={stopPlayback}
+          onClose={() => setStage(false)}
+        />
+      )}
 
       {printing &&
         parsed &&
@@ -382,87 +409,5 @@ function EmptySky() {
         />
       ))}
     </svg>
-  )
-}
-
-type Block = { chorus: boolean; lines: Array<{ line: SheetLine; at: number }> }
-
-/** Consecutive chorus lines (and the blank lines between them) form one block, set apart like a refrain. */
-function blocksOf(lines: SheetLine[]): Block[] {
-  const blocks: Block[] = []
-  lines.forEach((line, at) => {
-    const last = blocks[blocks.length - 1]
-    const chorus = line.kind === 'lyrics' ? line.chorus : line.kind === 'blank' && Boolean(last?.chorus)
-    if (last && last.chorus === chorus) last.lines.push({ line, at })
-    else blocks.push({ chorus, lines: [{ line, at }] })
-  })
-  // A chorus never ends on a blank line: it belongs to what follows.
-  for (let i = 0; i < blocks.length; i += 1) {
-    const block = blocks[i]
-    while (block.chorus && block.lines.length > 1 && block.lines[block.lines.length - 1].line.kind === 'blank') {
-      const moved = block.lines.pop()!
-      const next = blocks[i + 1]
-      if (next && !next.chorus) next.lines.unshift(moved)
-      else blocks.splice(i + 1, 0, { chorus: false, lines: [moved] })
-    }
-  }
-  return blocks
-}
-
-/**
- * Lines of lyrics, each chord set above the syllable it falls on and coloured by its function in the song's key.
- * Sections read as headings, the chorus as a set-apart block; while playing, the sung line glows and the past fades.
- */
-function Lyrics({ sheet, notation, live, chorusLabel }: { sheet: ParsedSheet; notation: string; live: number; chorusLabel: string }) {
-  const key = useMemo(() => sheetKey(sheet.chords), [sheet])
-  const blocks = useMemo(() => blocksOf(sheet.lines), [sheet])
-
-  const renderLine = (line: SheetLine, at: number) => {
-    if (line.kind === 'blank') return <div key={at} className="sb-gap" />
-    if (line.kind === 'comment')
-      return (
-        <p key={at} className="sb-comment">
-          <span>{line.text}</span>
-        </p>
-      )
-    const indices = line.segments.map((segment) => segment.index).filter((index) => index >= 0)
-    const isLive = live >= 0 && indices.includes(live)
-    const isPast = live >= 0 && indices.length > 0 && Math.max(...indices) < live
-    return (
-      <p key={at} className={`sb-line ${line.chorus ? 'is-chorus' : ''} ${isLive ? 'is-live' : ''} ${isPast ? 'is-past' : ''}`}>
-        {line.segments.map((segment, index) => (
-          <span
-            key={index}
-            className="sb-seg"
-            data-chord-index={segment.index >= 0 ? segment.index : undefined}
-            data-live={segment.index >= 0 && segment.index === live ? 'true' : undefined}
-          >
-            <span
-              className={`sb-chord ${segment.chord && !segment.parsed ? 'is-unknown' : ''}`}
-              data-fn={segment.parsed ? chordFunction(segment.parsed, key) : undefined}
-              aria-hidden={segment.chord ? undefined : 'true'}
-            >
-              {segment.parsed ? (notation === 'latin' ? segment.parsed.latin : segment.parsed.anglo) : (segment.chord ?? ' ')}
-            </span>
-            <span className="sb-text">{segment.text || ' '}</span>
-          </span>
-        ))}
-      </p>
-    )
-  }
-
-  return (
-    <div className="sb-lyrics">
-      {blocks.map((block, index) =>
-        block.chorus ? (
-          <div key={index} className="sb-chorus">
-            {sheet.lines[block.lines[0].at - 1]?.kind !== 'comment' && <p className="sb-chorus__label">{chorusLabel}</p>}
-            {block.lines.map(({ line, at }) => renderLine(line, at))}
-          </div>
-        ) : (
-          block.lines.map(({ line, at }) => renderLine(line, at))
-        ),
-      )}
-    </div>
   )
 }

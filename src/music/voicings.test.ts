@@ -48,9 +48,7 @@ describe('voicingsFor', () => {
 })
 
 describe('COMMON_SHAPES', () => {
-  const entries = Object.entries(COMMON_SHAPES).flatMap(([key, shapes]) =>
-    shapes.map((shape) => ({ key, shape })),
-  )
+  const entries = Object.entries(COMMON_SHAPES).flatMap(([key, shapes]) => shapes.map((shape) => ({ key, shape })))
 
   it.each(entries)('$key $shape contains only chord tones and every essential tone', ({ key, shape }) => {
     const [root, qualityId] = key.split(':')
@@ -63,5 +61,49 @@ describe('COMMON_SHAPES', () => {
     for (const pc of sounding) expect(allowed.has(pc)).toBe(true)
     for (const pc of essentialTones(rootPc, quality)) expect(sounding).toContain(pc)
     expect(sounding).toContain(rootPc)
+  })
+})
+
+describe('alternate tunings', () => {
+  it('every tuning finds playable shapes for the common open-key chords', async () => {
+    const { TUNINGS } = await import('./voicings')
+    const { qualityById } = await import('./chords')
+    for (const tuning of TUNINGS) {
+      for (const [rootPc, qualityId] of [
+        [2, 'maj'],
+        [7, 'maj'],
+        [9, 'min'],
+        [0, 'maj'],
+      ] as const) {
+        const shapes = voicingsFor(rootPc, qualityById(qualityId), tuning.midi)
+        expect(shapes.length, `${tuning.id} ${rootPc}:${qualityId}`).toBeGreaterThan(0)
+      }
+    }
+  })
+})
+
+describe('shapes in alternate tunings', () => {
+  it('never offers a curated shape that rings a note outside the chord', async () => {
+    const { TUNINGS } = await import('./voicings')
+    const { qualityById, chordTones } = await import('./chords')
+    for (const tuning of TUNINGS) {
+      for (let rootPc = 0; rootPc < 12; rootPc += 1) {
+        for (const qualityId of ['maj', 'min', '7', 'm7', 'maj7'] as const) {
+          const tones = new Set(chordTones(rootPc, qualityById(qualityId)))
+          for (const voicing of voicingsFor(rootPc, qualityById(qualityId), tuning.midi)) {
+            const foreign = voicing.midi.filter((note) => !tones.has(note % 12))
+            expect(foreign, `${tuning.id} ${rootPc}:${qualityId} ${voicing.frets.join(',')}`).toEqual([])
+          }
+        }
+      }
+    }
+  })
+
+  it('spells the open strings as the tuning is named', async () => {
+    const { TUNINGS, stringLabels } = await import('./voicings')
+    const midi = (id: string) => TUNINGS.find((tuning) => tuning.id === id)!.midi
+    expect(stringLabels(midi('open-d'))[3]).toMatch(/^F[#♯]$/)
+    expect(stringLabels(midi('open-e'))[3]).toMatch(/^G[#♯]$/)
+    expect(stringLabels(midi('half-step'))[0]).toMatch(/^E[b♭]$/)
   })
 })

@@ -27,7 +27,7 @@
 
 **Afinador** — Su propia pestaña: activa el micrófono y toca una cuerda al aire. Un anillo de estrellas (three.js) vibra y gira mientras está desafinada — lila si está baja, dorado si está alta — y se calma en turquesa, lanzando ondas, cuando está justa. Las clavijas de un clavijero fijan la cuerda y la hacen sonar.
 
-**Cancionero** — La letra con los acordes encima de cada sílaba (formato ChordPro: `[C]Hoy el [G]cielo`). Al tocarla, el acorde que suena se ilumina y la letra avanza sola. Se transpone, se imprime y se comparte.
+**Cancionero** — La letra con los acordes encima de cada sílaba (formato ChordPro: `[C]Hoy el [G]cielo`). Al tocarla, el acorde que suena se ilumina y la letra avanza sola. Se transpone, se imprime y se comparte. Arriba, los diagramas de sus acordes; y el **modo escenario** la pone sola en pantalla completa, con letra grande que se desplaza sola o con el pedal, para leer desde el atril.
 
 **Herramientas** — El cielo sobre el mástil (lunas de noche, soles de día) que sigue el pulso, metrónomo con subdivisión, marcar el tempo tocando (tecla `T`), control con pedal de pasar páginas, pantalla siempre encendida mientras practicas, tema de noche y de día (automático), notación C o Do, español e inglés. La ayuda está en la tecla `?`.
 

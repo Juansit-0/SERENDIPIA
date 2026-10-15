@@ -196,11 +196,6 @@
     animation: icon-turn 520ms cubic-bezier(0.3, 1.4, 0.5, 1) backwards;
   }
 
-  /* ---------- tuner: the needle star glows while the string is in tune ---------- */
-  .cc-tuner[data-advice='in-tune'] .cc-tuner__needle path {
-    animation: tune-glow 1.2s ease-in-out infinite;
-  }
-
   /* ---------- fretboard: struck strings ring, the thick ones longer ---------- */
   .cv-string.is-ringing {
     animation: string-ring 700ms cubic-bezier(0.2, 0.6, 0.3, 1) backwards;
@@ -271,27 +266,6 @@
   /* Switching triads/sevenths: each name settles in again. */
   .tv-card__name {
     animation: name-in 460ms cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
-  }
-
-  /* ---------- Práctica: every change sends a ring out; the counters tick ---------- */
-  .pv-tap__ripple {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 9rem;
-    height: 9rem;
-    border: 3px solid var(--cc-accent-deep);
-    border-radius: 50%;
-    pointer-events: none;
-    animation: tap-ripple 650ms cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
-  }
-
-  .pv-stat__value {
-    animation: stat-tick 260ms cubic-bezier(0.3, 1.4, 0.5, 1) backwards;
-  }
-
-  .pv-tap:not(:disabled) .pv-tap__rings {
-    animation: rings-breathe 3.2s ease-in-out infinite;
   }
 
   /* ---------- the song chip pops in when a song starts ---------- */
@@ -453,32 +427,3 @@
   }
 }
 
-@keyframes tap-ripple {
-  from {
-    opacity: 0.9;
-    transform: translate(-50%, -50%) scale(0.6);
-  }
-  to {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(4);
-  }
-}
-
-@keyframes stat-tick {
-  from {
-    opacity: 0.4;
-    transform: translateY(-6px);
-  }
-}
-
-@keyframes rings-breathe {
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: 0.85;
-  }
-  50% {
-    transform: scale(1.04);
-    opacity: 1;
-  }
-}

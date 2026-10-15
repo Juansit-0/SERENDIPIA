@@ -8,6 +8,10 @@ import '@fontsource/eb-garamond/400.css'
 import '@fontsource/eb-garamond/400-italic.css'
 import '@fontsource-variable/jost'
 import './styles/tailwind.css'
+import { registerWorker, setupPwa } from './state/pwa'
+
+// The install prompt fires early: listen before the first render.
+setupPwa()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -18,8 +22,4 @@ createRoot(document.getElementById('root')!).render(
 )
 
 // Offline: the built app registers its service worker (scripts/offline.ts) once the page has loaded.
-if (import.meta.env.PROD && 'serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`, { scope: import.meta.env.BASE_URL }).catch(() => undefined)
-  })
-}
+if (import.meta.env.PROD) registerWorker(`${import.meta.env.BASE_URL}sw.js`, import.meta.env.BASE_URL)

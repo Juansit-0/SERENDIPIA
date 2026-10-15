@@ -10,6 +10,11 @@ interface Section {
 /** Newest first. Each entry is one published version with what a player would notice. */
 export const CHANGELOG: Array<{ version: string; es: string[]; en: string[] }> = [
   {
+    version: '2.31',
+    es: ['Instálala como app desde Ajustes → App: icono propio, accesos directos a Teoría, Cancionero y Afinador, y aviso cuando hay versión nueva.'],
+    en: ['Install it as an app from Settings → App: its own icon, shortcuts to Theory, Songbook and Tuner, and a notice when a new version is ready.'],
+  },
+  {
     version: '2.30',
     es: ['Cancionero más bonito: cada acorde lleva el color de su función (como las estrellas de la tira), las partes y el coro se distinguen, y al tocar se ilumina la línea que suena.'],
     en: ['A prettier songbook: each chord wears the colour of its function (like the strip’s stars), sections and chorus stand apart, and the sung line lights up while playing.'],
@@ -182,7 +187,7 @@ export const helpText: Record<
         items: [
           'Afinador (su propia pestaña): activa el micrófono y toca una cuerda al aire. El anillo de estrellas vibra si está desafinada (lila baja, dorado alta) y se calma en turquesa al estar justa. Toca una clavija para fijar la cuerda y oír su nota.',
           '☾/☀ cambia entre noche y día; en Ajustes eliges automático, la notación (C o Do) y el idioma.',
-          'Se instala en el móvil («Añadir a pantalla de inicio») y funciona sin conexión.',
+          'Es una app: instálala desde Ajustes → App (o en el iPhone, Compartir → «Añadir a pantalla de inicio»). Se abre en su ventana y funciona sin conexión; cuando hay versión nueva te avisa para recargar.',
           'Todo lo tuyo se guarda en este navegador: usa ⋯ → Mis progresiones → Descargar copia para llevarlo a otro.',
         ],
       },
@@ -271,7 +276,7 @@ export const helpText: Record<
         items: [
           'Tuner (its own tab): turn on the microphone and play an open string. The ring of stars shakes when it is out of tune (lilac low, gold high) and settles in turquoise when it is right. Tap a peg to fix the string and hear its note.',
           '☾/☀ switches night and day; in Settings choose automatic, the notation (C or Do) and the language.',
-          'It installs on your phone («Add to home screen») and works offline.',
+          'It is an app: install it from Settings → App (on iPhone, Share → «Add to Home Screen»). It opens in its own window and works offline; when a new version is ready it offers to reload.',
           'Everything of yours is kept in this browser: use ⋯ → My progressions → Download backup to take it elsewhere.',
         ],
       },

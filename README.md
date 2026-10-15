@@ -44,7 +44,7 @@
 - **Teoría musical en TypeScript puro** (`src/music/`): análisis de acordes y tonalidades, posiciones, detección de acordes desde trastes y desde audio (FFT, picos espectrales y descarte de armónicos), escalas, transposición, ChordPro. Sin IA y sin servidor.
 - **Audio con Tone.js**: muestras de guitarra reales, rasgueos, metrónomo y una banda con batería y bajo grabados (bajo que camina hacia el siguiente acorde). Afinador y «Oír» con la Web Audio API.
 - **three.js** solo para la bienvenida y el afinador, cargado bajo demanda.
-- **Sin backend**: todo lo del usuario vive en su navegador (`localStorage` e IndexedDB para las grabaciones), con copia de seguridad descargable. Instalable (PWA) y funciona sin conexión gracias a un *service worker* generado al compilar.
+- **Sin backend**: todo lo del usuario vive en su navegador (`localStorage` e IndexedDB para las grabaciones), con copia de seguridad descargable. Se instala como app (PWA: icono adaptable, accesos directos, botón «Instalar» en Ajustes y aviso de versión nueva) y funciona sin conexión gracias a un *service worker* generado al compilar.
 - **Calidad**: más de 400 tests con Vitest y Testing Library, auditoría de accesibilidad automática con axe, lint con oxlint, y una prueba de humo contra la web publicada tras cada despliegue (GitHub Actions → GitHub Pages).
 
 ## Ejecutarla en local

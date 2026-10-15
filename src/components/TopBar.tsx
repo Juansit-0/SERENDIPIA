@@ -9,6 +9,7 @@ import { useStore, type Notation, type ViewId } from '../state/store'
 import { useTheme } from '../state/theme'
 import { openWelcome } from '../welcome/state'
 import { openHelp } from '../state/help'
+import { isIosSafari, promptInstall, usePwa } from '../state/pwa'
 import { helpText } from '../i18n/help'
 import { topbarText } from '../i18n/topbar'
 import '../styles/topbar.css'
@@ -31,6 +32,7 @@ function readOpen(): boolean {
 }
 
 export function TopBar() {
+  const pwa = usePwa()
   // Below `sm` the bar folds to: brand, Run, tempo and «Más». From `sm` up it is always open.
   const [open, setOpen] = useState(readOpen)
   const toggleOpen = () => {
@@ -493,6 +495,28 @@ export function TopBar() {
                       EN
                     </button>
                   </div>
+                </div>
+                <div className="cc-pop__row cc-install">
+                  <span className="cc-label cc-pop__title">{x.app}</span>
+                  {pwa.installed ? (
+                    <p>{x.installed}</p>
+                  ) : pwa.canPrompt ? (
+                    <>
+                      <button
+                        type="button"
+                        className="cc-btn cc-btn--primary w-full"
+                        onClick={() => {
+                          close()
+                          void promptInstall()
+                        }}
+                      >
+                        {x.install}
+                      </button>
+                      <p>{x.installHint}</p>
+                    </>
+                  ) : (
+                    <p>{isIosSafari() ? x.installIos : x.installOther}</p>
+                  )}
                 </div>
                 <div className="cc-pop__row">
                   <button

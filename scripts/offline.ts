@@ -1,7 +1,7 @@
 import type { Plugin } from 'vite'
 
 /** Files from public/ that the app needs offline (they are copied as-is, outside the bundle). */
-const PUBLIC_FILES = ['favicon.ico', 'icon.svg', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png', 'site.webmanifest']
+const PUBLIC_FILES = ['favicon.ico', 'icon.svg', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'apple-touch-icon.png', 'site.webmanifest']
 
 /** Only what a visit can use: no source maps, no legacy .woff, no font subsets for scripts the app never shows. */
 function needed(name: string): boolean {

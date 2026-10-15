@@ -1,85 +1,66 @@
 # SERENDIPIA
 
-Sistema de Encuentro y Recomendación de Escalas, Notación, Detección e Identificación de Progresiones Interactivas de Acordes.
+**Acordes, teoría, oído y canciones para practicar guitarra** — en el navegador, sin cuentas y también sin conexión.
 
-A personal guitar practice instrument: type a chord and see every playable position, mark a fretboard position and get the chord's name (with honest ambiguity), read the theory at whatever depth you choose, and build a progression that plays itself and reorders by drag. A metronome click runs over the progression or standalone. Bilingual ES/EN, Anglo notation with Latin alongside.
+**▶ Pruébala: [juansit-0.github.io/SERENDIPIA](https://juansit-0.github.io/SERENDIPIA/)**
 
-## Progression analysis
+![El acorde Am7: su nombre, sus notas y todas sus posiciones sobre un mástil interactivo, con la progresión como constelación abajo](docs/screenshots/acorde.jpg)
 
-As you build a progression, SERENDIPIA reads it with music-theory rules (no AI, works offline):
+*Serendipia: hallazgo valioso que llega sin buscarlo.* La app es un mapa del cielo para encontrar acordes, encadenarlos y quedarte con los que suenan bien.
 
-- **Key detection** from all the chords (the **Auto** stamp in the transport; pick a key by hand to turn it off).
-- **Roman numerals** on every step, with secondary dominants (`V7/V`), borrowed chords (`iv`, `♭VII`) and out-of-key chords set apart in color.
-- **A mark between each pair of chords** (✓ resolves, ↗ tension, ↪ deceptive, ◐ borrowed color, ⚡ out of key, → / ~ smooth motion). Tap one to read the change explained, with its common tones; by default the latest change is shown.
-- **Next-chord ideas from the last two or three chords**, recognising classic progressions (`C G Am` → "completes Pop I–V–vi–IV") and cadences (`Dm G` → `C`). They fill the ghost slots of the strip and the **Puede seguir** panel in Dictionary and Theory, which reads "After G → Am → F"; its **This chord** toggle switches the panel back to ideas after the selected chord.
+> **In English.** SERENDIPIA is a guitar practice web app: look up or detect any chord (by typing, marking the fretboard or playing it into the microphone), build progressions that play themselves over a bass-and-drums backing, see scales over the whole neck, train your ear, record yourself and keep a songbook with chords over the lyrics. React + TypeScript + Tone.js, no backend, installable and offline. Spanish and English UI.
 
-The logic lives in `src/music/analysis.ts`.
+## Qué hace
 
-## Easier to play
+**Acorde** — Escribe un acorde (`Am7`, `Do`, `G/B`…), márcalo en el mástil o tócalo con el micrófono encendido: te dice su nombre, sus notas por función (raíz, tercera, séptima…) y todas las posiciones para tocarlo, de la más fácil a la más difícil. «Puede seguir» propone acordes que encajan.
 
-- **Chain** (progression strip) re-voices every step so the hand moves as little as possible across the whole progression: a shortest-path search over each chord's best shapes that rewards held fingers and nearby positions, without giving up root-position, common shapes.
-- **Suggested capo** appears under the strip when another capo turns the progression into clearly easier shapes (e.g. `Bb F Gm Eb` → capo 3 → `G D Em C`); **Apply** moves the capo and re-spells the steps, so the progression sounds the same.
+**La progresión** — Tus acordes como una constelación: el color de cada estrella es su función armónica (tónica, subdominante, dominante, prestado) y entre cada par un comentario explica el cambio. Suena sola al tempo que elijas, con un rasgueo (o tu propio patrón) y, si quieres, con **bajo y batería** en estilo pop, balada, rock o bossa nova. Se transpone, se encadena para mover la mano lo mínimo, recomienda cejilla, se guarda, se comparte por enlace y se imprime con los diagramas.
 
-The logic lives in `src/music/playability.ts`.
+**Teoría** — Los acordes de la tonalidad con su función, progresiones clásicas listas para usar y **escalas sobre todo el mástil** por posiciones, con las notas del acorde que suena resaltadas para improvisar.
 
-## Practice
+| | |
+|---|---|
+| ![Escala de Do mayor sobre los 15 trastes, con las notas del acorde actual rellenas](docs/screenshots/escalas.jpg) | ![Cancionero: la letra con cada acorde encima de su sílaba](docs/screenshots/cancionero.jpg) |
+| **Escalas** en Teoría | **Cancionero** |
+| ![Entrenamiento de oído: ¿qué acorde suena?](docs/screenshots/oido.jpg) | ![Progreso: racha de días, minutos por día y cambios por minuto de cada pareja](docs/screenshots/progreso.jpg) |
+| **Práctica → Oído** | **Práctica → Progreso** |
 
-- **Strumming patterns**: pick a **Strum** in the transport (single strum, quarters, folk `↓ ↓↑ ↑↓↑`, ballad, eighths, offbeat, arpeggio) and the progression plays it on every step; the step picker can override it per step. Patterns live in `src/audio/strums.ts`.
-- **Change trainer** (**Practice** tab): two chords, shaped for the least hand movement.
-  - **One minute**: tap the big button (or Space) on every clean change; the score is changes per minute and the best score per pair of chords is kept.
-  - **With metronome**: the two chords alternate with the click; the tempo can ramp up by itself (+4 bpm every 8 changes) and **Slower** drops it 8 bpm. The top tempo per pair is kept.
+**Práctica** — Cambios por minuto entre dos acordes (con metrónomo que sube poco a poco), **entrenamiento de oído** (adivina acordes e intervalos), **grabarte** encima de la progresión y escucharte con la banda, y tu **progreso** día a día.
 
-Records stay in the browser (`localStorage`).
+**Cancionero** — La letra con los acordes encima de cada sílaba (formato ChordPro: `[C]Hoy el [G]cielo`). Al tocarla, el acorde que suena se ilumina y la letra avanza sola. Se transpone, se imprime y se comparte.
 
-## Organize and share
+**Herramientas** — Afinador por micrófono, metrónomo con subdivisión, marcar el tempo tocando (tecla `T`), control con pedal de pasar páginas, pantalla siempre encendida mientras practicas, tema de noche y de día (automático), notación C o Do, español e inglés. La ayuda está en la tecla `?`.
 
-- **Undo / redo** every progression edit with ↶ ↷ in the strip or **⌘Z / Ctrl+Z** and **⌘⇧Z / Ctrl+Y** (up to 50 steps back).
-- **Library**: **Save** names the progression (with its tempo, beats, capo and strum); **Library** lists them to load or delete. Saving with an existing name replaces it.
-- **Share link** copies a URL such as `?p=C_G:3-2-0-0-0-3_Am~folk_F&t=96&b=4&c=0&s=single` — chord symbols, optional pinned shape (`:frets`) and strum (`~id`) per step. Opening it loads that progression; unknown chords or values are skipped. No server involved.
+| | |
+|---|---|
+| ![La bienvenida: las estrellas forman la constelación de una progresión](docs/screenshots/welcome.jpg) | ![La vista Acorde de día](docs/screenshots/acorde-dia.jpg) |
+| La bienvenida (three.js) | El tema de día |
 
-## Run it
+<p align="center"><img src="docs/screenshots/movil.jpg" alt="SERENDIPIA en el móvil" width="300"></p>
+
+## Cómo está hecha
+
+- **React 19 + TypeScript + Vite**, estilos con Tailwind CSS v4 y un sistema de diseño propio («Carta celeste», descrito en [`DESIGN.md`](DESIGN.md)).
+- **Teoría musical en TypeScript puro** (`src/music/`): análisis de acordes y tonalidades, posiciones, detección de acordes desde trastes y desde audio (FFT, picos espectrales y descarte de armónicos), escalas, transposición, ChordPro. Sin IA y sin servidor.
+- **Audio con Tone.js**: muestras de guitarra reales, rasgueos, metrónomo y una banda sintetizada (bombo, caja, charles y bajo). Afinador y «Oír» con la Web Audio API.
+- **three.js** solo para la bienvenida, cargado bajo demanda.
+- **Sin backend**: todo lo del usuario vive en su navegador (`localStorage` e IndexedDB para las grabaciones), con copia de seguridad descargable. Instalable (PWA) y funciona sin conexión gracias a un *service worker* generado al compilar.
+- **Calidad**: más de 400 tests con Vitest y Testing Library, auditoría de accesibilidad automática con axe, lint con oxlint, y una prueba de humo contra la web publicada tras cada despliegue (GitHub Actions → GitHub Pages).
+
+## Ejecutarla en local
 
 ```bash
 npm install
 npm run dev        # http://localhost:5173
-npm test           # Vitest: music domain, audio engine (mocked Tone.js), state and components (jsdom)
-npm run typecheck
-npm run lint       # oxlint, including the React hooks rules
-npm run build
+npm test           # tests (Vitest)
+npm run lint       # oxlint
+npm run build      # compilación de producción
 ```
 
-## Keyboard
+`npm run build:pages` compila para GitHub Pages (base `/SERENDIPIA/`); el despliegue es automático con cada push a `main`.
 
-- **Space**: play / stop the progression (or the metronome alone)
-- **Fretboard**: one tab stop; arrows move between cells, Home / End jump along a string
-- **Progression**: tap or Enter on a step opens its picker (voicing, strum, move ← / →, remove); **Alt+←/→** moves the focused step; **Alt+click** removes it; **Esc** closes the picker
-- **Undo / redo**: **⌘Z / Ctrl+Z**, **⌘⇧Z / Ctrl+Y**
-- **Practice tab**: **Space** counts a change in the one-minute drill
+## Audio y licencias
 
-## Stack
+Las muestras de guitarra de `src/assets/samples/` salen de los soundfonts MusyngKite publicados por [gleitz/midi-js-soundfonts](https://github.com/gleitz/midi-js-soundfonts), con licencia **CC BY-SA 3.0**; se regeneran con `npm run samples` (requiere `ffmpeg`). Tipografías IM Fell English, EB Garamond y Jost (SIL OFL).
 
-- React 19 + Vite 8 + TypeScript, Tailwind CSS v4 (design tokens live in `@theme` in `src/styles/tailwind.css`)
-- Tone.js for the audio graph, with self-hosted guitar samples; loaded as a separate chunk, prefetched when the browser is idle
-- Pure TypeScript music domain in `src/music/` (notes, chord templates, parser, voicings, detector, scales, progressions), covered by Vitest
-
-## Visual world
-
-Riso Studio (direction seed `06d8a1d9`): music print culture — flat spot inks, overprint, print grain, registration marks. Paper `#F4F1EA`, ink `#1A1A1A`, riso blue `#0078BF`, orange `#FF6C2F`, yellow `#FFE800`, and turquoise `#40E0D0` as the accent ink. `DESIGN.md` records the built system.
-
-## Audio
-
-The guitar samples in `src/assets/samples/` are extracted from the pre-rendered MusyngKite soundfonts published by [gleitz/midi-js-soundfonts](https://github.com/gleitz/midi-js-soundfonts) (generated from the Musyng Kite soundfont, licensed **CC BY-SA 3.0**). Only twelve notes per timbre plus three fret-noise hits are kept, trimmed to ~1.7s, mono, converted with ffmpeg, and loaded lazily per timbre. If the samples fail to load the engine falls back to a synthesized plucked-string voice.
-
-Regenerate the sample set with (requires `ffmpeg` on the PATH):
-
-```bash
-node scripts/fetch-samples.mjs
-```
-
-## Regenerating the world
-
-The direction contract for this surface lives in `.impeccable/surfaces/src-app-tsx.md`; the product record is `PRODUCT.md` and the built design system is `DESIGN.md`.
-
-## License
-
-The code is released under the [MIT License](LICENSE). The guitar samples in `src/assets/samples/` keep their own license, **CC BY-SA 3.0** (see *Audio* above).
+El código se publica con [licencia MIT](LICENSE). Hecha por Juan Camilo López Díaz.

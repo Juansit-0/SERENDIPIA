@@ -782,7 +782,22 @@
 
 /* ---------- Práctica: Cambios / Oído ---------- */
 .pv-sections {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
   align-self: flex-start;
+}
+.pv-more {
+  gap: 4px;
+}
+.pv-more[aria-expanded='true'] svg {
+  rotate: 180deg;
+}
+.pv-tuner {
+  align-self: center;
+  width: min(100%, 28rem);
+  padding: 12px 16px;
 }
 
 .ear-top {

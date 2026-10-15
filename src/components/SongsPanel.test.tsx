@@ -16,6 +16,7 @@ const engine = {
     options = next
   },
   updateProgression: () => undefined,
+  preloadBand: () => undefined,
   stopProgression: () => {
     options = null
   },

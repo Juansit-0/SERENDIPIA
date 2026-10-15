@@ -1446,3 +1446,155 @@
     animation: name-in 360ms cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
   }
 }
+
+/*
+ * The sky over the fretboard: eight moons (night) or suns (day) on an arc, one per beat over two bars.
+ * Playing, the current body lights in the accent, its halo pulses and the trail follows it; quiet, the sky breathes.
+ */
+.cv-arc {
+  flex: 1 1 14rem;
+  min-width: 0;
+  height: 76px;
+  margin: -8px 0 -6px;
+}
+.cv-arc svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.cv-arc-horizon {
+  fill: none;
+  stroke: var(--cc-line);
+  stroke-width: 1;
+  stroke-dasharray: 2 6;
+  stroke-linecap: round;
+  opacity: 0.7;
+}
+.cv-arc-path {
+  fill: none;
+  stroke: var(--cc-line-strong);
+  stroke-width: 1.4;
+  stroke-dasharray: 1 7;
+  stroke-linecap: round;
+}
+.cv-arc-trail {
+  fill: none;
+  stroke: var(--cc-accent);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  opacity: 0.85;
+  transition: stroke-dashoffset 0.35s ease-out;
+}
+.cv-arc:not(.is-playing) .cv-arc-trail {
+  opacity: 0;
+}
+.cv-arc-inner {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition:
+    transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 0.25s ease;
+}
+.cv-arc-disc {
+  fill: var(--cc-ground-2);
+  stroke: none;
+}
+.cv-arc-rim {
+  fill: none;
+  stroke: var(--cc-ink);
+  stroke-width: 1.3;
+}
+.cv-arc-lit {
+  fill: var(--cc-ink);
+}
+.cv-arc-rays line {
+  stroke: var(--cc-fn-dom);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+:root[data-theme='day'] .cv-arc-lit {
+  fill: var(--cc-fn-dom-fill);
+}
+.cv-arc-halo {
+  fill: var(--cc-accent-soft);
+  stroke: var(--cc-accent);
+  stroke-width: 1.2;
+}
+
+/* Playing: the past fades a little, the present glows. */
+.cv-arc.is-playing .cv-arc-body .cv-arc-inner {
+  opacity: 0.5;
+}
+.cv-arc.is-playing .cv-arc-body.is-past .cv-arc-inner {
+  opacity: 0.75;
+}
+.cv-arc.is-playing .cv-arc-body.is-now .cv-arc-inner {
+  opacity: 1;
+  transform: scale(1.45);
+}
+.cv-arc-body.is-now .cv-arc-lit {
+  fill: var(--cc-accent);
+}
+.cv-arc-body.is-now .cv-arc-rim {
+  stroke: var(--cc-accent-deep);
+}
+.cv-arc-body.is-now .cv-arc-rays line {
+  stroke: var(--cc-accent-deep);
+}
+:root[data-theme='day'] .cv-arc-body.is-now .cv-arc-lit {
+  fill: var(--cc-fn-dom-fill);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .cv-arc:not(.is-playing) .cv-arc-inner {
+    animation: cv-arc-breathe 5.6s ease-in-out infinite;
+    animation-delay: calc(var(--i) * 0.35s);
+  }
+  .cv-arc-body.is-now .cv-arc-halo {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: cv-arc-pulse 0.6s ease-out both;
+  }
+  .cv-arc-body.is-now .cv-arc-rays {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: cv-arc-turn 2.4s linear infinite;
+  }
+}
+@keyframes cv-arc-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.62;
+  }
+  50% {
+    transform: scale(1.14);
+    opacity: 1;
+  }
+}
+@keyframes cv-arc-pulse {
+  from {
+    transform: scale(0.7);
+    opacity: 1;
+  }
+  to {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+}
+@keyframes cv-arc-turn {
+  to {
+    transform: rotate(45deg);
+  }
+}
+
+@media (max-width: 640px) {
+  .cv-arc {
+    order: 5;
+    flex-basis: 100%;
+    height: 54px;
+    margin: 0;
+  }
+}

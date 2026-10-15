@@ -552,6 +552,7 @@ export function TopBar() {
                     </a>
                     .
                   </p>
+                  <p>{x.creditsDrums}</p>
                   <p>{x.creditsFonts}</p>
                   <p>{x.creditsCode}</p>
                 </div>

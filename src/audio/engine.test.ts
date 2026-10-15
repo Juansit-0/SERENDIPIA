@@ -7,6 +7,8 @@ const tone = vi.hoisted(() => {
     samplersCreated: 0,
     disposed: 0,
     notes: [] as unknown[][],
+    attacks: [] as unknown[][],
+    samplerOptions: [] as Array<{ urls?: Record<string, string>; onload?: () => void }>,
     loaded: () => Promise.resolve() as Promise<void>,
   }
 
@@ -26,14 +28,19 @@ const tone = vi.hoisted(() => {
     triggerAttackRelease(...args: unknown[]) {
       state.notes.push(args)
     }
-    triggerAttack() {}
+    triggerAttack(...args: unknown[]) {
+      state.attacks.push(args)
+    }
+    triggerRelease() {}
+    releaseAll() {}
     async generate() {}
   }
 
   class FakeSampler extends FakeNode {
-    constructor() {
+    constructor(options?: { urls?: Record<string, string>; onload?: () => void }) {
       super()
       state.samplersCreated += 1
+      state.samplerOptions.push(options ?? {})
     }
   }
 
@@ -128,10 +135,32 @@ vi.mock('../assets/samples/generated', () => ({
   },
 }))
 
+vi.mock('../assets/samples/band', () => ({
+  DRUM_FILES: Object.fromEntries(
+    [
+      'kick-soft',
+      'kick-hard',
+      'snare-soft',
+      'snare-hard',
+      'snare-hard-2',
+      'sidestick',
+      'sidestick-2',
+      'brush',
+      'hat-soft',
+      'hat-soft-2',
+      'hat-hard',
+      'hat-open',
+      'hat-brush',
+    ].map((id) => [id, `${id}.mp3`]),
+  ),
+  BASS_FILES: { electric: { E1: 'e1.mp3' }, upright: { E1: 'e1.mp3' } },
+}))
+
 async function freshEngine() {
   vi.resetModules()
   tone.state.toneStartCalls = 0
   tone.state.samplersCreated = 0
+  tone.state.samplerOptions = []
   tone.state.disposed = 0
   tone.state.loaded = () => Promise.resolve()
   tone.scheduled.clear()
@@ -296,5 +325,37 @@ describe('latency', () => {
     // The first string within ~10 ms of the tap (jitter included), the strum spread after it.
     expect(Math.min(...times)).toBeLessThan(0.012)
     expect(Math.max(...times)).toBeLessThan(0.15)
+  })
+})
+
+describe('backing band', () => {
+  it('plays recorded drums and a bass that walks into the next chord, once the recordings are loaded', async () => {
+    const engine = await freshEngine()
+    await engine.start()
+    const basses = [0, 7, 9, 5]
+    const options = { ...baseOptions, loop: true, getBacking: () => 'pop' as const, getBass: (index: number) => basses[index] }
+    engine.playProgression(options)
+    const band = tone.state.samplerOptions.filter((sampler) => sampler.urls && ('C2' in sampler.urls || 'E1' in sampler.urls))
+    expect(band).toHaveLength(2)
+    const loop = (engine as unknown as { loopEvent: { callback: (time: number) => void } }).loopEvent
+
+    // Not loaded yet: the band stays silent instead of failing.
+    tone.state.attacks = []
+    tone.state.notes = []
+    loop.callback(10)
+    expect(tone.state.attacks).toHaveLength(0)
+
+    for (const sampler of band) sampler.onload?.()
+    tone.state.attacks = []
+    tone.state.notes = []
+    loop.callback(12)
+    // One drum key per one-shot: kick and hat on the first eighth.
+    expect(tone.state.attacks.filter(([, time]) => time === 12)).toHaveLength(2)
+    // Bass notes are frequencies below the guitar; the last one is a semitone from G (the next chord).
+    const bass = (tone.state.notes as Array<[number, number, number, number]>).filter(([note]) => typeof note === 'number' && note < 80)
+    expect(bass.length).toBeGreaterThan(0)
+    const lastFreq = bass[bass.length - 1][0]
+    const midi = Math.round(69 + 12 * Math.log2(lastFreq / 440))
+    expect(Math.abs((midi % 12) - 7)).toBe(1)
   })
 })

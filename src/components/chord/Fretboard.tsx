@@ -1,8 +1,8 @@
 import { chordText } from '../../i18n/chord'
 import { stringLabels } from '../../music/voicings'
 import { StepGrid } from '../StepGrid'
+import { SkyArc } from './SkyArc'
 import type { ChordModel } from './useChordModel'
-
 
 /** THE fretboard: one interactive 12-fret sky chart; marks drawn by role, ripples around the root. */
 export function Fretboard({ m, onToggle }: { m: ChordModel; onToggle: (stringIndex: number, fret: number) => void }) {
@@ -13,6 +13,7 @@ export function Fretboard({ m, onToggle }: { m: ChordModel; onToggle: (stringInd
     <section className="cc-module cv-chart" aria-label={c.chartLabel}>
       <header className="cv-chart-head">
         <h2 className="cc-label">{c.chartLabel}</h2>
+        <SkyArc />
         {m.capo > 0 && (
           <span className="cv-chart-cap">
             <b>{`${c.capo} ${m.capo}`}</b>
@@ -49,7 +50,6 @@ export function Fretboard({ m, onToggle }: { m: ChordModel; onToggle: (stringInd
           />
         </div>
       </div>
-
     </section>
   )
 }

@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest'
 import { STRUMS, isStrumId, strumHits } from './strums'
 
 const shape = (id: Parameters<typeof strumHits>[0], beats: number) =>
-  strumHits(id, beats).map((hit) => `${hit.eighth}${hit.kind[0]}`).join(' ')
+  strumHits(id, beats)
+    .map((hit) => `${hit.eighth}${hit.kind[0]}`)
+    .join(' ')
 
 describe('strumHits', () => {
   it('keeps the classic single strum for the whole step', () => {

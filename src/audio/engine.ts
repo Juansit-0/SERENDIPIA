@@ -4,12 +4,39 @@ import { beatsToNotation, isAccentBeat, progressionTicks, subdivisionOffsets } f
 import { bassLine, drumsAt, type BackingStyle, type DrumPart } from './backing'
 import { strumHits, type StrumId } from './strums'
 import { SAMPLE_FILES } from '../assets/samples/generated'
+import { BASS_FILES, DRUM_FILES } from '../assets/samples/band'
 
 import type { PlayPattern, ProgressionOptions, TimbreId } from './types'
 
 export type { PlayPattern, ProgressionOptions, TimbreId } from './types'
 
 const SAMPLE_TIMEOUT_MS = 15000
+
+type DrumSample = keyof typeof DRUM_FILES
+type BassKind = keyof typeof BASS_FILES
+
+const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+/** Each drum one-shot gets its own key on the sampler (C2, C#2…), so it always plays at its recorded pitch. */
+const DRUM_KEYS = Object.fromEntries(
+  (Object.keys(DRUM_FILES) as DrumSample[]).map((id, index) => [id, `${NOTE_NAMES[index % 12]}${2 + Math.floor(index / 12)}`]),
+) as Record<DrumSample, string>
+
+/** Which recordings a part plays: soft and hard layers, and alternate takes so repeated hits never sound identical. */
+const DRUM_LAYERS: Record<DrumPart, { soft: DrumSample[]; hard: DrumSample[] }> = {
+  kick: { soft: ['kick-soft'], hard: ['kick-hard'] },
+  snare: { soft: ['snare-soft'], hard: ['snare-hard', 'snare-hard-2'] },
+  ghost: { soft: ['snare-soft'], hard: ['snare-soft'] },
+  rim: { soft: ['sidestick', 'sidestick-2'], hard: ['sidestick', 'sidestick-2'] },
+  brush: { soft: ['brush'], hard: ['brush'] },
+  hat: { soft: ['hat-soft', 'hat-soft-2'], hard: ['hat-hard'] },
+  open: { soft: ['hat-open'], hard: ['hat-open'] },
+  brushHat: { soft: ['hat-brush'], hard: ['hat-brush'] },
+}
+
+/** Electric bass for pop and rock, upright for the softer styles. */
+function bassKind(style: BackingStyle): BassKind {
+  return style === 'ballad' || style === 'bossa' ? 'upright' : 'electric'
+}
 /** Lookahead of the transport (progression, metronome, band): small, but enough for a steady beat. */
 const LOOKAHEAD_S = 0.05
 
@@ -56,7 +83,13 @@ class AudioEngine {
   private beat = 0
   private cursor = 0
   private options: ProgressionOptions | null = null
-  private band: { drums: Record<DrumPart, (time: number, velocity: number) => void>; bass: Tone.MonoSynth } | null = null
+  private band: {
+    out: Tone.Gain
+    drums: Tone.Sampler
+    drumsReady: boolean
+    basses: Partial<Record<BassKind, { sampler: Tone.Sampler; ready: boolean }>>
+  } | null = null
+  private drumTake = 0
   /** Eighths played since playback started: the groove runs on across chord changes. */
   private bandEighth = 0
   private loadingTimbre: TimbreId | null = null
@@ -90,7 +123,7 @@ class AudioEngine {
       sampleFiles: Object.keys(SAMPLE_FILES[this.timbre] ?? {}).length,
       loaded: this.loadedTimbres.has(this.timbre),
       fallbackVoices: this.fallbackVoices.length,
-      metronome: this.metronomeEvent !== null,
+      metronome: this.metronomeEvent !== null && Boolean(this.options?.metronome),
       beat: this.beat,
     }
   }
@@ -184,9 +217,7 @@ class AudioEngine {
       const right = new Tone.Sampler({ urls, attack: 0.002, release: 1.2 }).connect(rightPan)
       nodes.push(leftPan, rightPan, left, right)
       await withTimeout(Tone.loaded(), SAMPLE_TIMEOUT_MS)
-      const loaded = [left, right].every(
-        (sampler) => (sampler as unknown as { loaded?: boolean }).loaded !== false,
-      )
+      const loaded = [left, right].every((sampler) => (sampler as unknown as { loaded?: boolean }).loaded !== false)
       if (!loaded) throw new Error(`samples for ${id} did not load`)
       this.loadedTimbres.add(id)
       this.samplers.set(id, { left, right })
@@ -283,15 +314,11 @@ class AudioEngine {
       return
     }
     if (pattern === 'arpeggio') {
-      notes.forEach((note, order) =>
-        this.triggerNote(note.stringIndex, note.midi, start + order * 0.1, gain, duration),
-      )
+      notes.forEach((note, order) => this.triggerNote(note.stringIndex, note.midi, start + order * 0.1, gain, duration))
       return
     }
     const ordered = pattern === 'strum-up' ? [...notes].reverse() : notes
-    ordered.forEach((note, order) =>
-      this.triggerNote(note.stringIndex, note.midi, start + order * spread, gain, duration),
-    )
+    ordered.forEach((note, order) => this.triggerNote(note.stringIndex, note.midi, start + order * spread, gain, duration))
   }
 
   /** One bar of `strum` on `frets` right now (the pattern editor's «Probar»), outside any progression. */
@@ -345,16 +372,19 @@ class AudioEngine {
     this.fretNoise.triggerAttackRelease(note, 0.18, time, 0.5)
   }
 
+  /** The beat clock runs whenever something plays (the sky over the fretboard follows it); it clicks only with the metronome on. */
   private startMetronomeLoop(): void {
     if (this.metronomeEvent || !this.click) return
     this.beat = 0
     this.metronomeEvent = new Tone.Loop((time) => {
-      const accent = isAccentBeat(this.beat)
-      this.click?.triggerAttackRelease(accent ? 'C6' : 'C5', 0.04, time, accent ? 1 : 0.42)
-      // Subdivisions: softer, lower clicks between the beats.
-      const beatSeconds = Tone.Time('4n').toSeconds()
-      for (const offset of subdivisionOffsets(this.options?.getSubdivision?.() ?? 1)) {
-        this.click?.triggerAttackRelease('G4', 0.03, time + offset * beatSeconds, 0.22)
+      if (this.options?.metronome) {
+        const accent = isAccentBeat(this.beat)
+        this.click?.triggerAttackRelease(accent ? 'C6' : 'C5', 0.04, time, accent ? 1 : 0.42)
+        // Subdivisions: softer, lower clicks between the beats.
+        const beatSeconds = Tone.Time('4n').toSeconds()
+        for (const offset of subdivisionOffsets(this.options?.getSubdivision?.() ?? 1)) {
+          this.click?.triggerAttackRelease('G4', 0.03, time + offset * beatSeconds, 0.22)
+        }
       }
       const beat = this.beat
       this.beat += 1
@@ -384,7 +414,8 @@ class AudioEngine {
     this.cursor = 0
     this.bandEighth = 0
     this.options = options
-    if (options.metronome) this.startMetronomeLoop()
+    this.preloadBand(options.getBacking?.() ?? 'none')
+    this.startMetronomeLoop()
 
     this.loopEvent = new Tone.Loop((time) => {
       const current = this.options
@@ -396,7 +427,11 @@ class AudioEngine {
         this.playStrum(frets, current.tuning, time, current.getStrum?.(index) ?? 'single', current.beatsPerChord)
       }
       const backing = current.getBacking?.() ?? 'none'
-      if (backing !== 'none') this.playBand(backing, current.getBass?.(index) ?? null, time, current.beatsPerChord)
+      if (backing !== 'none') {
+        const last = index === current.stepCount - 1
+        const next = last && !current.loop ? null : (current.getBass?.((index + 1) % current.stepCount) ?? null)
+        this.playBand(backing, current.getBass?.(index) ?? null, next, time, current.beatsPerChord)
+      }
       Tone.getDraw().schedule(() => current.onStep(index), time)
       this.cursor = (this.cursor + 1) % current.stepCount
     }, beatsToNotation(options.beatsPerChord))
@@ -430,10 +465,6 @@ class AudioEngine {
     this.options = { ...this.options, ...patch }
     const transport = Tone.getTransport()
     if (patch.tempo !== undefined) transport.bpm.rampTo(patch.tempo, 0.06)
-    if (patch.metronome !== undefined) {
-      if (patch.metronome) this.startMetronomeLoop()
-      else this.stopMetronomeLoop()
-    }
     const { stepCount, beatsPerChord, loop } = this.options
     transport.loop = stepCount === 0 ? true : loop
     transport.loopEnd = stepCount === 0 ? '1m' : `${progressionTicks(stepCount, beatsPerChord, transport.PPQ)}i`
@@ -446,51 +477,58 @@ class AudioEngine {
     }
   }
 
-  /** Bass and drums are built the first time a backing style plays. They go to the master after the guitar's high-pass. */
-  private ensureBand() {
-    if (this.band || !this.master) return this.band
-    const out = new Tone.Gain(0.9).connect(this.master)
-    const kick = new Tone.MembraneSynth({ pitchDecay: 0.03, octaves: 6, envelope: { attack: 0.001, decay: 0.32, sustain: 0, release: 0.1 } }).connect(out)
-    kick.volume.value = -7
-    const snareTone = new Tone.Filter(1600, 'highpass').connect(out)
-    const snare = new Tone.NoiseSynth({ noise: { type: 'white' }, envelope: { attack: 0.001, decay: 0.15, sustain: 0 } }).connect(snareTone)
-    snare.volume.value = -15
-    const hatTone = new Tone.Filter(7500, 'highpass').connect(out)
-    const hat = new Tone.NoiseSynth({ noise: { type: 'white' }, envelope: { attack: 0.001, decay: 0.035, sustain: 0 } }).connect(hatTone)
-    hat.volume.value = -20
-    const rim = new Tone.Synth({ oscillator: { type: 'triangle' }, envelope: { attack: 0.001, decay: 0.045, sustain: 0, release: 0.01 } }).connect(out)
-    rim.volume.value = -17
-    const bass = new Tone.MonoSynth({
-      oscillator: { type: 'sawtooth' },
-      filter: { Q: 1, type: 'lowpass', rolloff: -24 },
-      envelope: { attack: 0.005, decay: 0.3, sustain: 0.6, release: 0.12 },
-      filterEnvelope: { attack: 0.005, decay: 0.25, sustain: 0.3, release: 0.2, baseFrequency: 110, octaves: 2.4 },
-    }).connect(out)
-    bass.volume.value = -9
-    this.band = {
-      drums: {
-        kick: (time, velocity) => kick.triggerAttackRelease('C1', '8n', time, velocity),
-        snare: (time, velocity) => snare.triggerAttackRelease('16n', time, velocity),
-        hat: (time, velocity) => hat.triggerAttackRelease('32n', time, velocity),
-        rim: (time, velocity) => rim.triggerAttackRelease('D6', '32n', time, velocity),
-      },
-      bass,
+  /**
+   * The band's recordings load the first time a backing style is chosen or plays (≈250 KB): the drum kit and the
+   * bass the style uses. They go to the master after the guitar's high-pass. Until loaded, the band stays silent.
+   */
+  preloadBand(style: BackingStyle): void {
+    if (style === 'none' || !this.master) return
+    if (!this.band) {
+      const out = new Tone.Gain(0.85).connect(this.master)
+      const urls = Object.fromEntries((Object.keys(DRUM_FILES) as DrumSample[]).map((id) => [DRUM_KEYS[id], DRUM_FILES[id]]))
+      const drums = new Tone.Sampler({ urls, release: 0.06, onload: () => this.band && (this.band.drumsReady = true) }).connect(out)
+      drums.volume.value = -4
+      this.band = { out, drums, drumsReady: false, basses: {} }
     }
-    return this.band
+    const kind = bassKind(style)
+    if (!this.band.basses[kind]) {
+      const sampler = new Tone.Sampler({ urls: { ...BASS_FILES[kind] }, release: 0.12, onload: () => (entry.ready = true) }).connect(
+        this.band.out,
+      )
+      sampler.volume.value = kind === 'upright' ? 2 : -1
+      const entry = { sampler, ready: false }
+      this.band.basses[kind] = entry
+    }
   }
 
-  /** One step of the band: the groove continues from the running eighth count; the bass follows this chord. */
-  private playBand(style: BackingStyle, bassPc: number | null, time: number, beats: number): void {
-    const band = this.ensureBand()
-    if (!band) return
+  private hitDrum(part: DrumPart, time: number, velocity: number): void {
+    const band = this.band
+    if (!band?.drumsReady) return
+    const layer = DRUM_LAYERS[part]
+    const takes = velocity >= 0.7 ? layer.hard : layer.soft
+    this.drumTake += 1
+    const sample = takes[this.drumTake % takes.length]
+    // A closed hat chokes the open one, like a foot closing the pedal.
+    if (part === 'hat' || part === 'brushHat') band.drums.triggerRelease(DRUM_KEYS['hat-open'], time)
+    // A touch of human variation, so eighths on the hat do not sound like a machine.
+    const human = 1 + (Math.random() - 0.5) * 0.12
+    band.drums.triggerAttack(DRUM_KEYS[sample], time, Math.min(1, velocity * human))
+  }
+
+  /** One step of the band: the groove continues from the running eighth count; the bass follows this chord into the next. */
+  private playBand(style: BackingStyle, bassPc: number | null, nextPc: number | null, time: number, beats: number): void {
+    this.preloadBand(style)
+    if (!this.band) return
     const eighth = Tone.Time('8n').toSeconds()
     const count = Math.max(1, Math.round(beats * 2))
     for (let step = 0; step < count; step += 1) {
-      for (const hit of drumsAt(style, this.bandEighth + step)) band.drums[hit.part](time + step * eighth, hit.velocity)
+      for (const hit of drumsAt(style, this.bandEighth + step)) this.hitDrum(hit.part, time + step * eighth, hit.velocity)
     }
-    if (bassPc !== null) {
-      for (const note of bassLine(style, count, bassPc)) {
-        band.bass.triggerAttackRelease(midiToFreq(note.midi), note.length * eighth * 0.92, time + note.eighth * eighth, 0.9)
+    const bass = this.band.basses[bassKind(style)]
+    if (bassPc !== null && bass?.ready) {
+      for (const note of bassLine(style, count, bassPc, nextPc)) {
+        const accent = note.eighth % 4 === 0 ? 0.85 : 0.7
+        bass.sampler.triggerAttackRelease(midiToFreq(note.midi), note.length * eighth * 0.9, time + note.eighth * eighth, accent)
       }
     }
     this.bandEighth += count
@@ -508,7 +546,7 @@ class AudioEngine {
       this.endEvent = null
     }
     this.options = null
-    this.band?.bass.triggerRelease()
+    for (const bass of Object.values(this.band?.basses ?? {})) bass.sampler.releaseAll()
     transport.stop()
     transport.position = 0
   }

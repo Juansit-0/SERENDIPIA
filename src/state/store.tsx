@@ -105,6 +105,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const backingRef = useRef(backing)
   useEffect(() => {
     backingRef.current = backing
+    // Load the band's recordings as soon as a style is chosen, so it plays from the first bar.
+    loadedAudioEngine()?.preloadBand(backing)
   }, [backing])
   const getBacking = useCallback(() => backingRef.current, [])
   const [suggestFrom, setSuggestFrom] = useState<SuggestFrom>(initial.suggestFrom)

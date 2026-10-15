@@ -3,6 +3,7 @@ export const earText = {
   es: {
     sections: 'Sección de práctica',
     changes: 'Cambios',
+    more: 'Más',
     ear: 'Oído',
     title: 'Entrenamiento de oído',
     mode: 'Qué adivinar',
@@ -36,6 +37,7 @@ export const earText = {
   en: {
     sections: 'Practice section',
     changes: 'Changes',
+    more: 'More',
     ear: 'Ear',
     title: 'Ear training',
     mode: 'What to name',

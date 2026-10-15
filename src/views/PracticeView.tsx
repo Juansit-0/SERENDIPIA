@@ -1,18 +1,10 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { loadedAudioEngine } from '../audio/loader'
-import { ArrowRightIcon, MinusIcon, PlayIcon, PlusIcon, StopIcon } from '../components/icons'
+import { ArrowRightIcon, ChevronDownIcon, MinusIcon, PlayIcon, PlusIcon, StopIcon } from '../components/icons'
 import { useViewsText } from '../i18n/views'
 import { parseChord } from '../music/parseChord'
 import { chainVoicings } from '../music/playability'
-import {
-  DEFAULT_RAMP,
-  changesPerMinute,
-  loadRecords,
-  pairKey,
-  rampTempo,
-  saveRecord,
-  type PracticeRecord,
-} from '../music/practice'
+import { DEFAULT_RAMP, changesPerMinute, loadRecords, pairKey, rampTempo, saveRecord, type PracticeRecord } from '../music/practice'
 import { logPractice } from '../music/history'
 import { TEMPO_MAX, TEMPO_MIN } from '../state/settings'
 import { useStore } from '../state/store'
@@ -23,6 +15,8 @@ import { Recorder } from './practice/Recorder'
 import { recorderText } from '../i18n/recorder'
 import { progressText } from '../i18n/progress'
 import { earText } from '../i18n/ear'
+import { tunerText } from '../i18n/tuner'
+import { Tuner } from '../components/topbar/Tuner'
 import '../styles/views.css'
 
 type Mode = 'minute' | 'metronome'
@@ -30,28 +24,67 @@ type Mode = 'minute' | 'metronome'
 const MINUTE_MS = 60000
 const BEAT_CHOICES = [4, 2, 1]
 
-/** Práctica: the chord-change trainer and ear training, one at a time. */
+type Section = 'changes' | 'tuner' | 'ear' | 'record' | 'progress'
+const EXTRAS: Section[] = ['ear', 'record', 'progress']
+
+/**
+ * Práctica: what a guitar in hand needs first — chord changes and the tuner. Ear training, recording and the
+ * progress log wait behind «Más».
+ */
 export function PracticeView() {
   const { lang } = useStore()
   const x = earText[lang]
-  const [section, setSection] = useState<'changes' | 'ear' | 'record' | 'progress'>('changes')
+  const [section, setSection] = useState<Section>('changes')
+  const [more, setMore] = useState(false)
+  const names: Record<Section, string> = {
+    changes: x.changes,
+    tuner: tunerText[lang].title,
+    ear: x.ear,
+    record: recorderText[lang].tab,
+    progress: progressText[lang].tab,
+  }
+  const showExtras = more || EXTRAS.includes(section)
+  const tab = (id: Section) => (
+    <button key={id} type="button" aria-pressed={section === id} onClick={() => setSection(id)}>
+      {names[id]}
+    </button>
+  )
   return (
     <div className="pv flex flex-col gap-3 desk:h-full desk:min-h-0 desk:gap-2">
-      <div className="cc-seg pv-sections" role="group" aria-label={x.sections}>
-        <button type="button" aria-pressed={section === 'changes'} onClick={() => setSection('changes')}>
-          {x.changes}
+      <div className="pv-sections" role="group" aria-label={x.sections}>
+        <div className="cc-seg">{(['changes', 'tuner'] as Section[]).map(tab)}</div>
+        <button
+          type="button"
+          className="cc-btn cc-btn--ghost pv-more"
+          aria-expanded={showExtras}
+          aria-controls="pv-extras"
+          onClick={() => {
+            if (showExtras && EXTRAS.includes(section)) setSection('changes')
+            setMore(!showExtras)
+          }}
+        >
+          {x.more}
+          <ChevronDownIcon size={13} />
         </button>
-        <button type="button" aria-pressed={section === 'ear'} onClick={() => setSection('ear')}>
-          {x.ear}
-        </button>
-        <button type="button" aria-pressed={section === 'record'} onClick={() => setSection('record')}>
-          {recorderText[lang].tab}
-        </button>
-        <button type="button" aria-pressed={section === 'progress'} onClick={() => setSection('progress')}>
-          {progressText[lang].tab}
-        </button>
+        {showExtras && (
+          <div id="pv-extras" className="cc-seg pv-extras">
+            {EXTRAS.map(tab)}
+          </div>
+        )}
       </div>
-      {section === 'changes' ? <ChangeTrainer /> : section === 'ear' ? <EarTrainer /> : section === 'record' ? <Recorder /> : <Progress />}
+      {section === 'changes' ? (
+        <ChangeTrainer />
+      ) : section === 'tuner' ? (
+        <section className="cc-module pv-tuner" aria-label={names.tuner}>
+          <Tuner />
+        </section>
+      ) : section === 'ear' ? (
+        <EarTrainer />
+      ) : section === 'record' ? (
+        <Recorder />
+      ) : (
+        <Progress />
+      )}
     </div>
   )
 }
@@ -95,20 +128,17 @@ function ChangeTrainer() {
   const tapRef = useRef<HTMLButtonElement>(null)
 
   const roundStarted = useRef(0)
-  const finish = useCallback(
-    (score: number, recordKey: string | null) => {
-      setRunning(false)
-      // Every finished round counts towards the day's practice; one-minute rounds also chart the pair's progress.
-      const seconds = roundStarted.current ? (Date.now() - roundStarted.current) / 1000 : 0
-      roundStarted.current = 0
-      logPractice({ seconds, round: recordKey && !recordKey.endsWith('@tempo') ? { pair: recordKey, score } : true })
-      if (!recordKey) return
-      const newBest = saveRecord(recordKey, score)
-      setRecords(loadRecords())
-      setResult({ score, newBest })
-    },
-    [],
-  )
+  const finish = useCallback((score: number, recordKey: string | null) => {
+    setRunning(false)
+    // Every finished round counts towards the day's practice; one-minute rounds also chart the pair's progress.
+    const seconds = roundStarted.current ? (Date.now() - roundStarted.current) / 1000 : 0
+    roundStarted.current = 0
+    logPractice({ seconds, round: recordKey && !recordKey.endsWith('@tempo') ? { pair: recordKey, score } : true })
+    if (!recordKey) return
+    const newBest = saveRecord(recordKey, score)
+    setRecords(loadRecords())
+    setResult({ score, newBest })
+  }, [])
 
   const stopMetronome = useCallback(() => {
     loadedAudioEngine()?.stopProgression()
@@ -292,13 +322,25 @@ function ChangeTrainer() {
             <div className="pv-setup__row">
               <div className="pv-stepper" role="group" aria-label={v('practice.ownTempo')} title={v('practice.ownTempoHint')}>
                 <span className="pv-stepper__label">{v('practice.ownTempo')}</span>
-                <button type="button" className="cc-btn cc-btn--icon" disabled={live} onClick={() => setStartTempo((n) => Math.max(TEMPO_MIN, n - 4))} aria-label={t('a11y.tempoDown')}>
+                <button
+                  type="button"
+                  className="cc-btn cc-btn--icon"
+                  disabled={live}
+                  onClick={() => setStartTempo((n) => Math.max(TEMPO_MIN, n - 4))}
+                  aria-label={t('a11y.tempoDown')}
+                >
                   <MinusIcon size={16} />
                 </button>
                 <span className="pv-stepper__value cc-num" aria-live="polite">
                   {startTempo}
                 </span>
-                <button type="button" className="cc-btn cc-btn--icon" disabled={live} onClick={() => setStartTempo((n) => Math.min(TEMPO_MAX, n + 4))} aria-label={t('a11y.tempoUp')}>
+                <button
+                  type="button"
+                  className="cc-btn cc-btn--icon"
+                  disabled={live}
+                  onClick={() => setStartTempo((n) => Math.min(TEMPO_MAX, n + 4))}
+                  aria-label={t('a11y.tempoUp')}
+                >
                   <PlusIcon size={16} />
                 </button>
               </div>
@@ -312,7 +354,14 @@ function ChangeTrainer() {
                   ))}
                 </div>
               </div>
-              <button type="button" className="cc-btn" aria-pressed={ramp} disabled={live} onClick={() => setRamp(!ramp)} title={t('practice.rampHint')}>
+              <button
+                type="button"
+                className="cc-btn"
+                aria-pressed={ramp}
+                disabled={live}
+                onClick={() => setRamp(!ramp)}
+                title={t('practice.rampHint')}
+              >
                 {t('practice.ramp')}
               </button>
             </div>
@@ -325,7 +374,10 @@ function ChangeTrainer() {
           {readouts.map(([label, value, soft]) => (
             <div className="pv-stat" key={label}>
               <dt className="cc-label">{label}</dt>
-              <dd key={String(value)} className={`pv-stat__value cc-num ${soft ? 'is-soft' : ''} ${soft && typeof value === 'string' ? 'is-empty' : ''}`}>
+              <dd
+                key={String(value)}
+                className={`pv-stat__value cc-num ${soft ? 'is-soft' : ''} ${soft && typeof value === 'string' ? 'is-empty' : ''}`}
+              >
                 {value}
               </dd>
             </div>
@@ -355,7 +407,13 @@ function ChangeTrainer() {
         {mode === 'minute' ? (
           <>
             <button type="button" ref={tapRef} className="pv-tap" onClick={tap} disabled={!live}>
-              <svg className="pv-tap__rings" viewBox="0 0 400 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+              <svg
+                className="pv-tap__rings"
+                viewBox="0 0 400 200"
+                preserveAspectRatio="xMidYMid slice"
+                aria-hidden="true"
+                focusable="false"
+              >
                 <g fill="none" stroke="currentColor" strokeWidth="1" vectorEffect="non-scaling-stroke">
                   <circle cx="200" cy="100" r="50" />
                   <circle cx="200" cy="100" r="90" />
@@ -377,7 +435,9 @@ function ChangeTrainer() {
                 <circle cx="200" cy="100" r="140" />
               </g>
             </svg>
-            <span className="pv-follow__chord">{live && (active === 0 ? chordA : chordB) ? nameOf((active === 0 ? chordA : chordB)!) : '·'}</span>
+            <span className="pv-follow__chord">
+              {live && (active === 0 ? chordA : chordB) ? nameOf((active === 0 ? chordA : chordB)!) : '·'}
+            </span>
           </div>
         )}
         {result && (

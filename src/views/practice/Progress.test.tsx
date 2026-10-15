@@ -6,7 +6,10 @@ import { renderApp } from '../../test/renderApp'
 
 afterEach(cleanup)
 
-const openProgress = () => fireEvent.click(screen.getByRole('button', { name: 'Progreso' }))
+const openProgress = () => {
+  fireEvent.click(screen.getAllByRole('button', { name: 'Más' }).at(-1)!)
+  fireEvent.click(screen.getByRole('button', { name: 'Progreso' }))
+}
 
 describe('Práctica · Progreso', () => {
   it('invites to practise when there is nothing yet', () => {

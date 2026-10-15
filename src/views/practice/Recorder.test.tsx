@@ -16,6 +16,7 @@ afterEach(cleanup)
 describe('Práctica · Grabar', () => {
   it('records over the progression and keeps the take', async () => {
     renderApp('#practice')
+    fireEvent.click(screen.getAllByRole('button', { name: 'Más' }).at(-1)!)
     fireEvent.click(screen.getByRole('button', { name: 'Grabar' }))
     expect(screen.getByText(/Aún no hay tomas/)).toBeTruthy()
     await act(async () => {

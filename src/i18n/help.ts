@@ -10,6 +10,19 @@ interface Section {
 /** Newest first. Each entry is one published version with what a player would notice. */
 export const CHANGELOG: Array<{ version: string; es: string[]; en: string[] }> = [
   {
+    version: '2.28',
+    es: [
+      'La banda suena de verdad: batería grabada (bombo, caja, aro, escobillas, charles) y bajo eléctrico o contrabajo, que camina hacia el siguiente acorde.',
+      'Vuelven las lunas y los soles: un arco sobre el mástil que sigue el pulso mientras suena.',
+      'Práctica más directa: Cambios y Afinador delante; Oído, Grabar y Progreso en «Más».',
+    ],
+    en: [
+      'The band sounds real: recorded drums (kick, snare, side stick, brushes, hi-hat) and electric or upright bass that walks into the next chord.',
+      'The moons and suns are back: an arc over the fretboard that follows the beat while it plays.',
+      'A more direct Practice: Changes and Tuner up front; Ear, Record and Progress under «More».',
+    ],
+  },
+  {
     version: '2.27',
     es: ['Pantalla más tranquila: fuera adornos y datos repetidos; el mástil tiene más sitio. La función de cada estrella de la tira aparece al pasar el ratón.'],
     en: ['A calmer screen: decorations and repeated details are gone; the fretboard has more room. Hover a strip star to see its function.'],
@@ -99,7 +112,8 @@ export const helpText: Record<'es' | 'en', { title: string; open: string; close:
         title: 'Práctica',
         items: [
           'Cambios: un minuto cambiando entre dos acordes, o con el metrónomo subiendo poco a poco.',
-          'Oído: la app toca un acorde o un intervalo y tú lo adivinas.',
+          'Afinador: con el micrófono, cuerda por cuerda.',
+          'En «Más» → Oído: la app toca un acorde o un intervalo y tú lo adivinas.',
           'Grabar: grábate mientras suena la progresión y escúchate solo o con la banda.',
           'Progreso: tu racha de días, minutos por día y cómo mejora cada pareja de acordes.',
         ],
@@ -135,7 +149,7 @@ export const helpText: Record<'es' | 'en', { title: string; open: string; close:
         items: [
           'SERENDIPIA es una app para practicar guitarra: acordes, teoría, oído y canciones, hecha por Juan Camilo López Díaz.',
           'Hecha con React, TypeScript, Tone.js (sonido) y three.js (la bienvenida). No tiene servidor: funciona entera en tu navegador, también sin conexión.',
-          'Sonidos de guitarra: soundfont MusyngKite (CC BY-SA 3.0). Tipografías IM Fell English, EB Garamond y Jost (SIL OFL). Código con licencia MIT.',
+          'Sonidos de guitarra y bajo: soundfont MusyngKite (CC BY-SA 3.0). Batería: Big Rusty Drums de Karoryfer (CC0). Tipografías IM Fell English, EB Garamond y Jost (SIL OFL). Código con licencia MIT.',
         ],
       },
     ],
@@ -192,7 +206,8 @@ export const helpText: Record<'es' | 'en', { title: string; open: string; close:
         title: 'Practice',
         items: [
           'Changes: one minute switching between two chords, or with the metronome rising step by step.',
-          'Ear: the app plays a chord or an interval and you name it.',
+          'Tuner: with the microphone, string by string.',
+          'Under «More» → Ear: the app plays a chord or an interval and you name it.',
           'Record: record yourself while the progression plays and listen alone or with the band.',
           'Progress: your day streak, minutes per day and how each chord pair improves.',
         ],
@@ -228,7 +243,7 @@ export const helpText: Record<'es' | 'en', { title: string; open: string; close:
         items: [
           'SERENDIPIA is an app to practise guitar: chords, theory, ear and songs, made by Juan Camilo López Díaz.',
           'Built with React, TypeScript, Tone.js (sound) and three.js (the welcome). No server: it runs entirely in your browser, offline too.',
-          'Guitar sounds: MusyngKite soundfont (CC BY-SA 3.0). Typefaces IM Fell English, EB Garamond and Jost (SIL OFL). Code under the MIT license.',
+          'Guitar and bass sounds: MusyngKite soundfont (CC BY-SA 3.0). Drums: Karoryfer’s Big Rusty Drums (CC0). Typefaces IM Fell English, EB Garamond and Jost (SIL OFL). Code under the MIT license.',
         ],
       },
     ],

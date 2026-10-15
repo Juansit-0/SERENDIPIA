@@ -22,13 +22,18 @@ describe('accessibility (axe)', () => {
     ['Teoría', '#theory', null],
     ['Teoría · Escalas', '#theory', 'Escalas'],
     ['Práctica', '#practice', null],
-    ['Práctica · Oído', '#practice', 'Oído'],
-    ['Práctica · Grabar', '#practice', 'Grabar'],
-    ['Práctica · Progreso', '#practice', 'Progreso'],
+    ['Práctica · Afinador', '#practice', 'Afinador'],
+    ['Práctica · Oído', '#practice', 'Más|Oído'],
+    ['Práctica · Grabar', '#practice', 'Más|Grabar'],
+    ['Práctica · Progreso', '#practice', 'Más|Progreso'],
     ['Cancionero', '#songbook', 'Crear mi primera canción'],
-  ])('%s has no violations', async (_, hash, tab) => {
-    renderApp(hash)
-    if (tab) fireEvent.click(screen.getByRole('button', { name: tab }))
-    expect(await violations()).toEqual([])
-  }, 20000)
+  ])(
+    '%s has no violations',
+    async (_, hash, tab) => {
+      renderApp(hash)
+      for (const name of tab?.split('|') ?? []) fireEvent.click(screen.getAllByRole('button', { name }).at(-1)!)
+      expect(await violations()).toEqual([])
+    },
+    20000,
+  )
 })

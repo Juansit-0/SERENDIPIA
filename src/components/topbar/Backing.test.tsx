@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { ProgressionOptions } from '../../audio/types'
 
 let options: ProgressionOptions | null = null
+const preloaded: string[] = []
 const engine = {
   isStarted: true,
   onLoadingChange: null,
@@ -16,6 +17,9 @@ const engine = {
   },
   updateProgression: () => undefined,
   stopProgression: () => undefined,
+  preloadBand: (style: string) => {
+    preloaded.push(style)
+  },
 }
 vi.mock('../../audio/loader', () => ({
   loadAudioEngine: async () => engine,
@@ -36,6 +40,8 @@ describe('Acompañamiento', () => {
     fireEvent.click(screen.getByRole('button', { name: /^Reproducción/ }))
     fireEvent.change(screen.getByLabelText('Acompañamiento'), { target: { value: 'bossa' } })
     expect(JSON.parse(localStorage.getItem('serendipia.settings.v2')!).backing).toBe('bossa')
+    // The band's recordings start loading as soon as a style is chosen.
+    expect(preloaded).toContain('bossa')
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: /Correr/ }))
     })

@@ -1,7 +1,7 @@
 {
   "name": "serendipia",
   "private": true,
-  "version": "2.27.0",
+  "version": "2.28.0",
   "license": "MIT",
   "type": "module",
   "scripts": {

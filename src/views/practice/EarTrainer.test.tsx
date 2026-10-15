@@ -7,6 +7,7 @@ afterEach(cleanup)
 
 function openEar() {
   renderApp('#practice')
+  fireEvent.click(screen.getAllByRole('button', { name: 'Más' }).at(-1)!)
   fireEvent.click(screen.getByRole('button', { name: 'Oído' }))
 }
 

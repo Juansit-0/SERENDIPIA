@@ -25,11 +25,11 @@
 | ![Entrenamiento de oído: ¿qué acorde suena?](docs/screenshots/oido.jpg) | ![Progreso: racha de días, minutos por día y cambios por minuto de cada pareja](docs/screenshots/progreso.jpg) |
 | **Práctica → Oído** | **Práctica → Progreso** |
 
-**Práctica** — Cambios por minuto entre dos acordes (con metrónomo que sube poco a poco), **entrenamiento de oído** (adivina acordes e intervalos), **grabarte** encima de la progresión y escucharte con la banda, y tu **progreso** día a día.
+**Práctica** — Cambios por minuto entre dos acordes (con metrónomo que sube poco a poco) y el **afinador**; en «Más», **entrenamiento de oído** (adivina acordes e intervalos), **grabarte** encima de la progresión y escucharte con la banda, y tu **progreso** día a día.
 
 **Cancionero** — La letra con los acordes encima de cada sílaba (formato ChordPro: `[C]Hoy el [G]cielo`). Al tocarla, el acorde que suena se ilumina y la letra avanza sola. Se transpone, se imprime y se comparte.
 
-**Herramientas** — Afinador por micrófono, metrónomo con subdivisión, marcar el tempo tocando (tecla `T`), control con pedal de pasar páginas, pantalla siempre encendida mientras practicas, tema de noche y de día (automático), notación C o Do, español e inglés. La ayuda está en la tecla `?`.
+**Herramientas** — Afinador por micrófono, el cielo sobre el mástil (lunas de noche, soles de día) que sigue el pulso, metrónomo con subdivisión, marcar el tempo tocando (tecla `T`), control con pedal de pasar páginas, pantalla siempre encendida mientras practicas, tema de noche y de día (automático), notación C o Do, español e inglés. La ayuda está en la tecla `?`.
 
 | | |
 |---|---|
@@ -42,7 +42,7 @@
 
 - **React 19 + TypeScript + Vite**, estilos con Tailwind CSS v4 y un sistema de diseño propio («Carta celeste», descrito en [`DESIGN.md`](DESIGN.md)).
 - **Teoría musical en TypeScript puro** (`src/music/`): análisis de acordes y tonalidades, posiciones, detección de acordes desde trastes y desde audio (FFT, picos espectrales y descarte de armónicos), escalas, transposición, ChordPro. Sin IA y sin servidor.
-- **Audio con Tone.js**: muestras de guitarra reales, rasgueos, metrónomo y una banda sintetizada (bombo, caja, charles y bajo). Afinador y «Oír» con la Web Audio API.
+- **Audio con Tone.js**: muestras de guitarra reales, rasgueos, metrónomo y una banda con batería y bajo grabados (bajo que camina hacia el siguiente acorde). Afinador y «Oír» con la Web Audio API.
 - **three.js** solo para la bienvenida, cargado bajo demanda.
 - **Sin backend**: todo lo del usuario vive en su navegador (`localStorage` e IndexedDB para las grabaciones), con copia de seguridad descargable. Instalable (PWA) y funciona sin conexión gracias a un *service worker* generado al compilar.
 - **Calidad**: más de 400 tests con Vitest y Testing Library, auditoría de accesibilidad automática con axe, lint con oxlint, y una prueba de humo contra la web publicada tras cada despliegue (GitHub Actions → GitHub Pages).
@@ -61,6 +61,6 @@ npm run build      # compilación de producción
 
 ## Audio y licencias
 
-Las muestras de guitarra de `src/assets/samples/` salen de los soundfonts MusyngKite publicados por [gleitz/midi-js-soundfonts](https://github.com/gleitz/midi-js-soundfonts), con licencia **CC BY-SA 3.0**; se regeneran con `npm run samples` (requiere `ffmpeg`). Tipografías IM Fell English, EB Garamond y Jost (SIL OFL).
+Las muestras de guitarra de `src/assets/samples/` salen de los soundfonts MusyngKite publicados por [gleitz/midi-js-soundfonts](https://github.com/gleitz/midi-js-soundfonts), con licencia **CC BY-SA 3.0**; se regeneran con `npm run samples` (requiere `ffmpeg`). El bajo sale de los mismos soundfonts y la batería de [Big Rusty Drums](https://github.com/sfzinstruments/karoryfer.big-rusty-drums) de Karoryfer, con licencia **CC0**; ambos se regeneran con `node scripts/fetch-band.mjs`. Tipografías IM Fell English, EB Garamond y Jost (SIL OFL).
 
 El código se publica con [licencia MIT](LICENSE). Hecha por Juan Camilo López Díaz.

@@ -7,7 +7,6 @@ import type { DetectionCandidate } from '../../music/detectChord'
 import { parseChord } from '../../music/parseChord'
 import { useStore } from '../../state/store'
 import { MicIcon } from '../icons'
-import { voicingTitles } from './voicingTitle'
 import type { ChordModel } from './useChordModel'
 
 const GLYPHS = [
@@ -32,7 +31,6 @@ export function InfoRow({ m, onListen }: { m: ChordModel; onListen: () => void }
   useEffect(() => () => setChordInputFocused(false), [setChordInputFocused])
 
   const soundingName = notation === 'latin' ? m.sounding.latin : m.sounding.anglo
-  const activeLabel = m.activeVoicing ? (voicingTitles(m.voicings, c)[m.selectedVoicing] ?? null) : null
   const qualityName = lang === 'es' ? chord.quality.nameEs : chord.quality.nameEn
 
   // «Oír»: the microphone names the chord being strummed and the view follows it (as a shape under the capo).
@@ -177,15 +175,10 @@ export function InfoRow({ m, onListen }: { m: ChordModel; onListen: () => void }
               ))}
             </div>
           )}
-          {!chordError && m.alternatives.length === 0 && activeLabel && (
-            <p className="cv-ctx-pos">
-              {c.activePosition}: <b>{activeLabel}</b> · {c[m.activeVoicing!.difficulty]}
-            </p>
-          )}
-        </div>
+          </div>
       )}
 
-      {keyTop && (
+      {keyTop && keyDiffers && (
         <div className="cc-module cv-keymod">
           <span className="cc-chip cv-keychip">
             {c.keyProbable}:{' '}

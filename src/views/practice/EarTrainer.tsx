@@ -172,11 +172,6 @@ export function EarTrainer() {
               </div>
             </div>
           )}
-          <ol className="pv-steps ear-steps">
-            {x.steps.map((step) => (
-              <li key={step}>{step}</li>
-            ))}
-          </ol>
         </section>
 
         <section className="cc-module pv-stats ear-stats" aria-live="polite">

@@ -140,7 +140,7 @@ export function TopBar() {
         </button>
 
         <span className="max-sm:hidden desk:max-[1199px]:hidden">
-          <BeatMoons label={x.beatIndicator} />
+          {playing && <BeatMoons label={x.beatIndicator} />}
         </span>
 
         <div className="cc-stepper max-sm:ml-auto" role="group" aria-label={t('transport.tempo')}>

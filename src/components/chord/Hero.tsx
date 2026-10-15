@@ -9,7 +9,6 @@ export function Hero({ m }: { m: ChordModel }) {
   const name = m.heroName
   const stale = m.chordError && m.chartSource === 'voicing'
   const message = m.unrecognized ? c.unrecognized : c.empty
-  const otherLabel = m.notation === 'latin' ? c.angloName : c.latinName
 
   return (
     <section className="cc-module cv-hero" aria-label={c.chordLabel}>
@@ -44,10 +43,8 @@ export function Hero({ m }: { m: ChordModel }) {
               {m.otherName}
             </span>
           </p>
-          <span className="cc-label cv-latin-label">{otherLabel}</span>
         </div>
       )}
-      <span className="cc-hatch cv-hero-hatch" aria-hidden="true" />
     </section>
   )
 }

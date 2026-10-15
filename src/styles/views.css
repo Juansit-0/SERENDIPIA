@@ -639,8 +639,9 @@
 }
 
 @media (min-width: 1024px) and (min-height: 640px) {
+  /* The setup takes only the room its controls need; the two chords get the rest. */
   .pv-top {
-    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) minmax(0, 1.3fr);
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) minmax(15rem, auto);
     align-items: stretch;
   }
   .pv-setup {

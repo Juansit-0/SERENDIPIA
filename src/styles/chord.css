@@ -1123,7 +1123,7 @@
   }
   .cv-top {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 38px;
+    grid-template-columns: minmax(0, 1fr);
     gap: 6px;
     min-height: 0;
   }
@@ -1206,9 +1206,6 @@
 @media (min-width: 1180px) and (min-height: 640px) {
   .cv-ctx-pos {
     display: inline;
-  }
-  .cv-top {
-    grid-template-columns: minmax(0, 1fr) 38px minmax(150px, 190px) minmax(130px, 160px);
   }
   .cv-gloss {
     display: flex;

@@ -1,7 +1,6 @@
 import { useCallback } from 'react'
 import { BottomRow } from '../components/chord/BottomRow'
 import { Fretboard } from '../components/chord/Fretboard'
-import { GlossFind, GlossPulse, PhaseColumn } from '../components/chord/Gloss'
 import { Hero } from '../components/chord/Hero'
 import { InfoRow } from '../components/chord/InfoRow'
 import { useChordModel } from '../components/chord/useChordModel'
@@ -36,9 +35,6 @@ export function ChordView() {
     <div className="cv">
       <div className="cv-top">
         <Hero m={m} />
-        <PhaseColumn />
-        <GlossFind />
-        <GlossPulse />
       </div>
       <InfoRow m={m} onListen={listen} />
       <div className="cv-mid">

@@ -8,6 +8,7 @@ import { MarkIcon } from './MarkIcon'
 import { Star, type StarFn } from './Star'
 
 export const SLOTS = 16
+const FN_LABEL = { tonic: 'legendTonic', subdominant: 'legendSub', dominant: 'legendDom', borrowed: 'legendBorrowed' } as const
 const MAX_GHOSTS = 3
 // Vertical rhythm of one slot (px): roman, star, name, label. Offsets bend the line gently.
 const ROMAN_H = 14
@@ -194,7 +195,7 @@ export function Constellation({
                 title={playing ? t('transport.stop') : `${t('voicing.pick')}: ${step.anglo}`}
               >
                 <span className={`strip-roman ${chord ? STATUS_WEIGHT[chord.status] : ''}`}>{chord?.roman ?? ' '}</span>
-                <Star fn={fn} active={active} />
+                <Star fn={fn} active={active} title={s(FN_LABEL[fn])} />
                 <span className="strip-tile">
                   <span className="strip-name" title={notation === 'both' ? `${step.anglo} · ${step.latin}` : undefined}>
                     {name}
@@ -246,9 +247,6 @@ export function Constellation({
             onDragOver={(event) => handleDragOver(event, emptyStart + index)}
             onDrop={handleDrop}
           >
-            <span className="strip-dot" style={{ marginTop: ROMAN_H + STAR_H / 2 - 2 }}>
-              {index === 0 && ghosts.length < allGhosts.length ? <span className="strip-more">…</span> : null}
-            </span>
           </div>
         ))}
 

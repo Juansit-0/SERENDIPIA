@@ -317,11 +317,6 @@ function ChangeTrainer() {
               </button>
             </div>
           ) : null}
-          <ol className="pv-steps">
-            <li>{v('practice.how1')}</li>
-            <li>{v('practice.how2')}</li>
-            <li>{v(mode === 'minute' ? 'practice.how3.minute' : 'practice.how3.metronome')}</li>
-          </ol>
         </section>
       </div>
 

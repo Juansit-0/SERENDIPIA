@@ -3,9 +3,11 @@ import type { HarmonicFunction } from '../../music/scales'
 export type StarFn = HarmonicFunction | 'borrowed'
 
 /** Four-point sparkle, the strip's single mark. Colored by harmonic function through CSS variables. */
-export function Star({ fn, active = false, ghost = false }: { fn: StarFn; active?: boolean; ghost?: boolean }) {
+export function Star({ fn, active = false, ghost = false, title }: { fn: StarFn; active?: boolean; ghost?: boolean; title?: string }) {
   return (
     <svg className="strip-star" data-fn={fn} data-active={active || undefined} viewBox="-16 -16 32 32" aria-hidden="true" focusable="false">
+      {/* Hovering a star names its function (the colour legend lives in the help). */}
+      {title && <title>{title}</title>}
       <circle className="strip-star__halo" r="8" />
       {active && <circle className="strip-star__ring" r="15" />}
       {active && <circle className="strip-star__ring strip-star__ring--inner" r="11.5" />}

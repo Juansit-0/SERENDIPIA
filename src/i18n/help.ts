@@ -10,6 +10,11 @@ interface Section {
 /** Newest first. Each entry is one published version with what a player would notice. */
 export const CHANGELOG: Array<{ version: string; es: string[]; en: string[] }> = [
   {
+    version: '2.27',
+    es: ['Pantalla más tranquila: fuera adornos y datos repetidos; el mástil tiene más sitio. La función de cada estrella de la tira aparece al pasar el ratón.'],
+    en: ['A calmer screen: decorations and repeated details are gone; the fretboard has more room. Hover a strip star to see its function.'],
+  },
+  {
     version: '2.26',
     es: ['Títulos de sección más grandes y claros (Posiciones, Mástil, Notas del acorde, Puede seguir…).'],
     en: ['Larger, clearer section titles (Positions, Fretboard, Chord notes, What can follow…).'],
@@ -65,7 +70,7 @@ export const helpText: Record<'es' | 'en', { title: string; open: string; close:
         id: 'strip',
         title: 'La tira (progresión)',
         items: [
-          'Tu progresión, como una constelación: el color de cada estrella es su función (tónica, subdominante, dominante, prestado).',
+          'Tu progresión, como una constelación: el color de cada estrella es su función — lila tónica, turquesa subdominante, oro dominante, rosa prestado (pasa el ratón por una estrella para verlo).',
           'Toca un paso para elegir su posición y su ritmo; arrástralo para moverlo. Entre pasos, un comentario explica el cambio.',
           'Las estrellas punteadas son hallazgos: acordes que podrían seguir.',
           'En ⋯: guardar, transponer, canciones por secciones, copia de seguridad, compartir enlace e imprimir la hoja.',
@@ -158,7 +163,7 @@ export const helpText: Record<'es' | 'en', { title: string; open: string; close:
         id: 'strip',
         title: 'The strip (progression)',
         items: [
-          'Your progression as a constellation: each star’s colour is its function (tonic, subdominant, dominant, borrowed).',
+          'Your progression as a constellation: each star’s colour is its function — lilac tonic, turquoise subdominant, gold dominant, pink borrowed (hover a star to see it).',
           'Tap a step to choose its shape and rhythm; drag it to move it. Between steps, a note explains the change.',
           'Dotted stars are finds: chords that could come next.',
           'In ⋯: save, transpose, songs by sections, backup, share link and print sheet.',

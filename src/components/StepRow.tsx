@@ -8,7 +8,6 @@ import { RedoIcon, UndoIcon } from './icons'
 import { ProgressionTools } from './ProgressionTools'
 import { Constellation, SLOTS } from './strip/Constellation'
 import { MarkIcon } from './strip/MarkIcon'
-import { useStrip } from './strip/useStrip'
 import { StepVoicingPicker } from './StepVoicingPicker'
 
 /** The progression as a constellation, on a band at the foot of the app. */
@@ -33,7 +32,6 @@ export function StepRow() {
     lang,
     t,
   } = useStore()
-  const s = useStrip()
 
   const [pickerStepId, setPickerStepId] = useState<string | null>(null)
   const [announcement, setAnnouncement] = useState('')
@@ -54,12 +52,6 @@ export function StepRow() {
     announce(`${name}: ${t('a11y.stepMoved')} ${to + 1}`)
   }
 
-  const legend: Array<[string, string]> = [
-    ['tonic', s('legendTonic')],
-    ['sub', s('legendSub')],
-    ['dom', s('legendDom')],
-    ['borrowed', s('legendBorrowed')],
-  ]
 
   return (
     <section className="strip relative min-w-0 desk:shrink-0" aria-label={t('progression.title')}>
@@ -118,14 +110,6 @@ export function StepRow() {
             )}
           </p>
         )}
-        <ul className="strip__legend" aria-label={s('legendLabel')}>
-          {legend.map(([fn, label]) => (
-            <li key={fn}>
-              <i className="strip__swatch" data-fn={fn} aria-hidden="true" />
-              {label}
-            </li>
-          ))}
-        </ul>
         <ProgressionTools onAnnounce={(message) => setAnnouncement(message)} />
       </div>
 

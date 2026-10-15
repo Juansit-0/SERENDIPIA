@@ -17,6 +17,7 @@ const engine = {
   },
   updateProgression: () => undefined,
   stopProgression: () => undefined,
+  playFrets: () => undefined,
 }
 vi.mock('../audio/loader', () => ({
   loadAudioEngine: async () => engine,

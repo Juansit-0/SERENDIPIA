@@ -134,56 +134,56 @@ export function TunerView() {
   const [nx, ny] = polar(needle, radius + 18)
 
   return (
-    <div className="tv" data-advice={advice ?? 'none'} data-listening={listening}>
+    <div className="tn" data-advice={advice ?? 'none'} data-listening={listening}>
       <h2 className="sr-only">{x.title}</h2>
-      <div ref={stage} className="tv-stage">
-        <canvas ref={canvas} className="tv-sky" aria-hidden="true" />
+      <div ref={stage} className="tn-stage">
+        <canvas ref={canvas} className="tn-sky" aria-hidden="true" />
         <svg
-          className="tv-dial"
+          className="tn-dial"
           width={size}
           height={size}
           viewBox={`${-half} ${-half} ${size} ${size}`}
           role="img"
           aria-label={reading ? `${x.gauge}: ${reading.stringCents} ${x.cents}` : x.gauge}
         >
-          {!skyReady && <circle className="tv-ring-fallback" r={radius} />}
+          {!skyReady && <circle className="tn-ring-fallback" r={radius} />}
           {Array.from({ length: 21 }, (_, i) => {
             const value = -SPAN + i * 5
             const angle = (value / SPAN) * SWEEP
             const long = value % 25 === 0
             const [x1, y1] = polar(angle, radius + (value === 0 ? 4 : long ? 8 : 11))
             const [x2, y2] = polar(angle, radius + (value === 0 ? 34 : long ? 26 : 20))
-            return <line key={value} className={`tv-tick ${value === 0 ? 'is-zero' : ''}`} x1={x1} y1={y1} x2={x2} y2={y2} />
+            return <line key={value} className={`tn-tick ${value === 0 ? 'is-zero' : ''}`} x1={x1} y1={y1} x2={x2} y2={y2} />
           })}
-          <text className="tv-scale" x={polar(-SWEEP - 9, radius + 22)[0]} y={polar(-SWEEP - 9, radius + 22)[1] + 6} textAnchor="middle">
+          <text className="tn-scale" x={polar(-SWEEP - 9, radius + 22)[0]} y={polar(-SWEEP - 9, radius + 22)[1] + 6} textAnchor="middle">
             ♭
           </text>
-          <text className="tv-scale" x={polar(SWEEP + 9, radius + 22)[0]} y={polar(SWEEP + 9, radius + 22)[1] + 6} textAnchor="middle">
+          <text className="tn-scale" x={polar(SWEEP + 9, radius + 22)[0]} y={polar(SWEEP + 9, radius + 22)[1] + 6} textAnchor="middle">
             ♯
           </text>
           {cents !== null && Math.abs(needle) > 0.5 && (
             <path
-              className={`tv-trace ${cents < 0 ? 'is-flat' : 'is-sharp'}`}
+              className={`tn-trace ${cents < 0 ? 'is-flat' : 'is-sharp'}`}
               d={`M${polar(0, radius + 18).join(' ')} A${radius + 18} ${radius + 18} 0 0 ${needle > 0 ? 1 : 0} ${nx} ${ny}`}
             />
           )}
-          <g className="tv-needle" style={{ transform: `translate(${nx}px, ${ny}px)`, opacity: reading ? 1 : 0.4 }}>
+          <g className="tn-needle" style={{ transform: `translate(${nx}px, ${ny}px)`, opacity: reading ? 1 : 0.4 }}>
             <path d="M0,-12 Q1.6,-1.6 12,0 Q1.6,1.6 0,12 Q-1.6,1.6 -12,0 Q-1.6,-1.6 0,-12Z" />
           </g>
         </svg>
 
-        <div className="tv-core" style={{ width: radius * 1.5 }}>
+        <div className="tn-core" style={{ width: radius * 1.5 }}>
           {listening || reading ? (
             <>
-              <p className="tv-note" key={reading ? reading.midi : 'none'}>
+              <p className="tn-note" key={reading ? reading.midi : 'none'}>
                 {reading ? noteName(reading.midi) : '—'}
               </p>
-              <p className="tv-cents cc-num">
+              <p className="tn-cents cc-num">
                 {reading
                   ? `${reading.stringCents > 0 ? '+' : reading.stringCents < 0 ? '−' : ''}${Math.abs(reading.stringCents)} ${x.cents}`
                   : ' '}
               </p>
-              <p className="tv-advice" aria-live="polite">
+              <p className="tn-advice" aria-live="polite">
                 {advice === 'in-tune'
                   ? x.inTune
                   : advice === 'tighten'
@@ -195,24 +195,24 @@ export function TunerView() {
             </>
           ) : (
             <>
-              <p className="tv-lead">{x.lead}</p>
+              <p className="tn-lead">{x.lead}</p>
               <button
                 type="button"
-                className="cc-btn cc-btn--primary tv-start"
+                className="cc-btn cc-btn--primary tn-start"
                 disabled={status === 'starting' || status === 'unsupported'}
                 onClick={() => void start()}
               >
                 <MicIcon size={16} />
                 {x.start}
               </button>
-              {message && <p className={`tv-message ${status === 'starting' ? '' : 'is-error'}`}>{message}</p>}
+              {message && <p className={`tn-message ${status === 'starting' ? '' : 'is-error'}`}>{message}</p>}
             </>
           )}
         </div>
       </div>
 
-      <aside className="tv-side">
-        <div className="tv-field">
+      <aside className="tn-side">
+        <div className="tn-field">
           <label className="cc-label" htmlFor="tuner-tuning">
             {x.tuning}
           </label>
@@ -225,18 +225,18 @@ export function TunerView() {
           </select>
         </div>
 
-        <div className="tv-field">
+        <div className="tn-field">
           <span className="cc-label" title={x.stringsHint}>
             {x.strings} · {target === null ? x.auto : `${x.string} ${6 - target}`}
           </span>
           {/* A headstock: the three low strings' pegs on the left, the three high ones on the right. */}
-          <div className="tv-headstock" role="group" aria-label={x.strings}>
-            <span className="tv-headstock__wood" aria-hidden="true" />
+          <div className="tn-headstock" role="group" aria-label={x.strings}>
+            <span className="tn-headstock__wood" aria-hidden="true" />
             {tuning.map((midi, index) => (
               <button
                 key={index}
                 type="button"
-                className="tv-peg"
+                className="tn-peg"
                 style={{ gridColumn: index < 3 ? 1 : 3, gridRow: index < 3 ? 3 - index : index - 2 }}
                 aria-pressed={target === index}
                 data-near={reading?.stringIndex === index ? 'true' : undefined}
@@ -256,13 +256,13 @@ export function TunerView() {
               </button>
             ))}
           </div>
-          <p className="tv-hint">{x.stringsHint}</p>
+          <p className="tn-hint">{x.stringsHint}</p>
         </div>
 
-        <p className="tv-explain">{x.explain}</p>
+        <p className="tn-explain">{x.explain}</p>
 
         {listening && (
-          <button type="button" className="cc-btn cc-btn--ghost tv-stop" onClick={stop}>
+          <button type="button" className="cc-btn cc-btn--ghost tn-stop" onClick={stop}>
             {x.stop}
           </button>
         )}

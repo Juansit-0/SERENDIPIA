@@ -88,30 +88,23 @@ function Moon({ phase }: { phase: number }) {
   )
 }
 
-/** The sun: its rays grow toward noon (the top of the arc) and shrink at dawn and dusk. */
+/**
+ * The sun's position, as in the old phase column: a dial with the horizon across it and the sun rising on the left,
+ * crossing noon at the top and setting on the right, one step per beat.
+ */
+export function sunAngle(index: number): number {
+  return 180 - (index * 180) / (ARC_BODIES - 1)
+}
+
 function Sun({ index }: { index: number }) {
-  const strength = Math.sin((Math.PI * (index + 0.5)) / ARC_BODIES)
-  const inner = 9
-  const outer = inner + 2.5 + 6 * strength
+  const r = R - 2
+  const rad = (sunAngle(index) * Math.PI) / 180
   return (
     <>
-      <g className="cv-arc-rays">
-        {Array.from({ length: 8 }, (_, ray) => {
-          const angle = (ray * Math.PI) / 4
-          const [cos, sin] = [Math.cos(angle), Math.sin(angle)]
-          return (
-            <line
-              key={ray}
-              x1={(cos * inner).toFixed(2)}
-              y1={(sin * inner).toFixed(2)}
-              x2={(cos * outer).toFixed(2)}
-              y2={(sin * outer).toFixed(2)}
-            />
-          )
-        })}
-      </g>
-      <circle className="cv-arc-lit" r={7} />
-      <circle className="cv-arc-rim" r={7} />
+      <circle className="cv-arc-disc" r={r} />
+      <path className="cv-arc-horizon-line" d={`M${-r},0H${r}`} />
+      <circle className="cv-arc-sun" cx={(r * Math.cos(rad)).toFixed(2)} cy={(-r * Math.sin(rad)).toFixed(2)} r={4.4} />
+      <circle className="cv-arc-rim" r={r} />
     </>
   )
 }

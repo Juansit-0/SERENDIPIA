@@ -132,6 +132,27 @@
     animation-delay: 70ms;
   }
 
+  /* ---------- the ring draws itself around each new name, back half first, then the front ---------- */
+  .cv-orbit-a,
+  .cv-orbit-b {
+    animation: orbit-draw 1100ms cubic-bezier(0.3, 0.7, 0.2, 1) backwards;
+  }
+  .cv-orbit-b {
+    animation-duration: 1500ms;
+    animation-delay: 120ms;
+  }
+  .cv-orbit-sway {
+    animation: orbit-sway 14s ease-in-out infinite;
+  }
+  .cv-orbit-star {
+    animation: fade-in 600ms 900ms backwards;
+  }
+  .cv-orbit-star path {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: orbit-twinkle 3.2s ease-in-out infinite;
+  }
+
   /* ---------- note marks pop onto the fretboard ---------- */
   .cv-mark {
     animation: mark-pop 320ms cubic-bezier(0.3, 1.5, 0.5, 1) backwards;
@@ -315,6 +336,32 @@
   }
 }
 
+@keyframes orbit-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes orbit-sway {
+  0%,
+  100% {
+    transform: rotate(-1.6deg);
+  }
+  50% {
+    transform: rotate(1.2deg);
+  }
+}
+@keyframes orbit-twinkle {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+  50% {
+    transform: scale(1.35) rotate(45deg);
+  }
+}
 @keyframes name-in {
   from {
     opacity: 0;

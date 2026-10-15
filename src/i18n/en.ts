@@ -6,7 +6,7 @@ export const en: Dictionary = {
   'tabs.dictionary': 'Dictionary',
   'tabs.detector': 'Detector',
   'tabs.theory': 'Theory',
-  'tabs.practice': 'Practice',
+  'tabs.tuner': 'Tuner',
   'tabs.songbook': 'Songbook',
   'practice.title': 'Chord change trainer',
   'practice.intro': 'Pick two chords and drill the change between them. Each shape is chosen so your hand moves as little as possible.',

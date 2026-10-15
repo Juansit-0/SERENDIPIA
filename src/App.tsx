@@ -9,7 +9,7 @@ import { hasNews, openHelp } from './state/help'
 import { showNotice } from './state/notice'
 import { helpText } from './i18n/help'
 import { ChordView } from './views/ChordView'
-import { PracticeView } from './views/PracticeView'
+import { TunerView } from './views/TunerView'
 import { SongbookView } from './views/SongbookView'
 import { TheoryView } from './views/TheoryView'
 import { Welcome } from './welcome/Welcome'
@@ -19,12 +19,22 @@ function Shell() {
   const { view, togglePlay, undo, redo, playing, moveStepCursor, tapTempo } = useStore()
   const welcome = useWelcomeOpen()
   // The screen stays on while music plays or while practising.
-  useWakeLock(playing || view === 'practice')
+  useWakeLock(playing || view === 'tuner')
 
   // A page-turner pedal (PageDown/PageUp) or the arrow keys walk the progression chord by chord while stopped.
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (welcome || playing || view === 'practice' || view === 'songbook' || event.defaultPrevented || event.metaKey || event.ctrlKey || event.altKey) return
+      if (
+        welcome ||
+        playing ||
+        view === 'tuner' ||
+        view === 'songbook' ||
+        event.defaultPrevented ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.altKey
+      )
+        return
       const target = event.target as HTMLElement | null
       const tag = target?.tagName
       if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA' || target?.isContentEditable) return
@@ -41,8 +51,7 @@ function Shell() {
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      // The practice view uses Space for its own tap counter.
-      if (event.code !== 'Space' || event.repeat || event.defaultPrevented || view === 'practice' || welcome) return
+      if (event.code !== 'Space' || event.repeat || event.defaultPrevented || welcome) return
       const target = event.target as HTMLElement | null
       const tag = target?.tagName
       if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA' || target?.isContentEditable) return
@@ -116,11 +125,11 @@ function Shell() {
         <main className="flex min-w-0 flex-col desk:min-h-0 desk:flex-1">
           {view === 'chord' && <ChordView />}
           {view === 'theory' && <TheoryView />}
-          {view === 'practice' && <PracticeView />}
+          {view === 'tuner' && <TunerView />}
           {view === 'songbook' && <SongbookView />}
         </main>
       </div>
-      {view !== 'practice' && view !== 'songbook' && <StepRow />}
+      {view !== 'tuner' && view !== 'songbook' && <StepRow />}
       <Notice />
       <HelpDialog />
       {welcome && <Welcome />}

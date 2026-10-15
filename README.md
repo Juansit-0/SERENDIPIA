@@ -1,6 +1,6 @@
 # SERENDIPIA
 
-**Acordes, teoría, oído y canciones para practicar guitarra** — en el navegador, sin cuentas y también sin conexión.
+**Acordes, teoría, canciones y afinador para tocar guitarra** — en el navegador, sin cuentas y también sin conexión.
 
 **▶ Pruébala: [juansit-0.github.io/SERENDIPIA](https://juansit-0.github.io/SERENDIPIA/)**
 
@@ -8,7 +8,7 @@
 
 *Serendipia: hallazgo valioso que llega sin buscarlo.* La app es un mapa del cielo para encontrar acordes, encadenarlos y quedarte con los que suenan bien.
 
-> **In English.** SERENDIPIA is a guitar practice web app: look up or detect any chord (by typing, marking the fretboard or playing it into the microphone), build progressions that play themselves over a bass-and-drums backing, see scales over the whole neck, train your ear, record yourself and keep a songbook with chords over the lyrics. React + TypeScript + Tone.js, no backend, installable and offline. Spanish and English UI.
+> **In English.** SERENDIPIA is a guitar practice web app: look up or detect any chord (by typing, marking the fretboard or playing it into the microphone), build progressions that play themselves over a bass-and-drums backing, see scales over the whole neck, keep a songbook with chords over the lyrics, and tune up in a sky of stars. React + TypeScript + Tone.js, no backend, installable and offline. Spanish and English UI.
 
 ## Qué hace
 
@@ -22,14 +22,14 @@
 |---|---|
 | ![Escala de Do mayor sobre los 15 trastes, con las notas del acorde actual rellenas](docs/screenshots/escalas.jpg) | ![Cancionero: la letra con cada acorde encima de su sílaba](docs/screenshots/cancionero.jpg) |
 | **Escalas** en Teoría | **Cancionero** |
-| ![Entrenamiento de oído: ¿qué acorde suena?](docs/screenshots/oido.jpg) | ![Progreso: racha de días, minutos por día y cambios por minuto de cada pareja](docs/screenshots/progreso.jpg) |
-| **Práctica → Oído** | **Práctica → Progreso** |
+| ![El afinador: un anillo de estrellas que se calma en turquesa cuando la cuerda está justa](docs/screenshots/afinador.jpg) | |
+| **Afinador** | |
 
-**Práctica** — Cambios por minuto entre dos acordes (con metrónomo que sube poco a poco) y el **afinador**; en «Más», **entrenamiento de oído** (adivina acordes e intervalos), **grabarte** encima de la progresión y escucharte con la banda, y tu **progreso** día a día.
+**Afinador** — Su propia pestaña: activa el micrófono y toca una cuerda al aire. Un anillo de estrellas (three.js) vibra y gira mientras está desafinada — lila si está baja, dorado si está alta — y se calma en turquesa, lanzando ondas, cuando está justa. Las clavijas de un clavijero fijan la cuerda y la hacen sonar.
 
 **Cancionero** — La letra con los acordes encima de cada sílaba (formato ChordPro: `[C]Hoy el [G]cielo`). Al tocarla, el acorde que suena se ilumina y la letra avanza sola. Se transpone, se imprime y se comparte.
 
-**Herramientas** — Afinador por micrófono, el cielo sobre el mástil (lunas de noche, soles de día) que sigue el pulso, metrónomo con subdivisión, marcar el tempo tocando (tecla `T`), control con pedal de pasar páginas, pantalla siempre encendida mientras practicas, tema de noche y de día (automático), notación C o Do, español e inglés. La ayuda está en la tecla `?`.
+**Herramientas** — El cielo sobre el mástil (lunas de noche, soles de día) que sigue el pulso, metrónomo con subdivisión, marcar el tempo tocando (tecla `T`), control con pedal de pasar páginas, pantalla siempre encendida mientras practicas, tema de noche y de día (automático), notación C o Do, español e inglés. La ayuda está en la tecla `?`.
 
 | | |
 |---|---|
@@ -43,7 +43,7 @@
 - **React 19 + TypeScript + Vite**, estilos con Tailwind CSS v4 y un sistema de diseño propio («Carta celeste», descrito en [`DESIGN.md`](DESIGN.md)).
 - **Teoría musical en TypeScript puro** (`src/music/`): análisis de acordes y tonalidades, posiciones, detección de acordes desde trastes y desde audio (FFT, picos espectrales y descarte de armónicos), escalas, transposición, ChordPro. Sin IA y sin servidor.
 - **Audio con Tone.js**: muestras de guitarra reales, rasgueos, metrónomo y una banda con batería y bajo grabados (bajo que camina hacia el siguiente acorde). Afinador y «Oír» con la Web Audio API.
-- **three.js** solo para la bienvenida, cargado bajo demanda.
+- **three.js** solo para la bienvenida y el afinador, cargado bajo demanda.
 - **Sin backend**: todo lo del usuario vive en su navegador (`localStorage` e IndexedDB para las grabaciones), con copia de seguridad descargable. Instalable (PWA) y funciona sin conexión gracias a un *service worker* generado al compilar.
 - **Calidad**: más de 400 tests con Vitest y Testing Library, auditoría de accesibilidad automática con axe, lint con oxlint, y una prueba de humo contra la web publicada tras cada despliegue (GitHub Actions → GitHub Pages).
 

@@ -43,7 +43,7 @@ describe('welcome', () => {
     fireEvent.keyDown(dialog, { key: 'ArrowRight' })
     expect(screen.getByRole('heading', { name: 'Escribe tus canciones' })).toBeTruthy()
     fireEvent.keyDown(dialog, { key: 'ArrowRight' })
-    expect(screen.getByRole('heading', { name: 'Entrena el oído y la mano' })).toBeTruthy()
+    expect(screen.getByRole('heading', { name: 'Afina con las estrellas' })).toBeTruthy()
     expect(shown.at(-1)).toBe(5)
     fireEvent.click(screen.getByRole('button', { name: 'Empezar a tocar' }))
     // The exit plays first: a circle opens onto the app, which assembles itself.

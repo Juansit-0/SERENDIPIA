@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { chordText } from '../../i18n/chord'
-import { intervalName } from '../../music/notes'
 import { parseChord } from '../../music/parseChord'
 import { isPlayableFrets, voicingLabel } from '../../music/stepVoicing'
 import { CloseIcon, ListenIcon, PlusIcon } from '../icons'
 import { SuggestionsPanel } from '../SuggestionsPanel'
 import { NoteMark } from './NoteMark'
+import { toneWord } from './roles'
 import { FN_VAR, suggestionFunction } from './suggestFn'
 import type { ChordModel } from './useChordModel'
 
@@ -14,16 +14,19 @@ function NotesModule({ m }: { m: ChordModel }) {
   const loose = m.noChord && m.detection ? [...new Map(m.detection.notes.map((note) => [note.pc, note])).values()] : []
   return (
     <section className="cc-module cv-notes" aria-label={c.notesIntervals}>
-      <h2 className="cc-label">{c.notesIntervals}</h2>
+      <header className="cv-notes-head">
+        <h2 className="cc-label">{c.notesIntervals}</h2>
+        <span className="cv-notes-hint">{c.notesHint}</span>
+      </header>
       <ul className="cv-notes-list">
         {!m.noChord &&
           m.tones.map((tone) => (
-            <li key={`${tone.interval}-${tone.pc}`} className="cv-note">
+            <li key={`${tone.interval}-${tone.pc}`} className={`cv-note cv-note--${tone.role}`}>
               <NoteMark role={tone.role} />
-              <b>{tone.name}</b>
-              <i className="cc-num" title={c[tone.role === 'other' ? 'other' : tone.role]}>
-                {intervalName(tone.interval)}
-              </i>
+              <span className="cv-note-text">
+                <b>{tone.name}</b>
+                <i>{toneWord(tone.interval, m.chord.quality.id, m.lang)}</i>
+              </span>
             </li>
           ))}
         {loose.map((note) => (
@@ -157,7 +160,12 @@ function NextModule({ m }: { m: ChordModel }) {
             </button>
             {open && (
               <div className="cc-pop cv-sug-pop" role="dialog" aria-label={c.seeAllLabel}>
-                <button type="button" className="cc-btn cc-btn--icon cc-btn--ghost cv-pop-close" aria-label={c.closePanel} onClick={() => setOpen(false)}>
+                <button
+                  type="button"
+                  className="cc-btn cc-btn--icon cc-btn--ghost cv-pop-close"
+                  aria-label={c.closePanel}
+                  onClick={() => setOpen(false)}
+                >
                   <CloseIcon size={14} />
                 </button>
                 <SuggestionsPanel />

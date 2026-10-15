@@ -1,4 +1,4 @@
-// Texts owned by the Teoría and Práctica views (Carta celeste). They extend the shared dictionary.
+// Texts owned by the Teoría view (Carta celeste). They extend the shared dictionary.
 import { useStore } from '../state/store'
 
 export const viewsText = {
@@ -19,21 +19,6 @@ export const viewsText = {
     'theory.gloss.tonic': 'reposo',
     'theory.gloss.subdominant': 'se aleja',
     'theory.gloss.dominant': 'tensión',
-    'practice.setup': 'Preparación',
-    'practice.round': 'Ronda',
-    'practice.mode': 'Modo de práctica',
-    'practice.startRound': 'Empezar ronda',
-    'practice.endRound': 'Terminar',
-    'practice.ownTempo': 'Tempo de práctica',
-    'practice.ownTempoHint': 'Parte del tempo de la barra; no lo cambia.',
-    'practice.space': 'o Espacio',
-    'practice.live': 'En curso',
-    'practice.noRecord': 'sin récord',
-    'practice.how1': 'Escribe dos acordes: la mano elegirá las posiciones que menos se mueven.',
-    'practice.how2': 'Pulsa «Empezar ronda» y toca el primero.',
-    'practice.how3.minute': 'Cada cambio limpio, pulsa «¡Cambio!» o Espacio. Una ronda dura un minuto.',
-    'practice.how3.metronome': 'Cambia de acorde con el clic; si te cuesta, pulsa «Más lento».',
-    'practice.playing': 'Suena',
   },
   en: {
     'theory.key': 'Key',
@@ -52,21 +37,6 @@ export const viewsText = {
     'theory.gloss.tonic': 'rest',
     'theory.gloss.subdominant': 'moves away',
     'theory.gloss.dominant': 'tension',
-    'practice.setup': 'Setup',
-    'practice.round': 'Round',
-    'practice.mode': 'Practice mode',
-    'practice.startRound': 'Start round',
-    'practice.endRound': 'End',
-    'practice.ownTempo': 'Practice tempo',
-    'practice.ownTempoHint': 'Starts from the top bar tempo; never changes it.',
-    'practice.space': 'or Space',
-    'practice.live': 'Live',
-    'practice.noRecord': 'no record',
-    'practice.how1': 'Type two chords: the shapes are picked so your hand moves as little as possible.',
-    'practice.how2': 'Press “Start round” and play the first one.',
-    'practice.how3.minute': 'For every clean change press “Change!” or Space. A round lasts one minute.',
-    'practice.how3.metronome': 'Change chord with the click; if it is hard, press “Slower”.',
-    'practice.playing': 'Playing',
   },
 } as const
 

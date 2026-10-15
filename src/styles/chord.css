@@ -150,38 +150,49 @@
 }
 .cv-hero .cv-name-wrap {
   flex-basis: 100%;
+  text-align: center;
 }
 .cv-hero .cv-latin {
   max-width: none;
+  margin: -6px auto 0;
   padding: 0 0 0 0;
   border-left: 0;
+  text-align: center;
 }
-.cv-orbit-clip {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  border-radius: 3px;
-  pointer-events: none;
-  z-index: 0;
+/* Phones: the name and its other spelling stacked in the middle of the oval. */
+.cv-hero {
+  justify-content: center;
+  align-content: center;
+  padding-inline: 12%;
 }
 .cv-orbit {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  transform: rotate(-2.5deg) scale(1.03);
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
 }
-.cv-orbit-a {
-  fill: none;
-  stroke: var(--cc-accent-deep);
-  stroke-width: 1.5;
-  opacity: 0.85;
-}
+.cv-orbit-a,
 .cv-orbit-b {
   fill: none;
   stroke: var(--cc-accent-deep);
-  stroke-width: 0.7;
-  opacity: 0.5;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+}
+.cv-orbit-a {
+  stroke-width: 1.6;
+  opacity: 0.85;
+}
+.cv-orbit-b {
+  stroke-width: 0.8;
+  opacity: 0.45;
+}
+.cv-orbit-star path {
+  fill: var(--cc-accent);
+  stroke: var(--cc-ground-2);
+  stroke-width: 1;
 }
 .cv-name-wrap {
   position: relative;
@@ -810,26 +821,51 @@
   list-style: none;
   padding: 0;
 }
+.cv-notes-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 10px;
+}
+.cv-notes-hint {
+  font: italic 400 0.8125rem / 1.2 var(--font-serif);
+  color: var(--cc-ink-soft);
+}
 .cv-note {
-  --m: 17px;
+  --m: 20px;
   --ms: 1;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 2px 7px 2px 3px;
+  gap: 6px;
+  padding: 3px 10px 3px 4px;
   border: 1px solid var(--cc-line);
   border-radius: 999px;
   background: var(--cc-ground-3);
   font-size: 0.8125rem;
   white-space: nowrap;
 }
+.cv-note-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
 .cv-note b {
   font-weight: 600;
+  font-size: 0.9375rem;
 }
 .cv-note i {
   font-style: normal;
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   color: var(--cc-ink-soft);
+}
+/* The root leads: it is what the chord is named after. */
+.cv-note--root {
+  border-color: var(--cc-accent-deep);
+  background: var(--cc-accent-soft);
+}
+.cv-note--root i {
+  color: var(--cc-ink);
+  font-weight: 600;
 }
 .cv-note--none {
   border-style: dashed;
@@ -1114,7 +1150,7 @@
 @media (min-width: 1024px) and (min-height: 640px) {
   .cv {
     --cv-hero-h: clamp(108px, calc(13.5vh + 28px), 220px);
-    --cv-hero-max: min(calc(var(--cv-hero-h) - 22px), 7.5rem);
+    --cv-hero-max: min(calc(var(--cv-hero-h) - 40px), 6.75rem);
     display: grid;
     grid-template-rows: var(--cv-hero-h) 40px minmax(0, 1fr) auto;
     gap: 6px;
@@ -1140,8 +1176,19 @@
   }
   .cv-hero .cv-latin {
     max-width: min(200px, 32%);
-    padding: 0 0 14px 12px;
+    align-self: center;
+    margin-right: 7%;
+    padding: 4px 0 4px 14px;
     border-left: 1px solid var(--cc-line-strong);
+  }
+  /* The name sits in the middle of the long oval, never on its line. */
+  .cv-hero {
+    align-items: center;
+    padding-inline: 8%;
+  }
+  .cv-hero .cv-name-wrap {
+    align-self: center;
+    text-align: center;
   }
   .cv-info {
     grid-template-columns: minmax(230px, 270px) minmax(150px, 1fr) auto;
@@ -1509,13 +1556,15 @@
 .cv-arc-lit {
   fill: var(--cc-ink);
 }
-.cv-arc-rays line {
-  stroke: var(--cc-fn-dom);
-  stroke-width: 1.5;
-  stroke-linecap: round;
+.cv-arc-horizon-line {
+  stroke: var(--cc-ink);
+  stroke-width: 1;
+  opacity: 0.55;
 }
-:root[data-theme='day'] .cv-arc-lit {
+.cv-arc-sun {
   fill: var(--cc-fn-dom-fill);
+  stroke: var(--cc-ink);
+  stroke-width: 1.1;
 }
 .cv-arc-halo {
   fill: var(--cc-accent-soft);
@@ -1540,11 +1589,9 @@
 .cv-arc-body.is-now .cv-arc-rim {
   stroke: var(--cc-accent-deep);
 }
-.cv-arc-body.is-now .cv-arc-rays line {
+.cv-arc-body.is-now .cv-arc-sun {
+  fill: var(--cc-accent);
   stroke: var(--cc-accent-deep);
-}
-:root[data-theme='day'] .cv-arc-body.is-now .cv-arc-lit {
-  fill: var(--cc-fn-dom-fill);
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -1556,11 +1603,6 @@
     transform-box: fill-box;
     transform-origin: center;
     animation: cv-arc-pulse 0.6s ease-out both;
-  }
-  .cv-arc-body.is-now .cv-arc-rays {
-    transform-box: fill-box;
-    transform-origin: center;
-    animation: cv-arc-turn 2.4s linear infinite;
   }
 }
 @keyframes cv-arc-breathe {
@@ -1582,11 +1624,6 @@
   to {
     transform: scale(1.9);
     opacity: 0;
-  }
-}
-@keyframes cv-arc-turn {
-  to {
-    transform: rotate(45deg);
   }
 }
 

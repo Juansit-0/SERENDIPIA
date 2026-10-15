@@ -21,11 +21,7 @@ describe('accessibility (axe)', () => {
     ['Acorde', '', null],
     ['Teoría', '#theory', null],
     ['Teoría · Escalas', '#theory', 'Escalas'],
-    ['Práctica', '#practice', null],
-    ['Práctica · Afinador', '#practice', 'Afinador'],
-    ['Práctica · Oído', '#practice', 'Más|Oído'],
-    ['Práctica · Grabar', '#practice', 'Más|Grabar'],
-    ['Práctica · Progreso', '#practice', 'Más|Progreso'],
+    ['Afinador', '#tuner', null],
     ['Cancionero', '#songbook', 'Crear mi primera canción'],
   ])(
     '%s has no violations',

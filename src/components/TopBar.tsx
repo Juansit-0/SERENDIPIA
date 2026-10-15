@@ -10,16 +10,14 @@ import { useTheme } from '../state/theme'
 import { openWelcome } from '../welcome/state'
 import { openHelp } from '../state/help'
 import { helpText } from '../i18n/help'
-import { tunerText } from '../i18n/tuner'
-import { Tuner } from './topbar/Tuner'
 import { topbarText } from '../i18n/topbar'
 import '../styles/topbar.css'
 import { BeatMoons } from './topbar/BeatMoons'
 import { BrandMark } from './topbar/Brand'
 import { Popover } from './topbar/Popover'
-import { ChevronDownIcon, LoopIcon, MinusIcon, MoonIcon, PlayIcon, PlusIcon, SettingsIcon, SoundIcon, StopIcon, SunIcon, TunerIcon } from './icons'
+import { ChevronDownIcon, LoopIcon, MinusIcon, MoonIcon, PlayIcon, PlusIcon, SettingsIcon, SoundIcon, StopIcon, SunIcon } from './icons'
 
-const VIEWS: ViewId[] = ['chord', 'theory', 'practice', 'songbook']
+const VIEWS: ViewId[] = ['chord', 'theory', 'songbook', 'tuner']
 const NOTATIONS: Notation[] = ['anglo', 'both', 'latin']
 const OPEN_KEY = 'serendipia.transportOpen'
 
@@ -139,9 +137,7 @@ export function TopBar() {
           </span>
         </button>
 
-        <span className="max-sm:hidden desk:max-[1199px]:hidden">
-          {playing && <BeatMoons label={x.beatIndicator} />}
-        </span>
+        <span className="max-sm:hidden desk:max-[1199px]:hidden">{playing && <BeatMoons label={x.beatIndicator} />}</span>
 
         <div className="cc-stepper max-sm:ml-auto" role="group" aria-label={t('transport.tempo')}>
           <button
@@ -159,12 +155,7 @@ export function TopBar() {
               {x.bpm}
             </span>
           </span>
-          <button
-            type="button"
-            className="cc-btn"
-            onClick={() => setTempo(Math.min(TEMPO_MAX, tempo + 4))}
-            aria-label={t('a11y.tempoUp')}
-          >
+          <button type="button" className="cc-btn" onClick={() => setTempo(Math.min(TEMPO_MAX, tempo + 4))} aria-label={t('a11y.tempoUp')}>
             <PlusIcon size={14} />
           </button>
         </div>
@@ -188,7 +179,13 @@ export function TopBar() {
             <span className="cc-stepper__unit pl-2.5 pr-1 uppercase" aria-hidden="true">
               {t('transport.capo')}
             </span>
-            <button type="button" className="cc-btn" onClick={() => setCapo(capo - 1)} disabled={capo === 0} aria-label={t('a11y.capoDown')}>
+            <button
+              type="button"
+              className="cc-btn"
+              onClick={() => setCapo(capo - 1)}
+              disabled={capo === 0}
+              aria-label={t('a11y.capoDown')}
+            >
               <MinusIcon size={14} />
             </button>
             <span className="cc-stepper__val cc-num !min-w-[1.6rem]" aria-live="polite" aria-atomic="true">
@@ -265,7 +262,10 @@ export function TopBar() {
           </Popover>
 
           <span className="cc-top__sep max-sm:hidden" aria-hidden="true" />
-          <span className="max-sm:hidden desk:ml-auto" aria-hidden="true" />
+          {/* The free room between the key and the settings carries the name (the brand word hides on narrow desks). */}
+          <span className="cc-top__word max-sm:hidden" aria-hidden="true">
+            <span>{x.brand}</span>
+          </span>
 
           <Popover
             label={x.play}
@@ -336,7 +336,13 @@ export function TopBar() {
                   <label className="cc-label cc-pop__title" htmlFor="topbar-backing" title={x.backingHint}>
                     {x.backing}
                   </label>
-                  <select id="topbar-backing" className="cc-select" value={backing} title={x.backingHint} onChange={(event) => setBacking(event.target.value as BackingStyle)}>
+                  <select
+                    id="topbar-backing"
+                    className="cc-select"
+                    value={backing}
+                    title={x.backingHint}
+                    onChange={(event) => setBacking(event.target.value as BackingStyle)}
+                  >
                     {BACKING_STYLES.map((item) => (
                       <option key={item.id} value={item.id}>
                         {lang === 'es' ? item.nameEs : item.nameEn}
@@ -442,23 +448,7 @@ export function TopBar() {
             )}
           </Popover>
 
-          <Popover
-            label={tunerText[lang].title}
-            trigger={
-              <>
-                <TunerIcon size={15} />
-                <span className="cc-btn__label--wide">{tunerText[lang].title}</span>
-              </>
-            }
-          >
-            {() => <Tuner />}
-          </Popover>
-
-          <Popover
-            label={x.settings}
-            triggerClassName="cc-btn--icon"
-            trigger={<SettingsIcon size={16} />}
-          >
+          <Popover label={x.settings} triggerClassName="cc-btn--icon" trigger={<SettingsIcon size={16} />}>
             {({ close }) => (
               <div className="w-[16rem]">
                 <div className="cc-pop__row">

@@ -1,5 +1,6 @@
-import type { CSSProperties } from 'react'
+import { useRef, type CSSProperties } from 'react'
 import { chordText } from '../../i18n/chord'
+import { HeroOrbit } from './HeroOrbit'
 import type { ChordModel } from './useChordModel'
 
 /** The hero module: kicker, the chord name set huge inside a thin orbit, and the other spelling on its own line. */
@@ -9,15 +10,11 @@ export function Hero({ m }: { m: ChordModel }) {
   const name = m.heroName
   const stale = m.chordError && m.chartSource === 'voicing'
   const message = m.unrecognized ? c.unrecognized : c.empty
+  const box = useRef<HTMLElement>(null)
 
   return (
-    <section className="cc-module cv-hero" aria-label={c.chordLabel}>
-      <div className="cv-orbit-clip" aria-hidden="true">
-        <svg className="cv-orbit" viewBox="0 0 100 100" preserveAspectRatio="none" focusable="false">
-          <ellipse cx="50" cy="55" rx="49" ry="23" className="cv-orbit-a" vectorEffect="non-scaling-stroke" />
-          <ellipse cx="50" cy="55" rx="46" ry="17" className="cv-orbit-b" vectorEffect="non-scaling-stroke" />
-        </svg>
-      </div>
+    <section ref={box} className="cc-module cv-hero" aria-label={c.chordLabel}>
+      <HeroOrbit box={box} name={showName ? name : ''} />
       <div className={`cv-name-wrap ${stale ? 'is-stale' : ''}`}>
         {showName ? (
           <p

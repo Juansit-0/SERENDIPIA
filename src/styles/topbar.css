@@ -233,6 +233,61 @@
   }
 }
 
+/* The name in the free room of the bar: it grows to fill the gap, and shows only when there is room for it. */
+.cc-top__word {
+  display: none;
+}
+@media (min-width: 1024px) {
+  .cc-top__word {
+    display: flex;
+    flex: 1 1 0;
+    min-width: 0;
+    align-items: center;
+    justify-content: center;
+    container-type: inline-size;
+    height: 100%;
+  }
+  .cc-top__word > span {
+    font: 400 1.4rem / 1 var(--font-display);
+    letter-spacing: 0.34em;
+    padding-left: 0.34em;
+    white-space: nowrap;
+    color: var(--cc-ink);
+    background: linear-gradient(100deg, var(--cc-ink) 40%, var(--cc-accent) 50%, var(--cc-ink) 60%) 0 0 / 300% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-position: 100% 0;
+  }
+}
+:root[data-theme='day'] .cc-top__word > span {
+  background-image: linear-gradient(100deg, var(--cc-ink) 40%, var(--cc-ground-3) 50%, var(--cc-ink) 60%);
+}
+@media (min-width: 1560px) {
+  .cc-top__word > span {
+    display: none;
+  }
+}
+@container (max-width: 240px) {
+  .cc-top__word > span {
+    display: none;
+  }
+}
+@media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+  .cc-top__word > span {
+    animation: cc-word-shine 9s ease-in-out infinite;
+  }
+}
+@keyframes cc-word-shine {
+  0%,
+  60% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 0% 0;
+  }
+}
+
 /* Narrow desk (up to 1559px, where the full row no longer fits): monogram only, icon buttons, tighter gaps. */
 @media (min-width: 1024px) and (max-width: 1559px) {
   .cc-brand__word,

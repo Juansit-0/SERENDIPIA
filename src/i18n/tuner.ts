@@ -1,9 +1,17 @@
-// Texts of the tuner (top bar popover).
+// Texts of the Afinador view.
 export const tunerText = {
   es: {
     title: 'Afinador',
+    lead: 'Toca una cuerda al aire',
+    explain:
+      'El anillo de estrellas vibra y gira cuando la cuerda está desafinada: lila si está baja, dorado si está alta. Cuando está justa se calma en turquesa y lanza ondas.',
     tuning: 'Afinación',
-    tunings: { standard: 'Estándar · E A D G B e', 'drop-d': 'Drop D · D A D G B e', 'half-step': 'Medio tono abajo · E♭ A♭ D♭ G♭ B♭ e♭', 'open-g': 'Open G · D G D G B D' },
+    tunings: {
+      standard: 'Estándar · E A D G B e',
+      'drop-d': 'Drop D · D A D G B e',
+      'half-step': 'Medio tono abajo · E♭ A♭ D♭ G♭ B♭ e♭',
+      'open-g': 'Open G · D G D G B D',
+    },
     start: 'Activar micrófono',
     stop: 'Detener',
     starting: 'Pidiendo el micrófono…',
@@ -23,8 +31,16 @@ export const tunerText = {
   },
   en: {
     title: 'Tuner',
+    lead: 'Play an open string',
+    explain:
+      'The ring of stars shakes and turns while the string is out of tune: lilac when it is low, gold when it is high. In tune it settles in turquoise and sends out ripples.',
     tuning: 'Tuning',
-    tunings: { standard: 'Standard · E A D G B e', 'drop-d': 'Drop D · D A D G B e', 'half-step': 'Half step down · E♭ A♭ D♭ G♭ B♭ e♭', 'open-g': 'Open G · D G D G B D' },
+    tunings: {
+      standard: 'Standard · E A D G B e',
+      'drop-d': 'Drop D · D A D G B e',
+      'half-step': 'Half step down · E♭ A♭ D♭ G♭ B♭ e♭',
+      'open-g': 'Open G · D G D G B D',
+    },
     start: 'Turn on microphone',
     stop: 'Stop',
     starting: 'Asking for the microphone…',

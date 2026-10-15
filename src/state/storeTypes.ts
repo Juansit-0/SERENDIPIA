@@ -19,7 +19,7 @@ import type { Song } from './songs'
 /* Everything the app reads from the store: the shape of `useStore()`. */
 
 export type { Notation } from './settings'
-export type ViewId = 'chord' | 'theory' | 'practice' | 'songbook'
+export type ViewId = 'chord' | 'theory' | 'tuner' | 'songbook'
 
 /** Where the Acorde fretboard reads its notes from: the selected voicing, or the user's own marks. */
 export type ChartSource = 'voicing' | 'marks'

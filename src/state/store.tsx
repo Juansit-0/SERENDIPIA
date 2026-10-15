@@ -1,13 +1,4 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
-} from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { loadedAudioEngine } from '../audio/loader'
 import type { BackingStyle } from '../audio/backing'
 import { setCustomPattern, type StrumId } from '../audio/strums'
@@ -15,20 +6,9 @@ import { tapTempo as tapTempoFrom } from '../audio/timing'
 import type { PlayPattern, TimbreId } from '../audio/types'
 import { translate, type Lang, type TKey } from '../i18n'
 import { parseChord } from '../music/parseChord'
-import {
-  moveStep as reorderSteps,
-  nextChordSuggestions,
-  PROGRESSIONS,
-  resolveProgression,
-  Suggestion,
-} from '../music/progressions'
+import { moveStep as reorderSteps, nextChordSuggestions, PROGRESSIONS, resolveProgression, Suggestion } from '../music/progressions'
 import { Mode } from '../music/scales'
-import {
-  analyzeChord,
-  analyzeTransition,
-  detectProgressionKey,
-  suggestNextChords,
-} from '../music/analysis'
+import { analyzeChord, analyzeTransition, detectProgressionKey, suggestNextChords } from '../music/analysis'
 import { clampCapo, withCapo } from '../music/capo'
 import { resolveStepFrets, type StepVoicingRef } from '../music/stepVoicing'
 import { STANDARD_TUNING, TUNINGS } from '../music/voicings'
@@ -66,7 +46,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (typeof window === 'undefined') return 'chord'
     const hash = window.location.hash.replace('#', '')
     // Old links (#dictionary, #detector) land on the merged Acorde view.
-    return hash === 'theory' || hash === 'practice' || hash === 'songbook' ? hash : 'chord'
+    // Práctica became the Afinador: old #practice links land there.
+    if (hash === 'practice') return 'tuner'
+    return hash === 'theory' || hash === 'tuner' || hash === 'songbook' ? hash : 'chord'
   })
   const [tuningId, setTuningIdState] = useState(initial.tuningId)
   const [tempo, setTempo] = useState(shared?.tempo ?? initial.tempo)
@@ -119,13 +101,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       shared
         ? shared.steps.map((step, index) => ({ ...step, id: `shared-${index}` }))
         : (loadSessionSteps()?.map((step, index) => ({ ...step, id: `kept-${index}` })) ??
-          resolveProgression(PROGRESSIONS[0], initial.keyRootPc).map((step, index) => ({
-            rootPc: step.rootPc,
-            qualityId: step.qualityId,
-            anglo: step.anglo,
-            latin: step.latin,
-            id: `seed-${index}`,
-          }))),
+            resolveProgression(PROGRESSIONS[0], initial.keyRootPc).map((step, index) => ({
+              rootPc: step.rootPc,
+              qualityId: step.qualityId,
+              anglo: step.anglo,
+              latin: step.latin,
+              id: `seed-${index}`,
+            }))),
     ),
   )
   const progression = history.present
@@ -147,7 +129,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (shared) window.history.replaceState(null, '', `${window.location.pathname}${window.location.hash}`)
   }, [shared])
 
-
   // Keep the progression being worked on, so a reload (or a crash) never loses it.
   useEffect(() => {
     if (!songRef.current) saveSessionSteps(progression.map(({ id: _id, ...step }) => step))
@@ -168,7 +149,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       window.history.replaceState(null, '', `#${next}`)
     }
   }, [])
-
 
   useEffect(() => {
     const payload: PersistedSettings = {
@@ -192,13 +172,28 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       capo,
     }
     saveSettings(payload)
-  }, [lang, notation, tuningId, tempo, volume, manualKeyRootPc, manualKeyMode, keyAuto, loop, metronome, beatsPerChord, timbre, strum, customStrum, backing, subdivision, suggestFrom, capo])
+  }, [
+    lang,
+    notation,
+    tuningId,
+    tempo,
+    volume,
+    manualKeyRootPc,
+    manualKeyMode,
+    keyAuto,
+    loop,
+    metronome,
+    beatsPerChord,
+    timbre,
+    strum,
+    customStrum,
+    backing,
+    subdivision,
+    suggestFrom,
+    capo,
+  ])
 
-
-  const tuning = useMemo(
-    () => TUNINGS.find((item) => item.id === tuningId)?.midi ?? STANDARD_TUNING,
-    [tuningId],
-  )
+  const tuning = useMemo(() => TUNINGS.find((item) => item.id === tuningId)?.midi ?? STANDARD_TUNING, [tuningId])
 
   const soundingTuning = useMemo(() => withCapo(tuning, capo), [tuning, capo])
 
@@ -231,7 +226,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setCapoState(clampCapo(next))
   }, [])
 
-
   const setTuningId = useCallback(
     (id: string) => {
       setTuningIdState(id)
@@ -240,12 +234,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [setSelectedVoicing],
   )
 
-
   const setTimbre = useCallback((next: TimbreId) => {
     setTimbreState(next)
   }, [])
-
-
 
   const playFrets = useCallback(
     (frets: (number | null)[], pattern: PlayPattern = 'strum-down') => {
@@ -290,14 +281,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [enableAudio, tuning],
   )
 
-
-
-
   const [stepCursor, setStepCursor] = useState(-1)
   const moveStepCursor = useCallback(
     (delta: number) => {
       if (progression.length === 0) return
-      const next = stepCursor < 0 ? (delta > 0 ? 0 : progression.length - 1) : (stepCursor + delta + progression.length) % progression.length
+      const next =
+        stepCursor < 0 ? (delta > 0 ? 0 : progression.length - 1) : (stepCursor + delta + progression.length) % progression.length
       setStepCursor(next)
       const step = progression[next]
       const parsed = parseChord(step.anglo)
@@ -311,9 +300,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [progression, stepCursor, setChord, tuning, soundingTuning, enableAudio],
   )
 
-  const addToProgression = useCallback((step: Omit<ProgressionStep, 'id'>) => {
-    setProgression((current) => appendStep(current, step, stepId()))
-  }, [setProgression])
+  const addToProgression = useCallback(
+    (step: Omit<ProgressionStep, 'id'>) => {
+      setProgression((current) => appendStep(current, step, stepId()))
+    },
+    [setProgression],
+  )
 
   /** Back from a song to the player's own progression (outside the undo history: the song never edited it). */
   const endSong = useCallback(() => {
@@ -340,13 +332,19 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [stopPlayback, setProgression],
   )
 
-  const moveStep = useCallback((from: number, to: number) => {
-    setProgression((current) => reorderSteps(current, from, to))
-  }, [setProgression])
+  const moveStep = useCallback(
+    (from: number, to: number) => {
+      setProgression((current) => reorderSteps(current, from, to))
+    },
+    [setProgression],
+  )
 
-  const setStepVoicing = useCallback((index: number, voicing: StepVoicingRef | null) => {
-    setProgression((current) => applyStepVoicing(current, index, voicing))
-  }, [setProgression])
+  const setStepVoicing = useCallback(
+    (index: number, voicing: StepVoicingRef | null) => {
+      setProgression((current) => applyStepVoicing(current, index, voicing))
+    },
+    [setProgression],
+  )
 
   const removeFromProgression = useCallback(
     (index: number) => {
@@ -388,11 +386,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [progression],
   )
 
-  const setStepStrum = useCallback((index: number, next: StrumId | null) => {
-    setProgression((current) =>
-      current.map((step, position) => (position === index ? { ...step, strum: next ?? undefined } : step)),
-    )
-  }, [setProgression])
+  const setStepStrum = useCallback(
+    (index: number, next: StrumId | null) => {
+      setProgression((current) => current.map((step, position) => (position === index ? { ...step, strum: next ?? undefined } : step)))
+    },
+    [setProgression],
+  )
 
   const togglePlay = useCallback(() => {
     if (playing) {
@@ -461,8 +460,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     })
   }, [playing, progression.length, metronome, tempo, loop, beatsPerChord, soundingTuning, getFretsForStep, getStrumForStep, getBassForStep])
 
-
-
   const addSuggestion = useCallback(
     (suggestion: Suggestion) => {
       addToProgression({
@@ -476,10 +473,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [addToProgression],
   )
 
-  const detectedKey = useMemo(
-    () => (progression.length >= 2 ? detectProgressionKey(progression) : null),
-    [progression],
-  )
+  const detectedKey = useMemo(() => (progression.length >= 2 ? detectProgressionKey(progression) : null), [progression])
   const keyRootPc = keyAuto && detectedKey ? detectedKey.rootPc : manualKeyRootPc
   const keyMode = keyAuto && detectedKey ? detectedKey.mode : manualKeyMode
 
@@ -538,8 +532,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     deleteSheet,
   } = useCollections(initial.lang, snapshot)
 
-
-
   const loadFromLibrary = useCallback(
     (entry: LibraryEntry) => {
       stopPlayback()
@@ -553,8 +545,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     },
     [stopPlayback, setProgression, setCustomStrum],
   )
-
-
 
   const playSong = useCallback(
     (song: Song) => {
@@ -607,7 +597,21 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         setPlaying(true)
       })
     },
-    [stopPlayback, progression, enableAudio, tempo, loop, beatsPerChord, soundingTuning, metronome, tuning, strum, endSong, getBacking, getSubdivision],
+    [
+      stopPlayback,
+      progression,
+      enableAudio,
+      tempo,
+      loop,
+      beatsPerChord,
+      soundingTuning,
+      metronome,
+      tuning,
+      strum,
+      endSong,
+      getBacking,
+      getSubdivision,
+    ],
   )
 
   const playSheet = useCallback(
@@ -661,22 +665,30 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [progression, capo, tuning],
   )
 
-  const applyCapoSuggestion = useCallback((option: CapoOption) => {
-    setCapoState(option.capo)
-    setProgression((current) =>
-      current.map((step, index) => {
-        const shape = option.shapes[index]
-        if (!shape) return step
-        // New shapes: drop any pinned voicing so each step picks its easiest form again.
-        return { id: step.id, rootPc: shape.rootPc, qualityId: shape.qualityId, bassPc: shape.bassPc, anglo: shape.anglo, latin: shape.latin, strum: step.strum }
-      }),
-    )
-  }, [setProgression])
-
-  const suggestions = useMemo(
-    () => nextChordSuggestions(chord.rootPc, keyRootPc, keyMode),
-    [chord.rootPc, keyRootPc, keyMode],
+  const applyCapoSuggestion = useCallback(
+    (option: CapoOption) => {
+      setCapoState(option.capo)
+      setProgression((current) =>
+        current.map((step, index) => {
+          const shape = option.shapes[index]
+          if (!shape) return step
+          // New shapes: drop any pinned voicing so each step picks its easiest form again.
+          return {
+            id: step.id,
+            rootPc: shape.rootPc,
+            qualityId: shape.qualityId,
+            bassPc: shape.bassPc,
+            anglo: shape.anglo,
+            latin: shape.latin,
+            strum: step.strum,
+          }
+        }),
+      )
+    },
+    [setProgression],
   )
+
+  const suggestions = useMemo(() => nextChordSuggestions(chord.rootPc, keyRootPc, keyMode), [chord.rootPc, keyRootPc, keyMode])
 
   const nextSteps = useMemo(
     () => (progression.length > 0 ? suggestNextChords(progression, { rootPc: keyRootPc, mode: keyMode }) : suggestions),
@@ -686,133 +698,231 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const panelFollowsProgression = suggestFrom === 'progression' && progression.length > 0
   const panelSuggestions = panelFollowsProgression ? nextSteps : suggestions
 
-  const value = useMemo<StoreValue>(() => ({
-    t,
-    lang,
-    setLang,
-    notation,
-    setNotation,
-    view,
-    setView,
-    tuningId,
-    setTuningId,
-    tuning,
-    soundingTuning,
-    capo,
-    setCapo,
-    tempo,
-    setTempo,
-    volume,
-    setVolume,
-    loop,
-    setLoop,
-    metronome,
-    setMetronome,
-    beatsPerChord,
-    setBeatsPerChord,
-    timbre,
-    setTimbre,
-    strum,
-    setStrum,
-    setStepStrum,
-    stopPlayback,
-    keyRootPc,
-    setKeyRootPc,
-    keyMode,
-    setKeyMode,
-    keyAuto,
-    setKeyAuto,
-    detectedKey,
-    analysis,
-    nextSteps,
-    suggestFrom,
-    setSuggestFrom,
-    panelSuggestions,
-    panelFollowsProgression,
-    undo,
-    redo,
-    canUndo: history.past.length > 0,
-    canRedo: history.future.length > 0,
-    shareLink,
-    library,
-    sheets,
-    saveSheet,
-    deleteSheet,
-    playSheet,
-    sheetPlay,
-    songs,
-    saveSong: saveSongToList,
-    deleteSong,
-    playSong,
-    songPlay,
-    saveToLibrary: saveProgressionToLibrary,
-    importLibrary,
-    loadFromLibrary,
-    deleteFromLibrary,
-    chainProgression,
-    capoSuggestion,
-    applyCapoSuggestion,
-    chord,
-    chordInput,
-    chordError,
-    setChordInput,
-    setChord,
-    stepCursor: stepCursor < progression.length ? stepCursor : -1,
-    moveStepCursor,
-    voicings,
-    selectedVoicing,
-    selectVoicing,
-    playVoicing,
-    playFrets,
-    playOpenString,
-    playNotes,
-    previewStrum,
-    customStrum,
-    setCustomStrum,
-    backing,
-    setBacking,
-    subdivision,
-    setSubdivision,
-    tapTempo,
-    transposeProgression,
-    progression,
-    loadProgression,
-    addToProgression,
-    moveStep,
-    setStepVoicing,
-    removeFromProgression,
-    markedVoicing,
-    setMarkedVoicing,
-    clearProgression,
-    playing,
-    togglePlay,
-    audioReady,
-    audioLoading,
-    audioFallback,
-    enableAudio,
-    suggestions,
-    addSuggestion,
-    detectorFrets,
-    setDetectorFrets,
-    toggleDetectorString,
-    chartSource,
-    chartFrets,
-    detection,
-    toggleChartFret,
-    pickDetectedName,
-    clearChartMarks,
-    setChordInputFocused,
-  }), [
-    t, lang, notation, view, setView, tuningId, setTuningId, tuning, soundingTuning, capo, setCapo, tempo, volume, loop,
-    metronome, setMetronome, beatsPerChord, timbre, setTimbre, strum, setStepStrum, stopPlayback, keyRootPc, setKeyRootPc, keyMode, setKeyMode, keyAuto,
-    detectedKey, analysis, nextSteps, suggestFrom, panelSuggestions, panelFollowsProgression, undo, redo, history.past.length, history.future.length, shareLink, library,
-    saveProgressionToLibrary, importLibrary, sheets, saveSheet, deleteSheet, playSheet, sheetPlay, songs, saveSongToList, deleteSong, playSong, songPlay, loadFromLibrary, deleteFromLibrary, chainProgression, capoSuggestion, applyCapoSuggestion, chord, chordInput, chordError, setChordInput,
-    setChord, stepCursor, moveStepCursor, voicings, selectedVoicing, selectVoicing, playVoicing, playFrets, playOpenString, playNotes, previewStrum, customStrum, setCustomStrum, backing, subdivision, tapTempo, transposeProgression, progression, loadProgression,
-    addToProgression, moveStep, setStepVoicing, removeFromProgression, markedVoicing, setMarkedVoicing,
-    clearProgression, playing, togglePlay, audioReady, audioLoading, audioFallback, enableAudio, suggestions,
-    addSuggestion, detectorFrets, setDetectorFrets, toggleDetectorString, chartSource, chartFrets, detection, toggleChartFret,
-    pickDetectedName, clearChartMarks, setChordInputFocused,
-  ])
+  const value = useMemo<StoreValue>(
+    () => ({
+      t,
+      lang,
+      setLang,
+      notation,
+      setNotation,
+      view,
+      setView,
+      tuningId,
+      setTuningId,
+      tuning,
+      soundingTuning,
+      capo,
+      setCapo,
+      tempo,
+      setTempo,
+      volume,
+      setVolume,
+      loop,
+      setLoop,
+      metronome,
+      setMetronome,
+      beatsPerChord,
+      setBeatsPerChord,
+      timbre,
+      setTimbre,
+      strum,
+      setStrum,
+      setStepStrum,
+      stopPlayback,
+      keyRootPc,
+      setKeyRootPc,
+      keyMode,
+      setKeyMode,
+      keyAuto,
+      setKeyAuto,
+      detectedKey,
+      analysis,
+      nextSteps,
+      suggestFrom,
+      setSuggestFrom,
+      panelSuggestions,
+      panelFollowsProgression,
+      undo,
+      redo,
+      canUndo: history.past.length > 0,
+      canRedo: history.future.length > 0,
+      shareLink,
+      library,
+      sheets,
+      saveSheet,
+      deleteSheet,
+      playSheet,
+      sheetPlay,
+      songs,
+      saveSong: saveSongToList,
+      deleteSong,
+      playSong,
+      songPlay,
+      saveToLibrary: saveProgressionToLibrary,
+      importLibrary,
+      loadFromLibrary,
+      deleteFromLibrary,
+      chainProgression,
+      capoSuggestion,
+      applyCapoSuggestion,
+      chord,
+      chordInput,
+      chordError,
+      setChordInput,
+      setChord,
+      stepCursor: stepCursor < progression.length ? stepCursor : -1,
+      moveStepCursor,
+      voicings,
+      selectedVoicing,
+      selectVoicing,
+      playVoicing,
+      playFrets,
+      playOpenString,
+      playNotes,
+      previewStrum,
+      customStrum,
+      setCustomStrum,
+      backing,
+      setBacking,
+      subdivision,
+      setSubdivision,
+      tapTempo,
+      transposeProgression,
+      progression,
+      loadProgression,
+      addToProgression,
+      moveStep,
+      setStepVoicing,
+      removeFromProgression,
+      markedVoicing,
+      setMarkedVoicing,
+      clearProgression,
+      playing,
+      togglePlay,
+      audioReady,
+      audioLoading,
+      audioFallback,
+      enableAudio,
+      suggestions,
+      addSuggestion,
+      detectorFrets,
+      setDetectorFrets,
+      toggleDetectorString,
+      chartSource,
+      chartFrets,
+      detection,
+      toggleChartFret,
+      pickDetectedName,
+      clearChartMarks,
+      setChordInputFocused,
+    }),
+    [
+      t,
+      lang,
+      notation,
+      view,
+      setView,
+      tuningId,
+      setTuningId,
+      tuning,
+      soundingTuning,
+      capo,
+      setCapo,
+      tempo,
+      volume,
+      loop,
+      metronome,
+      setMetronome,
+      beatsPerChord,
+      timbre,
+      setTimbre,
+      strum,
+      setStepStrum,
+      stopPlayback,
+      keyRootPc,
+      setKeyRootPc,
+      keyMode,
+      setKeyMode,
+      keyAuto,
+      detectedKey,
+      analysis,
+      nextSteps,
+      suggestFrom,
+      panelSuggestions,
+      panelFollowsProgression,
+      undo,
+      redo,
+      history.past.length,
+      history.future.length,
+      shareLink,
+      library,
+      saveProgressionToLibrary,
+      importLibrary,
+      sheets,
+      saveSheet,
+      deleteSheet,
+      playSheet,
+      sheetPlay,
+      songs,
+      saveSongToList,
+      deleteSong,
+      playSong,
+      songPlay,
+      loadFromLibrary,
+      deleteFromLibrary,
+      chainProgression,
+      capoSuggestion,
+      applyCapoSuggestion,
+      chord,
+      chordInput,
+      chordError,
+      setChordInput,
+      setChord,
+      stepCursor,
+      moveStepCursor,
+      voicings,
+      selectedVoicing,
+      selectVoicing,
+      playVoicing,
+      playFrets,
+      playOpenString,
+      playNotes,
+      previewStrum,
+      customStrum,
+      setCustomStrum,
+      backing,
+      subdivision,
+      tapTempo,
+      transposeProgression,
+      progression,
+      loadProgression,
+      addToProgression,
+      moveStep,
+      setStepVoicing,
+      removeFromProgression,
+      markedVoicing,
+      setMarkedVoicing,
+      clearProgression,
+      playing,
+      togglePlay,
+      audioReady,
+      audioLoading,
+      audioFallback,
+      enableAudio,
+      suggestions,
+      addSuggestion,
+      detectorFrets,
+      setDetectorFrets,
+      toggleDetectorString,
+      chartSource,
+      chartFrets,
+      detection,
+      toggleChartFret,
+      pickDetectedName,
+      clearChartMarks,
+      setChordInputFocused,
+    ],
+  )
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>
 }

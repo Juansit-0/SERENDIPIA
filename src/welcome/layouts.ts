@@ -158,7 +158,7 @@ function songbook(): Figure {
   }
 }
 
-/** Practice: a sound wave over four beats — listen, play, record. */
+/** The tuner: a string's wave inside the ring of stars, over four beats. */
 function practice(): Figure {
   const wave: Array<[number, number]> = Array.from({ length: 41 }, (_, i) => {
     const x = -3 + (i / 40) * 6

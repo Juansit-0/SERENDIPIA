@@ -1,14 +1,20 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
-import { renderApp } from '../../test/renderApp'
+import { renderApp } from '../test/renderApp'
 
 afterEach(cleanup)
 
 const openTuner = () => fireEvent.click(screen.getByRole('button', { name: 'Afinador' }))
 
-describe('tuner', () => {
-  it('lists the strings of the chosen tuning and switches tuning for the whole app', () => {
+describe('Afinador', () => {
+  it('is its own view, reachable from old Práctica links too', () => {
+    renderApp('#practice')
+    expect(screen.getByRole('button', { name: 'Afinador' }).getAttribute('aria-current')).toBe('page')
+    expect(screen.getByRole('button', { name: 'Activar micrófono' })).toBeTruthy()
+  })
+
+  it('lists the strings of the chosen tuning on the headstock and switches tuning for the whole app', () => {
     renderApp()
     openTuner()
     expect(screen.getByRole('button', { name: 'Cuerda 6: E · Mi' })).toBeTruthy()

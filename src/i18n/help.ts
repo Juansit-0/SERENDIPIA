@@ -1,5 +1,5 @@
 // The help panel: how each part works, what is new, and what the app is.
-export type HelpSectionId = 'chord' | 'strip' | 'play' | 'theory' | 'practice' | 'songbook' | 'tools' | 'keys' | 'news' | 'about'
+export type HelpSectionId = 'chord' | 'strip' | 'play' | 'theory' | 'songbook' | 'tools' | 'keys' | 'news' | 'about'
 
 interface Section {
   id: HelpSectionId
@@ -9,6 +9,21 @@ interface Section {
 
 /** Newest first. Each entry is one published version with what a player would notice. */
 export const CHANGELOG: Array<{ version: string; es: string[]; en: string[] }> = [
+  {
+    version: '2.29',
+    es: [
+      'La guitarra vuelve a oírse por encima de la banda.',
+      'El Afinador tiene su propia pestaña, con un cielo animado: un anillo de estrellas que vibra hasta que la cuerda está justa.',
+      'Las notas del acorde dicen qué son: Raíz, 3ª menor, 5ª justa…',
+      'El nombre del acorde vive dentro de su óvalo, que se dibuja con cada acorde; de día vuelven las posiciones del sol.',
+    ],
+    en: [
+      'The guitar is heard above the band again.',
+      'The Tuner has its own tab with an animated sky: a ring of stars that shakes until the string is right.',
+      'Chord notes say what they are: Root, minor 3rd, perfect 5th…',
+      'The chord name lives inside its oval, which draws itself for each chord; by day the sun positions are back.',
+    ],
+  },
   {
     version: '2.28',
     es: [
@@ -24,8 +39,12 @@ export const CHANGELOG: Array<{ version: string; es: string[]; en: string[] }> =
   },
   {
     version: '2.27',
-    es: ['Pantalla más tranquila: fuera adornos y datos repetidos; el mástil tiene más sitio. La función de cada estrella de la tira aparece al pasar el ratón.'],
-    en: ['A calmer screen: decorations and repeated details are gone; the fretboard has more room. Hover a strip star to see its function.'],
+    es: [
+      'Pantalla más tranquila: fuera adornos y datos repetidos; el mástil tiene más sitio. La función de cada estrella de la tira aparece al pasar el ratón.',
+    ],
+    en: [
+      'A calmer screen: decorations and repeated details are gone; the fretboard has more room. Hover a strip star to see its function.',
+    ],
   },
   {
     version: '2.26',
@@ -34,8 +53,16 @@ export const CHANGELOG: Array<{ version: string; es: string[]; en: string[] }> =
   },
   {
     version: '2.25',
-    es: ['El sonido responde al instante: tocar un acorde ya no tiene retraso.', 'Cancionero más fácil: toca una palabra y elige su acorde, sin escribir corchetes.', 'Pega una canción con los acordes encima de la letra y se colocan solos.'],
-    en: ['Sound answers at once: tapping a chord no longer lags.', 'Easier songbook: tap a word and pick its chord, no brackets to type.', 'Paste a song with the chords above the lyrics and they place themselves.'],
+    es: [
+      'El sonido responde al instante: tocar un acorde ya no tiene retraso.',
+      'Cancionero más fácil: toca una palabra y elige su acorde, sin escribir corchetes.',
+      'Pega una canción con los acordes encima de la letra y se colocan solos.',
+    ],
+    en: [
+      'Sound answers at once: tapping a chord no longer lags.',
+      'Easier songbook: tap a word and pick its chord, no brackets to type.',
+      'Paste a song with the chords above the lyrics and they place themselves.',
+    ],
   },
   {
     version: '2.24',
@@ -49,17 +76,45 @@ export const CHANGELOG: Array<{ version: string; es: string[]; en: string[] }> =
   },
   {
     version: '2.20–2.22',
-    es: ['Acompañamiento de bajo y batería (Pop, Balada, Rock, Bossa).', 'Marcar el tempo tocando (tecla T) y subdivisión del click.', 'Práctica → Grabar: grábate encima de la banda.'],
-    en: ['Bass and drum backing (Pop, Ballad, Rock, Bossa).', 'Tap the tempo (T key) and click subdivision.', 'Practice → Record: record yourself over the band.'],
+    es: [
+      'Acompañamiento de bajo y batería (Pop, Balada, Rock, Bossa).',
+      'Marcar el tempo tocando (tecla T) y subdivisión del click.',
+      'Práctica → Grabar: grábate encima de la banda.',
+    ],
+    en: [
+      'Bass and drum backing (Pop, Ballad, Rock, Bossa).',
+      'Tap the tempo (T key) and click subdivision.',
+      'Practice → Record: record yourself over the band.',
+    ],
   },
   {
     version: '2.13–2.19',
-    es: ['Oír: el micrófono reconoce el acorde que tocas.', 'Práctica → Oído y Progreso; Teoría → Escalas.', 'Mi patrón de rasgueo, canciones compartibles y vista previa de enlaces.'],
-    en: ['Hear: the microphone names the chord you play.', 'Practice → Ear and Progress; Theory → Scales.', 'My strum pattern, shareable songs and link previews.'],
+    es: [
+      'Oír: el micrófono reconoce el acorde que tocas.',
+      'Práctica → Oído y Progreso; Teoría → Escalas.',
+      'Mi patrón de rasgueo, canciones compartibles y vista previa de enlaces.',
+    ],
+    en: [
+      'Hear: the microphone names the chord you play.',
+      'Practice → Ear and Progress; Theory → Scales.',
+      'My strum pattern, shareable songs and link previews.',
+    ],
   },
 ]
 
-export const helpText: Record<'es' | 'en', { title: string; open: string; close: string; nav: string; newsTitle: string; newsNotice: string; newsAction: string; sections: Section[] }> = {
+export const helpText: Record<
+  'es' | 'en',
+  {
+    title: string
+    open: string
+    close: string
+    nav: string
+    newsTitle: string
+    newsNotice: string
+    newsAction: string
+    sections: Section[]
+  }
+> = {
   es: {
     title: '¿Cómo se usa?',
     open: '¿Cómo se usa?',
@@ -108,17 +163,6 @@ export const helpText: Record<'es' | 'en', { title: string; open: string; close:
         ],
       },
       {
-        id: 'practice',
-        title: 'Práctica',
-        items: [
-          'Cambios: un minuto cambiando entre dos acordes, o con el metrónomo subiendo poco a poco.',
-          'Afinador: con el micrófono, cuerda por cuerda.',
-          'En «Más» → Oído: la app toca un acorde o un intervalo y tú lo adivinas.',
-          'Grabar: grábate mientras suena la progresión y escúchate solo o con la banda.',
-          'Progreso: tu racha de días, minutos por día y cómo mejora cada pareja de acordes.',
-        ],
-      },
-      {
         id: 'songbook',
         title: 'Cancionero',
         items: [
@@ -131,7 +175,7 @@ export const helpText: Record<'es' | 'en', { title: string; open: string; close:
         id: 'tools',
         title: 'Afinador y ajustes',
         items: [
-          'El diapasón de arriba abre el afinador: activa el micrófono y toca una cuerda al aire.',
+          'Afinador (su propia pestaña): activa el micrófono y toca una cuerda al aire. El anillo de estrellas vibra si está desafinada (lila baja, dorado alta) y se calma en turquesa al estar justa. Toca una clavija para fijar la cuerda y oír su nota.',
           '☾/☀ cambia entre noche y día; en Ajustes eliges automático, la notación (C o Do) y el idioma.',
           'Se instala en el móvil («Añadir a pantalla de inicio») y funciona sin conexión.',
           'Todo lo tuyo se guarda en este navegador: usa ⋯ → Mis progresiones → Descargar copia para llevarlo a otro.',
@@ -140,7 +184,13 @@ export const helpText: Record<'es' | 'en', { title: string; open: string; close:
       {
         id: 'keys',
         title: 'Atajos',
-        items: ['Espacio: correr / parar', '→ ← o pedal (PageDown/PageUp): acorde siguiente / anterior', 'T: marcar el tempo', '⌘Z / ⌘⇧Z: deshacer / rehacer', '?: esta ayuda'],
+        items: [
+          'Espacio: correr / parar',
+          '→ ← o pedal (PageDown/PageUp): acorde siguiente / anterior',
+          'T: marcar el tempo',
+          '⌘Z / ⌘⇧Z: deshacer / rehacer',
+          '?: esta ayuda',
+        ],
       },
       { id: 'news', title: 'Novedades', items: [] },
       {
@@ -202,17 +252,6 @@ export const helpText: Record<'es' | 'en', { title: string; open: string; close:
         ],
       },
       {
-        id: 'practice',
-        title: 'Practice',
-        items: [
-          'Changes: one minute switching between two chords, or with the metronome rising step by step.',
-          'Tuner: with the microphone, string by string.',
-          'Under «More» → Ear: the app plays a chord or an interval and you name it.',
-          'Record: record yourself while the progression plays and listen alone or with the band.',
-          'Progress: your day streak, minutes per day and how each chord pair improves.',
-        ],
-      },
-      {
         id: 'songbook',
         title: 'Songbook',
         items: [
@@ -225,7 +264,7 @@ export const helpText: Record<'es' | 'en', { title: string; open: string; close:
         id: 'tools',
         title: 'Tuner and settings',
         items: [
-          'The tuning fork up top opens the tuner: turn on the microphone and play an open string.',
+          'Tuner (its own tab): turn on the microphone and play an open string. The ring of stars shakes when it is out of tune (lilac low, gold high) and settles in turquoise when it is right. Tap a peg to fix the string and hear its note.',
           '☾/☀ switches night and day; in Settings choose automatic, the notation (C or Do) and the language.',
           'It installs on your phone («Add to home screen») and works offline.',
           'Everything of yours is kept in this browser: use ⋯ → My progressions → Download backup to take it elsewhere.',
@@ -234,7 +273,13 @@ export const helpText: Record<'es' | 'en', { title: string; open: string; close:
       {
         id: 'keys',
         title: 'Shortcuts',
-        items: ['Space: run / stop', '→ ← or pedal (PageDown/PageUp): next / previous chord', 'T: tap the tempo', '⌘Z / ⌘⇧Z: undo / redo', '?: this help'],
+        items: [
+          'Space: run / stop',
+          '→ ← or pedal (PageDown/PageUp): next / previous chord',
+          'T: tap the tempo',
+          '⌘Z / ⌘⇧Z: undo / redo',
+          '?: this help',
+        ],
       },
       { id: 'news', title: 'What is new', items: [] },
       {

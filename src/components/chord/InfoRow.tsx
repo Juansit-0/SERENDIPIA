@@ -105,7 +105,8 @@ export function InfoRow({ m, onListen }: { m: ChordModel; onListen: () => void }
             <>
               <span className="cv-hear-dot" aria-hidden="true" />
               <p className="cv-hear-name">
-                {h.heard} <b key={ear.heard.candidate.anglo}>{notation === 'latin' ? ear.heard.candidate.latin : ear.heard.candidate.anglo}</b>
+                {h.heard}{' '}
+                <b key={ear.heard.candidate.anglo}>{notation === 'latin' ? ear.heard.candidate.latin : ear.heard.candidate.anglo}</b>
                 {ear.heard.alternatives.length > 0 && (
                   <span className="cv-hear-alt">
                     {' '}
@@ -175,7 +176,7 @@ export function InfoRow({ m, onListen }: { m: ChordModel; onListen: () => void }
               ))}
             </div>
           )}
-          </div>
+        </div>
       )}
 
       {keyTop && keyDiffers && (

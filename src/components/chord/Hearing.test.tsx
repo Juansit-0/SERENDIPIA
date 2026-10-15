@@ -10,7 +10,12 @@ const G = detectFromMidi([43, 47, 50, 55, 59, 67]).candidates[0]
 vi.mock('../../audio/useChordListener', () => ({
   useChordListener: (onChord: (candidate: DetectionCandidate) => void) => {
     ear.onChord = onChord
-    return { status: 'listening', heard: { candidate: G, alternatives: [], confidence: 0.9 }, start: async () => undefined, stop: () => undefined }
+    return {
+      status: 'listening',
+      heard: { candidate: G, alternatives: [], confidence: 0.9 },
+      start: async () => undefined,
+      stop: () => undefined,
+    }
   },
 }))
 

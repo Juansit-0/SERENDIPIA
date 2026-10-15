@@ -10,7 +10,7 @@ describe('top bar', () => {
     renderApp()
     const nav = screen.getByRole('navigation', { name: 'Vistas' })
     const tabs = within(nav).getAllByRole('button')
-    expect(tabs.map((tab) => tab.textContent)).toEqual(['Acorde', 'Teoría', 'Práctica', 'Cancionero'])
+    expect(tabs.map((tab) => tab.textContent)).toEqual(['Acorde', 'Teoría', 'Cancionero', 'Afinador'])
     expect(tabs[0].getAttribute('aria-current')).toBe('page')
     fireEvent.click(tabs[1])
     expect(tabs[1].getAttribute('aria-current')).toBe('page')

@@ -4,7 +4,7 @@ export const es = {
   'tabs.dictionary': 'Diccionario',
   'tabs.detector': 'Detector',
   'tabs.theory': 'Teoría',
-  'tabs.practice': 'Práctica',
+  'tabs.tuner': 'Afinador',
   'tabs.songbook': 'Cancionero',
   'practice.title': 'Entrenador de cambios',
   'practice.intro': 'Elige dos acordes y practica el cambio entre ellos. La posición de cada uno se elige para que la mano se mueva lo menos posible.',

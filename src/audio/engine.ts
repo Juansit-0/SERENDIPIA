@@ -487,7 +487,8 @@ class AudioEngine {
       const out = new Tone.Gain(0.85).connect(this.master)
       const urls = Object.fromEntries((Object.keys(DRUM_FILES) as DrumSample[]).map((id) => [DRUM_KEYS[id], DRUM_FILES[id]]))
       const drums = new Tone.Sampler({ urls, release: 0.06, onload: () => this.band && (this.band.drumsReady = true) }).connect(out)
-      drums.volume.value = -4
+      // Measured against the guitar: the band sits under it (drum peaks ≈ ⅔ of a strum, the bass a little lower).
+      drums.volume.value = -13
       this.band = { out, drums, drumsReady: false, basses: {} }
     }
     const kind = bassKind(style)
@@ -495,7 +496,7 @@ class AudioEngine {
       const sampler = new Tone.Sampler({ urls: { ...BASS_FILES[kind] }, release: 0.12, onload: () => (entry.ready = true) }).connect(
         this.band.out,
       )
-      sampler.volume.value = kind === 'upright' ? 2 : -1
+      sampler.volume.value = kind === 'upright' ? -7 : -10
       const entry = { sampler, ready: false }
       this.band.basses[kind] = entry
     }

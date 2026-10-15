@@ -31,7 +31,7 @@ beforeEach(() => {
 })
 
 describe('welcome', () => {
-  it('greets a first visit and walks through the four figures', async () => {
+  it('greets a first visit and walks through the six figures', async () => {
     await openApp()
     const dialog = screen.getByRole('dialog', { name: 'Bienvenida a SERENDIPIA' })
     expect(dialog.textContent).toContain('SERENDIPIA')
@@ -40,7 +40,11 @@ describe('welcome', () => {
     fireEvent.keyDown(dialog, { key: 'ArrowRight' })
     fireEvent.keyDown(dialog, { key: 'ArrowRight' })
     expect(screen.getByRole('heading', { name: 'Deja sitio a la casualidad' })).toBeTruthy()
-    expect(shown.at(-1)).toBe(3)
+    fireEvent.keyDown(dialog, { key: 'ArrowRight' })
+    expect(screen.getByRole('heading', { name: 'Escribe tus canciones' })).toBeTruthy()
+    fireEvent.keyDown(dialog, { key: 'ArrowRight' })
+    expect(screen.getByRole('heading', { name: 'Entrena el oído y la mano' })).toBeTruthy()
+    expect(shown.at(-1)).toBe(5)
     fireEvent.click(screen.getByRole('button', { name: 'Empezar a tocar' }))
     // The exit plays first: a circle opens onto the app, which assembles itself.
     expect(screen.getByRole('dialog').getAttribute('data-leaving')).toBe('true')
@@ -66,6 +70,7 @@ describe('welcome', () => {
 
   it('stays away on later visits and when opening a shared link', async () => {
     localStorage.setItem('serendipia.welcome.v1', 'seen')
+    localStorage.setItem('serendipia.seen.v1', __APP_VERSION__)
     await openApp()
     expect(screen.queryByRole('dialog', { name: 'Bienvenida a SERENDIPIA' })).toBeNull()
     cleanup()

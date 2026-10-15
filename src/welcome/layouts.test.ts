@@ -3,7 +3,7 @@ import { FIGURES, place } from './layouts'
 
 describe('welcome figures', () => {
   it('has one figure per welcome step', () => {
-    expect(FIGURES).toHaveLength(4)
+    expect(FIGURES).toHaveLength(6)
   })
 
   it('places exactly the requested particles, dots first and bigger than line stars', () => {

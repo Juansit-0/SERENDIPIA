@@ -1,0 +1,221 @@
+// The help panel: how each part works, what is new, and what the app is.
+export type HelpSectionId = 'chord' | 'strip' | 'play' | 'theory' | 'practice' | 'songbook' | 'tools' | 'keys' | 'news' | 'about'
+
+interface Section {
+  id: HelpSectionId
+  title: string
+  items: string[]
+}
+
+/** Newest first. Each entry is one published version with what a player would notice. */
+export const CHANGELOG: Array<{ version: string; es: string[]; en: string[] }> = [
+  {
+    version: '2.24',
+    es: ['Ayuda «¿Cómo se usa?» (tecla ?), novedades y bienvenida al día.'],
+    en: ['«How it works» help (? key), what is new, and an updated welcome.'],
+  },
+  {
+    version: '2.23',
+    es: ['Cancionero: letra con los acordes encima, que avanza sola al tocarla; se transpone, imprime y comparte.'],
+    en: ['Songbook: lyrics with chords on top that move on as it plays; transpose, print and share.'],
+  },
+  {
+    version: '2.20–2.22',
+    es: ['Acompañamiento de bajo y batería (Pop, Balada, Rock, Bossa).', 'Marcar el tempo tocando (tecla T) y subdivisión del click.', 'Práctica → Grabar: grábate encima de la banda.'],
+    en: ['Bass and drum backing (Pop, Ballad, Rock, Bossa).', 'Tap the tempo (T key) and click subdivision.', 'Practice → Record: record yourself over the band.'],
+  },
+  {
+    version: '2.13–2.19',
+    es: ['Oír: el micrófono reconoce el acorde que tocas.', 'Práctica → Oído y Progreso; Teoría → Escalas.', 'Mi patrón de rasgueo, canciones compartibles y vista previa de enlaces.'],
+    en: ['Hear: the microphone names the chord you play.', 'Practice → Ear and Progress; Theory → Scales.', 'My strum pattern, shareable songs and link previews.'],
+  },
+]
+
+export const helpText: Record<'es' | 'en', { title: string; open: string; close: string; nav: string; newsTitle: string; newsNotice: string; newsAction: string; sections: Section[] }> = {
+  es: {
+    title: '¿Cómo se usa?',
+    open: '¿Cómo se usa?',
+    close: 'Cerrar la ayuda',
+    nav: 'Temas de la ayuda',
+    newsTitle: 'Novedades',
+    newsNotice: 'SERENDIPIA tiene novedades',
+    newsAction: 'Ver novedades',
+    sections: [
+      {
+        id: 'chord',
+        title: 'Acorde',
+        items: [
+          'Escribe un acorde (Am7, Do, G/B…) o marca trastes en el mástil: te dice su nombre, sus notas y sus posiciones.',
+          'El micrófono junto al campo del acorde lo escucha: rasguea y el acorde de arriba sigue lo que tocas.',
+          '«Puede seguir» propone acordes que encajan; el + los añade a la progresión.',
+          'Toca una posición para oírla; «Añadir a la progresión» la lleva a la tira.',
+        ],
+      },
+      {
+        id: 'strip',
+        title: 'La tira (progresión)',
+        items: [
+          'Tu progresión, como una constelación: el color de cada estrella es su función (tónica, subdominante, dominante, prestado).',
+          'Toca un paso para elegir su posición y su ritmo; arrástralo para moverlo. Entre pasos, un comentario explica el cambio.',
+          'Las estrellas punteadas son hallazgos: acordes que podrían seguir.',
+          'En ⋯: guardar, transponer, canciones por secciones, copia de seguridad, compartir enlace e imprimir la hoja.',
+          'Deshacer y rehacer con las flechas curvas (o ⌘Z / ⌘⇧Z).',
+        ],
+      },
+      {
+        id: 'play',
+        title: 'Tocar',
+        items: [
+          'Correr hace sonar la progresión; el tempo se cambia con − y + o marcándolo en Reproducción (tecla T).',
+          'Reproducción: ritmo de rasgueo (o «Mi patrón»), acompañamiento de bajo y batería, repetir, click y su subdivisión.',
+          'Sonido: el timbre de la guitarra y el volumen.',
+        ],
+      },
+      {
+        id: 'theory',
+        title: 'Teoría',
+        items: [
+          'Acordes: los siete de la tonalidad con su función; tócalos o añádelos. Debajo, progresiones clásicas listas para usar.',
+          'Escalas: la escala de la tonalidad en todo el mástil, por posiciones; las notas del acorde que suena van rellenas.',
+        ],
+      },
+      {
+        id: 'practice',
+        title: 'Práctica',
+        items: [
+          'Cambios: un minuto cambiando entre dos acordes, o con el metrónomo subiendo poco a poco.',
+          'Oído: la app toca un acorde o un intervalo y tú lo adivinas.',
+          'Grabar: grábate mientras suena la progresión y escúchate solo o con la banda.',
+          'Progreso: tu racha de días, minutos por día y cómo mejora cada pareja de acordes.',
+        ],
+      },
+      {
+        id: 'songbook',
+        title: 'Cancionero',
+        items: [
+          'Escribe la letra con los acordes entre corchetes justo antes de la sílaba: [C]Hoy el [G]cielo.',
+          '{comment: Coro} pone un título de parte; el estribillo va entre {soc} y {eoc}.',
+          'Tocar hace sonar los acordes en orden y la letra avanza sola. También se transpone, imprime y comparte.',
+        ],
+      },
+      {
+        id: 'tools',
+        title: 'Afinador y ajustes',
+        items: [
+          'El diapasón de arriba abre el afinador: activa el micrófono y toca una cuerda al aire.',
+          '☾/☀ cambia entre noche y día; en Ajustes eliges automático, la notación (C o Do) y el idioma.',
+          'Se instala en el móvil («Añadir a pantalla de inicio») y funciona sin conexión.',
+          'Todo lo tuyo se guarda en este navegador: usa ⋯ → Mis progresiones → Descargar copia para llevarlo a otro.',
+        ],
+      },
+      {
+        id: 'keys',
+        title: 'Atajos',
+        items: ['Espacio: correr / parar', '→ ← o pedal (PageDown/PageUp): acorde siguiente / anterior', 'T: marcar el tempo', '⌘Z / ⌘⇧Z: deshacer / rehacer', '?: esta ayuda'],
+      },
+      { id: 'news', title: 'Novedades', items: [] },
+      {
+        id: 'about',
+        title: 'Acerca de',
+        items: [
+          'SERENDIPIA es una app para practicar guitarra: acordes, teoría, oído y canciones, hecha por Juan Camilo López Díaz.',
+          'Hecha con React, TypeScript, Tone.js (sonido) y three.js (la bienvenida). No tiene servidor: funciona entera en tu navegador, también sin conexión.',
+          'Sonidos de guitarra: soundfont MusyngKite (CC BY-SA 3.0). Tipografías IM Fell English, EB Garamond y Jost (SIL OFL). Código con licencia MIT.',
+        ],
+      },
+    ],
+  },
+  en: {
+    title: 'How it works',
+    open: 'How it works',
+    close: 'Close help',
+    nav: 'Help topics',
+    newsTitle: 'What is new',
+    newsNotice: 'SERENDIPIA has something new',
+    newsAction: 'See what is new',
+    sections: [
+      {
+        id: 'chord',
+        title: 'Chord',
+        items: [
+          'Type a chord (Am7, Do, G/B…) or mark frets on the fretboard: you get its name, notes and shapes.',
+          'The microphone next to the chord field listens: strum and the chord above follows what you play.',
+          '«Could follow» suggests chords that fit; + adds them to the progression.',
+          'Tap a shape to hear it; «Add to progression» takes it to the strip.',
+        ],
+      },
+      {
+        id: 'strip',
+        title: 'The strip (progression)',
+        items: [
+          'Your progression as a constellation: each star’s colour is its function (tonic, subdominant, dominant, borrowed).',
+          'Tap a step to choose its shape and rhythm; drag it to move it. Between steps, a note explains the change.',
+          'Dotted stars are finds: chords that could come next.',
+          'In ⋯: save, transpose, songs by sections, backup, share link and print sheet.',
+          'Undo and redo with the curved arrows (or ⌘Z / ⌘⇧Z).',
+        ],
+      },
+      {
+        id: 'play',
+        title: 'Playing',
+        items: [
+          'Run plays the progression; change the tempo with − and + or tap it in Playback (T key).',
+          'Playback: strum rhythm (or «My pattern»), bass and drum backing, loop, click and its subdivision.',
+          'Sound: the guitar’s timbre and the volume.',
+        ],
+      },
+      {
+        id: 'theory',
+        title: 'Theory',
+        items: [
+          'Chords: the seven of the key with their function; play or add them. Below, classic progressions ready to use.',
+          'Scales: the key’s scale over the whole neck, by positions; the tones of the sounding chord are filled.',
+        ],
+      },
+      {
+        id: 'practice',
+        title: 'Practice',
+        items: [
+          'Changes: one minute switching between two chords, or with the metronome rising step by step.',
+          'Ear: the app plays a chord or an interval and you name it.',
+          'Record: record yourself while the progression plays and listen alone or with the band.',
+          'Progress: your day streak, minutes per day and how each chord pair improves.',
+        ],
+      },
+      {
+        id: 'songbook',
+        title: 'Songbook',
+        items: [
+          'Write the lyrics with chords in brackets just before the syllable: [C]Today the [G]sky.',
+          '{comment: Chorus} titles a part; the chorus goes between {soc} and {eoc}.',
+          'Play sounds the chords in order and the lyrics move on by themselves. It also transposes, prints and shares.',
+        ],
+      },
+      {
+        id: 'tools',
+        title: 'Tuner and settings',
+        items: [
+          'The tuning fork up top opens the tuner: turn on the microphone and play an open string.',
+          '☾/☀ switches night and day; in Settings choose automatic, the notation (C or Do) and the language.',
+          'It installs on your phone («Add to home screen») and works offline.',
+          'Everything of yours is kept in this browser: use ⋯ → My progressions → Download backup to take it elsewhere.',
+        ],
+      },
+      {
+        id: 'keys',
+        title: 'Shortcuts',
+        items: ['Space: run / stop', '→ ← or pedal (PageDown/PageUp): next / previous chord', 'T: tap the tempo', '⌘Z / ⌘⇧Z: undo / redo', '?: this help'],
+      },
+      { id: 'news', title: 'What is new', items: [] },
+      {
+        id: 'about',
+        title: 'About',
+        items: [
+          'SERENDIPIA is an app to practise guitar: chords, theory, ear and songs, made by Juan Camilo López Díaz.',
+          'Built with React, TypeScript, Tone.js (sound) and three.js (the welcome). No server: it runs entirely in your browser, offline too.',
+          'Guitar sounds: MusyngKite soundfont (CC BY-SA 3.0). Typefaces IM Fell English, EB Garamond and Jost (SIL OFL). Code under the MIT license.',
+        ],
+      },
+    ],
+  },
+}

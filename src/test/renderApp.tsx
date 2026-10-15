@@ -12,6 +12,8 @@ vi.mock('../audio/loader', () => ({
 export function renderApp(search = '') {
   localStorage.clear()
   localStorage.setItem('serendipia.welcome.v1', 'seen')
+  // «Novedades» stays quiet unless a test asks for it.
+  localStorage.setItem('serendipia.seen.v1', __APP_VERSION__)
   window.history.replaceState(null, '', `/${search}`)
   resetSongLinkForTests()
   return render(<App />)

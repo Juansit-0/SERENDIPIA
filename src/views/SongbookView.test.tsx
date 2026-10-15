@@ -29,6 +29,7 @@ beforeEach(() => {
   options = null
   localStorage.clear()
   localStorage.setItem('serendipia.welcome.v1', 'seen')
+    localStorage.setItem('serendipia.seen.v1', __APP_VERSION__)
 })
 
 async function open(search = '') {

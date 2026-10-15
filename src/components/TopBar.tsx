@@ -8,6 +8,8 @@ import { BEAT_OPTIONS, TEMPO_MAX, TEMPO_MIN } from '../state/settings'
 import { useStore, type Notation, type ViewId } from '../state/store'
 import { useTheme } from '../state/theme'
 import { openWelcome } from '../welcome/state'
+import { openHelp } from '../state/help'
+import { helpText } from '../i18n/help'
 import { tunerText } from '../i18n/tuner'
 import { Tuner } from './topbar/Tuner'
 import { topbarText } from '../i18n/topbar'
@@ -512,6 +514,16 @@ export function TopBar() {
                     }}
                   >
                     {x.welcomeAgain}
+                  </button>
+                  <button
+                    type="button"
+                    className="cc-btn cc-btn--ghost w-full mt-1"
+                    onClick={() => {
+                      close()
+                      openHelp()
+                    }}
+                  >
+                    {helpText[lang].open}
                   </button>
                 </div>
                 <div className="cc-pop__row">

@@ -29,6 +29,7 @@ describe('Acompañamiento', () => {
   it('plays bass and drums in the chosen style, the bass on each chord’s root', async () => {
     localStorage.clear()
     localStorage.setItem('serendipia.welcome.v1', 'seen')
+    localStorage.setItem('serendipia.seen.v1', __APP_VERSION__)
     window.history.replaceState(null, '', '/')
     const { default: App } = await import('../../App')
     render(<App />)

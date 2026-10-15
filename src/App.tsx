@@ -1,9 +1,13 @@
 import { useEffect } from 'react'
+import { HelpDialog } from './components/HelpDialog'
 import { Notice } from './components/Notice'
 import { StepRow } from './components/StepRow'
 import { TopBar } from './components/TopBar'
 import { StoreProvider, useStore } from './state/store'
 import { useWakeLock } from './state/wakeLock'
+import { hasNews, openHelp } from './state/help'
+import { showNotice } from './state/notice'
+import { helpText } from './i18n/help'
 import { ChordView } from './views/ChordView'
 import { PracticeView } from './views/PracticeView'
 import { SongbookView } from './views/SongbookView'
@@ -49,6 +53,28 @@ function Shell() {
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [togglePlay, view, welcome])
+
+  // ? opens the help; once per new version, returning players hear about what is new.
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== '?' || welcome) return
+      const target = event.target as HTMLElement | null
+      if (target && (['INPUT', 'SELECT', 'TEXTAREA'].includes(target.tagName) || target.isContentEditable)) return
+      event.preventDefault()
+      openHelp()
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [welcome])
+
+  const { lang } = useStore()
+  useEffect(() => {
+    if (!hasNews(__APP_VERSION__, welcome)) return
+    const x = helpText[lang]
+    showNotice(x.newsNotice, 9000, { label: x.newsAction, run: () => openHelp('news') })
+    // Once per load: the version is recorded as seen on the first check.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // T taps the tempo, anywhere but in a text field.
   useEffect(() => {
@@ -96,6 +122,7 @@ function Shell() {
       </div>
       {view !== 'practice' && view !== 'songbook' && <StepRow />}
       <Notice />
+      <HelpDialog />
       {welcome && <Welcome />}
     </div>
   )

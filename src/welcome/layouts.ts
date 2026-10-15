@@ -139,7 +139,38 @@ function serendipity(): Figure {
   }
 }
 
-export const FIGURES: Figure[] = [brand(), chordChart(), constellation(), serendipity()]
+/** The songbook: three lines of lyrics (dotted, like words) with chord stars over their syllables. */
+function songbook(): Figure {
+  const rows = [1.5, 0, -1.5]
+  const chords: Array<{ at: [number, number]; hue: Hue; size: number }> = [
+    { at: [-2.7, 2.05], hue: 'tonic', size: 1.1 },
+    { at: [-0.8, 2.05], hue: 'dom', size: 1.1 },
+    { at: [1.3, 2.05], hue: 'tonic', size: 1.6 },
+    { at: [-2.1, 0.55], hue: 'sub', size: 1.1 },
+    { at: [0.6, 0.55], hue: 'dom', size: 1.1 },
+    { at: [2.4, 0.55], hue: 'tonic', size: 1.1 },
+    { at: [-1.4, -0.95], hue: 'sub', size: 1.1 },
+    { at: [1.8, -0.95], hue: 'borrowed', size: 1.1 },
+  ]
+  return {
+    segments: rows.map((y, index): Segment => ({ from: [-3, y], to: [index === 2 ? 1.6 : 3, y], hue: 'ink', dash: 0.72 })),
+    dots: chords,
+  }
+}
+
+/** Practice: a sound wave over four beats — listen, play, record. */
+function practice(): Figure {
+  const wave: Array<[number, number]> = Array.from({ length: 41 }, (_, i) => {
+    const x = -3 + (i / 40) * 6
+    return [x, Math.sin(x * 2.1) * 1.1 * Math.exp(-((x + 0.4) ** 2) / 9) + 0.4]
+  })
+  return {
+    segments: [...path(wave, 'sub'), ...circle(2.45, 'accent', 56, 0.4).map((segment) => ({ ...segment, from: [segment.from[0], segment.from[1] + 0.2] as [number, number], to: [segment.to[0], segment.to[1] + 0.2] as [number, number] }))],
+    dots: [-2.25, -0.75, 0.75, 2.25].map((x, index): Dot => ({ at: [x, -1.75], hue: index === 0 ? 'tonic' : 'ink', size: index === 0 ? 1.4 : 0.9 })),
+  }
+}
+
+export const FIGURES: Figure[] = [brand(), chordChart(), constellation(), serendipity(), songbook(), practice()]
 
 export interface Placement {
   x: number

@@ -1,0 +1,157 @@
+/* «¿Cómo se usa?»: a centred panel over a dimmed page; topics on the left, one at a time on the right. */
+.help {
+  position: fixed;
+  inset: 0;
+  z-index: 95;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: color-mix(in srgb, var(--cc-ground) 72%, transparent);
+  backdrop-filter: blur(3px);
+}
+
+.help__panel {
+  display: grid;
+  grid-template-areas: 'head' 'nav' 'body';
+  grid-template-rows: auto auto minmax(0, 1fr);
+  width: min(56rem, 100%);
+  max-height: min(42rem, calc(100dvh - 32px));
+  overflow: hidden;
+  box-shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.6);
+}
+
+.help__head {
+  grid-area: head;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem 0.5rem;
+  border-bottom: 1px solid var(--cc-line);
+}
+
+.help__head h2 {
+  margin: 0;
+  font: 400 1.75rem / 1.1 var(--font-display);
+}
+
+.help__nav {
+  grid-area: nav;
+  display: flex;
+  gap: 4px;
+  padding: 0.5rem 0.75rem;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--cc-line);
+}
+
+.help__nav button {
+  flex: none;
+  padding: 0.4rem 0.7rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: none;
+  color: var(--cc-ink-soft);
+  font: 600 0.8125rem / 1.2 var(--font-ui);
+  text-align: left;
+  cursor: pointer;
+}
+
+.help__nav button:hover {
+  color: var(--cc-ink);
+}
+
+.help__nav button[aria-current='true'] {
+  border-color: var(--cc-accent-deep);
+  background: var(--cc-accent-soft);
+  color: var(--cc-ink);
+}
+
+.help__body {
+  grid-area: body;
+  overflow: auto;
+  padding: 1rem 1.25rem 1.5rem;
+}
+
+.help__body h3 {
+  margin: 0 0 0.75rem;
+  font: 400 1.5rem / 1.1 var(--font-display);
+}
+
+.help__body ul {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin: 0;
+  padding-left: 1.1rem;
+  font-family: var(--font-serif);
+  font-size: 1.0625rem;
+  line-height: 1.45;
+}
+
+.help__body li::marker {
+  color: var(--cc-accent-deep);
+}
+
+.help__keys {
+  font-family: var(--font-ui) !important;
+  font-size: 0.9375rem !important;
+}
+
+.help__news {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  margin: 0;
+}
+
+.help__news div {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr);
+  gap: 0.75rem;
+}
+
+.help__news dt {
+  font-weight: 700;
+  color: var(--cc-accent-deep);
+}
+
+.help__news dd {
+  margin: 0;
+}
+
+.help__links {
+  margin: 1rem 0 0;
+  font-size: 0.875rem;
+}
+
+.help__links a {
+  color: var(--cc-accent-deep);
+}
+
+@media (min-width: 760px) {
+  .help__panel {
+    grid-template-areas: 'head head' 'nav body';
+    grid-template-columns: 13rem minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .help__nav {
+    flex-direction: column;
+    overflow: auto;
+    border-bottom: 0;
+    border-right: 1px solid var(--cc-line);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .help__panel {
+    animation: pop-in 220ms cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+  }
+}
+
+/* Phones: the version sits over its notes instead of beside them. */
+@media (max-width: 599px) {
+  .help__news div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.25rem;
+  }
+}

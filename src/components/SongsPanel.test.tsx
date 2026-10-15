@@ -33,6 +33,7 @@ const stepNames = () => Array.from(document.querySelectorAll<HTMLElement>('[data
 async function openSongs() {
   localStorage.clear()
   localStorage.setItem('serendipia.welcome.v1', 'seen')
+    localStorage.setItem('serendipia.seen.v1', __APP_VERSION__)
   localStorage.setItem('serendipia.library.v1', JSON.stringify([{ id: 'v', name: 'Verso', savedAt: '', data: 'p=Am_F' }]))
   window.history.replaceState(null, '', '/')
   const { default: App } = await import('../App')

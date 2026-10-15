@@ -10,6 +10,18 @@ export function Notice() {
   return (
     <div key={notice.id} className="cc-notice" role="status">
       <span>{notice.text}</span>
+      {notice.action && (
+        <button
+          type="button"
+          className="cc-btn cc-btn--primary"
+          onClick={() => {
+            notice.action?.run()
+            dismissNotice()
+          }}
+        >
+          {notice.action.label}
+        </button>
+      )}
       <button type="button" className="cc-btn cc-btn--icon cc-btn--ghost" onClick={dismissNotice} aria-label={lang === 'es' ? 'Cerrar aviso' : 'Close notice'}>
         <CloseIcon size={14} />
       </button>

@@ -83,3 +83,100 @@ export const SAMPLE_SHEET = `{title: Mi canción}
 {start_of_chorus}
 [F]Así se ven en[G]cima de la [C]letra
 {end_of_chorus}`
+
+/* ---------- Editing without brackets ---------- */
+
+export interface WordSlot {
+  /** Where the word starts in the raw line (after any chord bracket in front of it). */
+  start: number
+  word: string
+  /** The bracket just before the word, if any: its name and where it sits in the raw line. */
+  chord: { name: string; from: number; to: number } | null
+  /** True when this piece continues the word before it (a chord fell mid-word: «mi[Em]rar»). */
+  attached: boolean
+}
+
+/**
+ * The places a chord can go on one raw line: each word (with the chord already in front of it, if any), plus
+ * a chord that ends the line with no lyric after it.
+ */
+export function lineSlots(raw: string): WordSlot[] {
+  const slots: WordSlot[] = []
+  const pattern = /(\[[^\]]*\])?(\S+)?/g
+  let match: RegExpExecArray | null
+  while ((match = pattern.exec(raw))) {
+    if (match[0] === '') {
+      pattern.lastIndex += 1
+      continue
+    }
+    const bracket = match[1]
+    let word = match[2] ?? ''
+    // A word that holds a bracket inside («a[C]quí») is split there: each part is its own place.
+    const inner = word.indexOf('[')
+    if (inner > 0) {
+      word = word.slice(0, inner)
+      pattern.lastIndex = match.index + (bracket?.length ?? 0) + inner
+    }
+    const from = match.index
+    slots.push({
+      start: from + (bracket?.length ?? 0),
+      word,
+      chord: bracket ? { name: bracket.slice(1, -1).trim(), from, to: from + bracket.length } : null,
+      attached: from > 0 && !/\s/.test(raw[from - 1]),
+    })
+  }
+  return slots
+}
+
+/** Puts `chord` on a word (replacing the one there), or takes it off when `chord` is null. */
+export function setChordAt(raw: string, slot: WordSlot, chord: string | null): string {
+  const before = slot.chord ? raw.slice(0, slot.chord.from) : raw.slice(0, slot.start)
+  const after = raw.slice(slot.start)
+  return `${before}${chord ? `[${chord.trim()}]` : ''}${after}`
+}
+
+/** True for a line made only of chord names (and bar marks), the way songs are posted with chords on top. */
+function isChordLine(line: string): boolean {
+  const tokens = line.trim().split(/\s+/).filter((token) => !/^[|\\/\-–.:()x\d]+$/i.test(token))
+  return tokens.length > 0 && tokens.every((token) => parseChord(token.replace(/[()]/g, '')) !== null)
+}
+
+/**
+ * «Chords over lyrics» → ChordPro: each chord line is folded into the lyric line below it, the chord placed at its
+ * column. A chord line with no lyrics under it becomes a line of chords alone. Text already in ChordPro is kept.
+ */
+export function chordsOverLyrics(text: string): { text: string; converted: boolean } {
+  const lines = text.replace(/\r\n?/g, '\n').split('\n')
+  const out: string[] = []
+  let converted = false
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index]
+    if (!isChordLine(line) || line.includes('[')) {
+      out.push(line)
+      continue
+    }
+    converted = true
+    const chords = [...line.matchAll(/\S+/g)]
+      .filter((match) => parseChord(match[0].replace(/[()]/g, '')) !== null)
+      .map((match) => ({ column: match.index ?? 0, name: match[0].replace(/[()]/g, '') }))
+    const next = lines[index + 1]
+    if (next === undefined || next.trim() === '' || isChordLine(next) || /^\s*\{/.test(next)) {
+      out.push(chords.map((chord) => `[${chord.name}]`).join(' '))
+      continue
+    }
+    let lyric = next.padEnd(Math.max(...chords.map((chord) => chord.column)), ' ')
+    // A chord over a space belongs to the word that follows it.
+    const at = (column: number) => {
+      let position = column
+      while (position < next.length && next[position] === ' ') position += 1
+      return position < next.length ? position : column
+    }
+    for (const chord of [...chords].reverse()) {
+      const position = at(chord.column)
+      lyric = `${lyric.slice(0, position)}[${chord.name}]${lyric.slice(position)}`
+    }
+    out.push(lyric.trimEnd())
+    index += 1
+  }
+  return { text: out.join('\n'), converted }
+}

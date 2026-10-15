@@ -1,11 +1,12 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type ClipboardEvent } from 'react'
 import { createPortal } from 'react-dom'
 import { MinusIcon, PlayIcon, PlusIcon, StopIcon } from '../components/icons'
 import { songbookText } from '../i18n/songbook'
-import { parseSheet, SAMPLE_SHEET, type ParsedSheet } from '../music/chordpro'
+import { chordsOverLyrics, parseSheet, type ParsedSheet } from '../music/chordpro'
 import { showNotice } from '../state/notice'
 import { sheetId, sheetUrl, type Sheet } from '../state/sheets'
 import { useStore } from '../state/store'
+import { ChordPlacer } from './songbook/ChordPlacer'
 import '../styles/songbook.css'
 
 /** The Cancionero: lyrics with chords over each syllable, played chord by chord with the lyrics following. */
@@ -14,7 +15,7 @@ export function SongbookView() {
   const x = songbookText[lang]
   const [selectedId, setSelectedId] = useState<string | null>(() => sheets[0]?.id ?? null)
   const selected = sheets.find((sheet) => sheet.id === selectedId) ?? sheets[0] ?? null
-  const [mode, setMode] = useState<'view' | 'edit'>('view')
+  const [mode, setMode] = useState<'view' | 'chords' | 'text'>('view')
   const [semitones, setSemitones] = useState(0)
   const [confirm, setConfirm] = useState(false)
   const [link, setLink] = useState<string | null>(null)
@@ -23,12 +24,26 @@ export function SongbookView() {
   const parsed = useMemo(() => (selected ? parseSheet(selected.text, semitones) : null), [selected, semitones])
   const live = playing && sheetPlay?.sheetId === selected?.id ? sheetPlay.index : -1
 
-  const create = (text = SAMPLE_SHEET) => {
-    const sheet: Sheet = { id: sheetId(), name: parseSheet(text).title ?? x.untitled, text, savedAt: '' }
+  // A new song starts with its lyrics: write or paste them, then place the chords by tapping words.
+  const create = () => {
+    const sheet: Sheet = { id: sheetId(), name: x.untitled, text: '', savedAt: '' }
     saveSheet(sheet)
     setSelectedId(sheet.id)
-    setMode('edit')
+    setMode('text')
     setSemitones(0)
+  }
+
+  const onPasteLyrics = (event: ClipboardEvent<HTMLTextAreaElement>) => {
+    if (!selected) return
+    const pasted = event.clipboardData.getData('text')
+    const result = chordsOverLyrics(pasted)
+    if (!result.converted) return
+    event.preventDefault()
+    const area = event.currentTarget
+    const text = area.value.slice(0, area.selectionStart) + result.text + area.value.slice(area.selectionEnd)
+    const title = parseSheet(text).title
+    saveSheet({ ...selected, text, name: selected.name === x.untitled && title ? title : selected.name })
+    showNotice(x.pastedChords)
   }
 
   const select = (id: string) => {
@@ -82,7 +97,7 @@ export function SongbookView() {
       <section className="cc-module sb-empty">
         <h2 className="sb-empty__title">{x.title}</h2>
         <p>{x.intro}</p>
-        <button type="button" className="cc-btn cc-btn--primary cc-btn--lg" onClick={() => create()}>
+        <button type="button" className="cc-btn cc-btn--primary cc-btn--lg" onClick={create}>
           <PlusIcon size={16} /> {x.first}
         </button>
       </section>
@@ -94,7 +109,7 @@ export function SongbookView() {
       <section className="cc-module sb-list" aria-label={x.list}>
         <div className="sb-list__head">
           <h2 className="cc-label">{x.title}</h2>
-          <button type="button" className="cc-btn" onClick={() => create()}>
+          <button type="button" className="cc-btn" onClick={create}>
             <PlusIcon size={14} /> {x.create}
           </button>
         </div>
@@ -112,7 +127,7 @@ export function SongbookView() {
 
       <section className="cc-module sb-sheet" aria-label={selected.name}>
         <div className="sb-tools">
-          {mode === 'edit' ? (
+          {mode !== 'view' ? (
             <input
               className="sb-title-input"
               aria-label={x.name}
@@ -128,7 +143,10 @@ export function SongbookView() {
               <button type="button" aria-pressed={mode === 'view'} onClick={() => setMode('view')}>
                 {x.view}
               </button>
-              <button type="button" aria-pressed={mode === 'edit'} onClick={() => setMode('edit')}>
+              <button type="button" aria-pressed={mode === 'chords'} onClick={() => setMode('chords')}>
+                {x.place}
+              </button>
+              <button type="button" aria-pressed={mode === 'text'} onClick={() => setMode('text')}>
                 {x.edit}
               </button>
             </div>
@@ -193,13 +211,29 @@ export function SongbookView() {
           {link && <input className="strip-field" readOnly value={link} aria-label={x.copyHere} onFocus={(event) => event.currentTarget.select()} autoFocus />}
         </div>
 
-        {mode === 'edit' ? (
+        {mode === 'text' ? (
           <div className="sb-editor">
             <label className="cc-label" htmlFor="sheet-text">
               {x.text}
             </label>
-            <textarea id="sheet-text" spellCheck={false} value={selected.text} onChange={(event) => saveSheet({ ...selected, text: event.target.value })} />
-            <p className="sb-help">{x.help}</p>
+            <textarea
+              id="sheet-text"
+              spellCheck={false}
+              value={selected.text}
+              placeholder={x.textPlaceholder}
+              onPaste={onPasteLyrics}
+              onChange={(event) => saveSheet({ ...selected, text: event.target.value })}
+            />
+            <div className="sb-editor__foot">
+              <p className="sb-help">{x.help}</p>
+              <button type="button" className="cc-btn cc-btn--primary" disabled={!selected.text.trim()} onClick={() => setMode('chords')}>
+                {x.nextPlace}
+              </button>
+            </div>
+          </div>
+        ) : mode === 'chords' ? (
+          <div className="sb-body">
+            <ChordPlacer text={selected.text} onChange={(text) => saveSheet({ ...selected, text })} />
           </div>
         ) : (
           <div className="sb-body" ref={body}>

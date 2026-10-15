@@ -35,3 +35,40 @@ describe('ChordPro', () => {
     expect(sheet.chords.map((chord) => chord.anglo)).toEqual(['A'])
   })
 })
+
+describe('placing chords without brackets', () => {
+  it('finds each word and the chord in front of it', async () => {
+    const { lineSlots } = await import('./chordpro')
+    const slots = lineSlots('[C]Hoy el [G]cielo a[Am]quí')
+    expect(slots.map((slot) => [slot.word, slot.chord?.name ?? null])).toEqual([
+      ['Hoy', 'C'],
+      ['el', null],
+      ['cielo', 'G'],
+      ['a', null],
+      ['quí', 'Am'],
+    ])
+  })
+
+  it('puts, changes and takes off a chord on a word', async () => {
+    const { lineSlots, setChordAt } = await import('./chordpro')
+    let line = 'Hoy el cielo tiene luz'
+    line = setChordAt(line, lineSlots(line)[2], 'G')
+    expect(line).toBe('Hoy el [G]cielo tiene luz')
+    line = setChordAt(line, lineSlots(line)[0], 'C')
+    expect(line).toBe('[C]Hoy el [G]cielo tiene luz')
+    line = setChordAt(line, lineSlots(line)[2], 'Em')
+    expect(line).toBe('[C]Hoy el [Em]cielo tiene luz')
+    line = setChordAt(line, lineSlots(line)[0], null)
+    expect(line).toBe('Hoy el [Em]cielo tiene luz')
+  })
+
+  it('turns a song posted with chords on top into ChordPro', async () => {
+    const { chordsOverLyrics, parseSheet } = await import('./chordpro')
+    const pasted = ['C           G', 'Hoy el cielo tiene luz', '', 'Am   F', 'Y si me quedo', 'G  C'].join('\n')
+    const { text, converted } = chordsOverLyrics(pasted)
+    expect(converted).toBe(true)
+    expect(text.split('\n')).toEqual(['[C]Hoy el cielo [G]tiene luz', '', '[Am]Y si [F]me quedo', '[G] [C]'])
+    expect(parseSheet(text).chords.map((chord) => chord.anglo)).toEqual(['C', 'G', 'Am', 'F', 'G', 'C'])
+    expect(chordsOverLyrics('Solo letra, sin acordes').converted).toBe(false)
+  })
+})

@@ -258,3 +258,131 @@
     border-left-color: #15131c;
   }
 }
+
+/* ---------- «Acordes»: tap a word, pick its chord ---------- */
+.sb-placer {
+  display: flex;
+  flex-direction: column;
+}
+
+.sb-placer > .sb-help {
+  margin-bottom: 0.75rem;
+}
+
+.sb-line--place {
+  gap: 2px 0;
+}
+
+.sb-place {
+  position: relative;
+  display: inline-flex;
+}
+
+.sb-word {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-height: 2.9em;
+  padding: 0 0.3em 0 0;
+  border: 0;
+  border-radius: 4px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sb-word:hover,
+.sb-word[aria-expanded='true'] {
+  background: var(--cc-accent-soft);
+}
+
+.sb-word:hover .sb-chord.is-empty,
+.sb-word:focus-visible .sb-chord.is-empty,
+.sb-word[aria-expanded='true'] .sb-chord.is-empty {
+  opacity: 1;
+}
+
+/* The empty slot shows a faint + only where the pointer or focus is, so the lyrics stay readable. */
+.sb-chord.is-empty {
+  color: var(--cc-ink-faint);
+  opacity: 0;
+}
+
+@media (pointer: coarse) {
+  .sb-chord.is-empty {
+    opacity: 0.35;
+  }
+}
+
+.sb-palette {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  width: min(20rem, calc(100vw - 32px));
+  padding: 0.7rem;
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
+}
+
+.sb-palette__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sb-palette__word {
+  font-family: var(--font-serif);
+  font-size: 1.0625rem;
+}
+
+.sb-palette__group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.sb-palette__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.sb-palette__chip {
+  min-width: 3rem;
+  min-height: 40px;
+  font-weight: 700;
+}
+
+.sb-palette__other {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: end;
+  gap: 0.3rem;
+}
+
+.sb-palette__other label {
+  grid-column: 1 / -1;
+}
+
+.sb-palette__remove {
+  align-self: flex-start;
+}
+
+.sb-editor__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+/* A word split by a chord mid-word reads as one word: no gap before its second piece. */
+.sb-place.is-split .sb-word {
+  padding-right: 0;
+}

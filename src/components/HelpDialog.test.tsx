@@ -17,7 +17,7 @@ describe('¿Cómo se usa?', () => {
     const dialog = screen.getByRole('dialog', { name: '¿Cómo se usa?' })
     expect(within(dialog).getByRole('heading', { name: 'Acorde' })).toBeTruthy()
     fireEvent.click(within(dialog).getByRole('button', { name: 'Cancionero' }))
-    expect(within(dialog).getByText(/\[C\]Hoy el \[G\]cielo/)).toBeTruthy()
+    expect(within(dialog).getByText(/toca una palabra y elige su acorde/)).toBeTruthy()
     fireEvent.click(within(dialog).getByRole('button', { name: 'Acerca de' }))
     expect(within(dialog).getByRole('link', { name: /github.com\/Juansit-0\/SERENDIPIA/ })).toBeTruthy()
     let result: axe.AxeResults | undefined

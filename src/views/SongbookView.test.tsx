@@ -80,4 +80,33 @@ describe('Cancionero', () => {
     expect(document.querySelector('.cc-notice')?.textContent).toContain('Añadida al Cancionero')
     expect(window.location.search).toBe('')
   }, 20000)
+
+  it('places chords by tapping words, without typing brackets', async () => {
+    await open()
+    fireEvent.click(screen.getByRole('button', { name: /Crear mi primera canción/ }))
+    fireEvent.change(screen.getByLabelText('Letra con acordes (ChordPro)'), { target: { value: 'Hoy el cielo tiene luz' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Siguiente: poner acordes' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Acorde para «Hoy»' }))
+    const palette = screen.getByRole('dialog', { name: 'Acorde para «Hoy»' })
+    // C major is the key in view: its chords are offered.
+    fireEvent.click(within(within(palette).getByRole('group', { name: 'De la tonalidad' })).getByRole('button', { name: 'C' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Acorde para «cielo»' }))
+    fireEvent.change(screen.getByLabelText('Otro'), { target: { value: 'Em7' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Poner' }))
+    expect(JSON.parse(localStorage.getItem('serendipia.sheets.v1')!)[0].text).toBe('[C]Hoy el [Em7]cielo tiene luz')
+    // The song's own chords come first next time; a placed chord can be taken off.
+    fireEvent.click(screen.getByRole('button', { name: 'Acorde para «cielo»: Em7' }))
+    expect(within(screen.getByRole('group', { name: 'En esta canción' })).getAllByRole('button').map((b) => b.textContent)).toEqual(['C', 'Em7'])
+    fireEvent.click(screen.getByRole('button', { name: 'Quitar acorde' }))
+    expect(JSON.parse(localStorage.getItem('serendipia.sheets.v1')!)[0].text).toBe('[C]Hoy el cielo tiene luz')
+  }, 20000)
+
+  it('a song pasted with the chords on top gets them placed over the lyrics', async () => {
+    await open()
+    fireEvent.click(screen.getByRole('button', { name: /Crear mi primera canción/ }))
+    const area = screen.getByLabelText('Letra con acordes (ChordPro)') as HTMLTextAreaElement
+    fireEvent.paste(area, { clipboardData: { getData: () => 'G        D\nCae la tarde lenta' } })
+    expect(JSON.parse(localStorage.getItem('serendipia.sheets.v1')!)[0].text).toBe('[G]Cae la ta[D]rde lenta')
+    expect(document.querySelector('.cc-notice')?.textContent).toContain('Coloqué los acordes')
+  }, 20000)
 })

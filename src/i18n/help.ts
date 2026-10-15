@@ -10,6 +10,11 @@ interface Section {
 /** Newest first. Each entry is one published version with what a player would notice. */
 export const CHANGELOG: Array<{ version: string; es: string[]; en: string[] }> = [
   {
+    version: '2.25',
+    es: ['Cancionero más fácil: toca una palabra y elige su acorde, sin escribir corchetes.', 'Pega una canción con los acordes encima de la letra y se colocan solos.'],
+    en: ['Easier songbook: tap a word and pick its chord, no brackets to type.', 'Paste a song with the chords above the lyrics and they place themselves.'],
+  },
+  {
     version: '2.24',
     es: ['Ayuda «¿Cómo se usa?» (tecla ?), novedades y bienvenida al día.'],
     en: ['«How it works» help (? key), what is new, and an updated welcome.'],
@@ -93,8 +98,8 @@ export const helpText: Record<'es' | 'en', { title: string; open: string; close:
         id: 'songbook',
         title: 'Cancionero',
         items: [
-          'Escribe la letra con los acordes entre corchetes justo antes de la sílaba: [C]Hoy el [G]cielo.',
-          '{comment: Coro} pone un título de parte; el estribillo va entre {soc} y {eoc}.',
+          'En «Letra» escribe o pega la letra. Si la pegas de internet con los acordes en la línea de arriba, se colocan solos.',
+          'En «Acordes» toca una palabra y elige su acorde: primero salen los que ya usa la canción y luego los de su tonalidad (suenan al elegirlos). Toca un acorde puesto para cambiarlo o quitarlo.',
           'Tocar hace sonar los acordes en orden y la letra avanza sola. También se transpone, imprime y comparte.',
         ],
       },
@@ -186,8 +191,8 @@ export const helpText: Record<'es' | 'en', { title: string; open: string; close:
         id: 'songbook',
         title: 'Songbook',
         items: [
-          'Write the lyrics with chords in brackets just before the syllable: [C]Today the [G]sky.',
-          '{comment: Chorus} titles a part; the chorus goes between {soc} and {eoc}.',
+          'In «Lyrics» write or paste the lyrics. Pasted from the web with the chords on the line above, they place themselves.',
+          'In «Chords» tap a word and pick its chord: the song’s own chords first, then its key’s (they sound as you pick). Tap a placed chord to change or remove it.',
           'Play sounds the chords in order and the lyrics move on by themselves. It also transposes, prints and shares.',
         ],
       },

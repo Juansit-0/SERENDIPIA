@@ -244,7 +244,7 @@ Ornament vocabulary: dashed "/////" hatch (6px, 60-degree), diamond checker band
 Poster cells. Ground-2 fill, 1px line border, 3px radius, corner ticks. The only way to group content on the page.
 
 ### Section label
-Jost 600, 11px, uppercase, 0.16em tracking, accent-deep. Header elements (h1 to h4, legend) get a filled band (accent-soft) with 2px radius; inline labels stay plain text.
+Two ranks. Section titles (`h1–h4.cc-label`: Posiciones, Mástil, Notas del acorde, Puede seguir…) are the first thing the eye looks for: Jost 650 at 15px, sentence case, full ink, led by a 7px accent-deep diamond. Field labels (`span.cc-label`: ACORDE, CUALIDAD, popover titles) stay small spaced capitals (12px, 0.12em, accent-deep), quiet beside what they name. Titles are short: «Mástil», not «Carta celeste · Mástil».
 
 ### Buttons
 - **Default / ghost:** ground-3 fill, line-strong border, pill, 32px minimum height, Jost 500 at 0.875rem, raised at rest.

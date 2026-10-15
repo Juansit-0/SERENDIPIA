@@ -180,21 +180,39 @@
   }
 
   /* Section header: small spaced caps in accent-deep, with a rule — always visible. */
+  /* Field labels: small spaced capitals, quiet beside what they name. */
   .cc-label {
     font-family: var(--font-ui);
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
     font-weight: 600;
-    letter-spacing: 0.16em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--cc-accent-deep);
   }
 
-  /* Only section headers carry the filled band; inline labels stay plain text. */
+  /*
+   * Section titles (Posiciones, Mástil, Puede seguir…): the first thing the eye looks for, so they read as
+   * titles — larger, in full ink, sentence case — led by a small accent diamond that marks where a section starts.
+   */
   :is(h1, h2, h3, h4, legend).cc-label {
-    display: inline-block;
-    padding: 0.18rem 0.5rem;
-    border-radius: 2px;
-    background: var(--cc-accent-soft);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 650;
+    letter-spacing: 0.01em;
+    text-transform: none;
+    color: var(--cc-ink);
+  }
+
+  :is(h1, h2, h3, h4, legend).cc-label::before {
+    content: '';
+    flex: none;
+    width: 7px;
+    height: 7px;
+    background: var(--cc-accent-deep);
+    transform: rotate(45deg);
   }
 
   /*

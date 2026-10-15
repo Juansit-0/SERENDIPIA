@@ -10,6 +10,11 @@ interface Section {
 /** Newest first. Each entry is one published version with what a player would notice. */
 export const CHANGELOG: Array<{ version: string; es: string[]; en: string[] }> = [
   {
+    version: '2.26',
+    es: ['Títulos de sección más grandes y claros (Posiciones, Mástil, Notas del acorde, Puede seguir…).'],
+    en: ['Larger, clearer section titles (Positions, Fretboard, Chord notes, What can follow…).'],
+  },
+  {
     version: '2.25',
     es: ['El sonido responde al instante: tocar un acorde ya no tiene retraso.', 'Cancionero más fácil: toca una palabra y elige su acorde, sin escribir corchetes.', 'Pega una canción con los acordes encima de la letra y se colocan solos.'],
     en: ['Sound answers at once: tapping a chord no longer lags.', 'Easier songbook: tap a word and pick its chord, no brackets to type.', 'Paste a song with the chords above the lyrics and they place themselves.'],

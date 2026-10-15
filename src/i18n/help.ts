@@ -10,6 +10,11 @@ interface Section {
 /** Newest first. Each entry is one published version with what a player would notice. */
 export const CHANGELOG: Array<{ version: string; es: string[]; en: string[] }> = [
   {
+    version: '2.30',
+    es: ['Cancionero más bonito: cada acorde lleva el color de su función (como las estrellas de la tira), las partes y el coro se distinguen, y al tocar se ilumina la línea que suena.'],
+    en: ['A prettier songbook: each chord wears the colour of its function (like the strip’s stars), sections and chorus stand apart, and the sung line lights up while playing.'],
+  },
+  {
     version: '2.29',
     es: [
       'La guitarra vuelve a oírse por encima de la banda.',

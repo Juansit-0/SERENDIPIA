@@ -45,6 +45,10 @@ export const songbookText = {
     noChords: 'Sin acordes todavía: pásate a «Acordes» y toca cada palabra para ponérselos.',
     untitled: 'Sin título',
     list: 'Canciones del cancionero',
+    emptyKicker: 'Tu cancionero está vacío',
+    chordCount: '{n} acordes',
+    chorus: 'Coro',
+    tone: 'Tono',
   },
   en: {
     title: 'Songbook',
@@ -91,5 +95,9 @@ export const songbookText = {
     noChords: 'No chords yet: go to «Chords» and tap each word to add them.',
     untitled: 'Untitled',
     list: 'Songs in the songbook',
+    emptyKicker: 'Your songbook is empty',
+    chordCount: '{n} chords',
+    chorus: 'Chorus',
+    tone: 'Key',
   },
 }

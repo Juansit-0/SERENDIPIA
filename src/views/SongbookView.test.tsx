@@ -111,4 +111,19 @@ describe('Cancionero', () => {
     expect(JSON.parse(localStorage.getItem('serendipia.sheets.v1')!)[0].text).toBe('[G]Cae la ta[D]rde lenta')
     expect(document.querySelector('.cc-notice')?.textContent).toContain('Coloqué los acordes')
   }, 20000)
+
+  it('colours each chord by its function in the key, sets the chorus apart and names the key', async () => {
+    await open()
+    fireEvent.click(screen.getByRole('button', { name: /Crear mi primera canción/ }))
+    fireEvent.change(screen.getByLabelText('Letra con acordes (ChordPro)'), {
+      target: { value: '{title: Prueba}\n{comment: Verso}\n[C]Hoy el [G]cielo\n\n{soc}\n[F]Canta [Am]conmigo\n[G]noche de [C]marzo\n{eoc}' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Ver' }))
+    const fn = (name: string) => Array.from(document.querySelectorAll<HTMLElement>('.sb-body .sb-chord')).find((node) => node.textContent === name)?.dataset.fn
+    expect([fn('C'), fn('F'), fn('G'), fn('Am')]).toEqual(['tonic', 'subdominant', 'dominant', 'tonic'])
+    const chorus = document.querySelector('.sb-chorus')
+    expect(chorus?.querySelectorAll('.sb-line')).toHaveLength(2)
+    expect(chorus?.textContent).toContain('Coro')
+    expect(document.querySelector('.sb-meta')?.textContent).toContain('C mayor')
+  }, 20000)
 })

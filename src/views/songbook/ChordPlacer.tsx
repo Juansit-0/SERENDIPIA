@@ -7,6 +7,7 @@ import { parseChord } from '../../music/parseChord'
 import { diatonicChords } from '../../music/scales'
 import { resolveStepFrets } from '../../music/stepVoicing'
 import { useStore } from '../../state/store'
+import { chordFunction } from './sheetKey'
 
 const DIRECTIVE = /^\s*\{.*\}\s*$/
 
@@ -23,10 +24,20 @@ export function ChordPlacer({ text, onChange }: { text: string; onChange: (next:
   const sheet = useMemo(() => parseSheet(text), [text])
   const inSong = useMemo(() => [...new Set(sheet.chords.map((chord) => chord.anglo))], [sheet])
   const key = useMemo(() => {
-    const steps = sheet.chords.map((chord) => ({ rootPc: chord.rootPc, qualityId: chord.quality.id, anglo: chord.anglo, latin: chord.latin }))
+    const steps = sheet.chords.map((chord) => ({
+      rootPc: chord.rootPc,
+      qualityId: chord.quality.id,
+      anglo: chord.anglo,
+      latin: chord.latin,
+    }))
     return (steps.length >= 2 ? detectProgressionKey(steps) : null) ?? { rootPc: keyRootPc, mode: keyMode }
   }, [sheet, keyRootPc, keyMode])
   const inKey = useMemo(() => diatonicChords(key.rootPc, key.mode).map((degree) => degree.anglo), [key])
+
+  const fnOfName = (anglo: string) => {
+    const chord = parseChord(anglo)
+    return chord ? chordFunction(chord, key) : undefined
+  }
 
   const show = (anglo: string) => {
     const chord = parseChord(anglo)
@@ -76,7 +87,11 @@ export function ChordPlacer({ text, onChange }: { text: string; onChange: (next:
                     aria-label={`${x.palette} «${slot.word || '…'}»${slot.chord ? `: ${show(slot.chord.name)}` : ''}`}
                     onClick={() => setOpen(isOpen ? null : { line: lineIndex, slot: slotIndex })}
                   >
-                    <span className={`sb-chord ${slot.chord ? '' : 'is-empty'}`} aria-hidden="true">
+                    <span
+                      className={`sb-chord ${slot.chord ? '' : 'is-empty'}`}
+                      data-fn={slot.chord ? fnOfName(slot.chord.name) : undefined}
+                      aria-hidden="true"
+                    >
                       {slot.chord ? show(slot.chord.name) : '+'}
                     </span>
                     <span className="sb-text" aria-hidden="true">
@@ -90,6 +105,7 @@ export function ChordPlacer({ text, onChange }: { text: string; onChange: (next:
                       inSong={inSong}
                       inKey={inKey}
                       show={show}
+                      fnOf={fnOfName}
                       onHear={hear}
                       onPick={(chord) => {
                         hear(chord)
@@ -115,6 +131,7 @@ function Palette({
   inSong,
   inKey,
   show,
+  fnOf,
   onHear,
   onPick,
   onRemove,
@@ -125,6 +142,7 @@ function Palette({
   inSong: string[]
   inKey: string[]
   show: (anglo: string) => string
+  fnOf: (anglo: string) => string | undefined
   onHear: (anglo: string) => void
   onPick: (anglo: string) => void
   onRemove: () => void
@@ -151,7 +169,14 @@ function Palette({
         <span className="cc-label">{title}</span>
         <div className="sb-palette__chips">
           {names.map((name) => (
-            <button key={name} type="button" className="cc-btn sb-palette__chip" aria-pressed={current === name} onClick={() => onPick(name)}>
+            <button
+              key={name}
+              type="button"
+              className="cc-btn sb-palette__chip"
+              data-fn={fnOf(name)}
+              aria-pressed={current === name}
+              onClick={() => onPick(name)}
+            >
               {show(name)}
             </button>
           ))}
@@ -179,7 +204,10 @@ function Palette({
         </button>
       </div>
       {group(x.inSong, inSong)}
-      {group(x.inKey, inKey.filter((name) => !inSong.includes(name)))}
+      {group(
+        x.inKey,
+        inKey.filter((name) => !inSong.includes(name)),
+      )}
       <form
         className="sb-palette__other"
         onSubmit={(event) => {
@@ -201,7 +229,14 @@ function Palette({
           aria-invalid={other.trim() !== '' && !parsedOther}
           onChange={(event) => setOther(event.target.value)}
         />
-        <button type="button" className="cc-btn cc-btn--icon" disabled={!parsedOther} aria-label={x.listen} title={x.listen} onClick={() => parsedOther && onHear(parsedOther.anglo)}>
+        <button
+          type="button"
+          className="cc-btn cc-btn--icon"
+          disabled={!parsedOther}
+          aria-label={x.listen}
+          title={x.listen}
+          onClick={() => parsedOther && onHear(parsedOther.anglo)}
+        >
           <PlayIcon size={14} />
         </button>
         <button type="submit" className="cc-btn cc-btn--primary" disabled={!parsedOther}>

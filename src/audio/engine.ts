@@ -10,6 +10,16 @@ import type { PlayPattern, ProgressionOptions, TimbreId } from './types'
 export type { PlayPattern, ProgressionOptions, TimbreId } from './types'
 
 const SAMPLE_TIMEOUT_MS = 15000
+/** Lookahead of the transport (progression, metronome, band): small, but enough for a steady beat. */
+const LOOKAHEAD_S = 0.05
+
+/**
+ * When a sound played by hand starts: now, on the audio clock, without Tone's lookahead (`Tone.now()` adds it),
+ * plus a few milliseconds so the very first sample is never cut.
+ */
+function soon(): number {
+  return Tone.immediate() + 0.008
+}
 
 function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   return new Promise((resolve, reject) => {
@@ -98,6 +108,9 @@ class AudioEngine {
   }
 
   private async boot(): Promise<void> {
+    // An instrument has to answer the hand: the interactive latency mode and a short lookahead (Tone's default
+    // is 0.1 s, heard as a lag on every tap). The transport still gets enough lookahead for a steady beat.
+    Tone.setContext(new Tone.Context({ latencyHint: 'interactive', lookAhead: LOOKAHEAD_S }))
     await Tone.start()
     if (Tone.getContext().state !== 'running') {
       await Tone.getContext().resume()
@@ -260,7 +273,7 @@ class AudioEngine {
     const notes = this.planNotes(frets, tuning)
     if (notes.length === 0) return
 
-    const start = Tone.now() + 0.04
+    const start = soon()
     const spread = 0.028
     const duration = options.muted ? 0.14 : options.accent ? 2.6 : 1.9
     const gain = options.muted ? velocity * 0.65 : options.accent ? Math.min(1, velocity * 1.12) : velocity
@@ -285,13 +298,13 @@ class AudioEngine {
   previewStrum(frets: (number | null)[], tuning: number[], strum: StrumId, tempo: number): void {
     if (!this.started) return
     if (!this.options) Tone.getTransport().bpm.value = tempo
-    this.playStrum(frets, tuning, Tone.now() + 0.05, strum, 4)
+    this.playStrum(frets, tuning, soon(), strum, 4)
   }
 
   /** Any notes, low to high: together (a soft strum) or one after another. For ear training. */
   playNotes(midi: number[], arpeggio = false): void {
     if (!this.started) return
-    const start = Tone.now() + 0.03
+    const start = soon()
     const sorted = [...midi].sort((a, b) => a - b)
     sorted.forEach((note, order) => {
       const stringIndex = Math.min(5, Math.round((order * 5) / Math.max(1, sorted.length - 1)))
@@ -301,7 +314,7 @@ class AudioEngine {
 
   playString(stringIndex: number, midi: number): void {
     if (!this.started) return
-    this.triggerNote(stringIndex, midi, Tone.now() + 0.03, 1, 1.8)
+    this.triggerNote(stringIndex, midi, soon(), 1, 1.8)
   }
 
   private playStrum(frets: (number | null)[], tuning: number[], time: number, strum: StrumId, beats: number): void {

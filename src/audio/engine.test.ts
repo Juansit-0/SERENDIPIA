@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const tone = vi.hoisted(() => {
   const state = {
+    contextOptions: null as unknown,
     toneStartCalls: 0,
     samplersCreated: 0,
     disposed: 0,
@@ -86,6 +87,17 @@ vi.mock('tone', () => ({
     await new Promise((resolve) => setTimeout(resolve, 5))
   },
   getContext: () => tone.context,
+  // The engine swaps in a low-latency context at boot; the fake keeps the same context and records the options.
+  setContext: (context: { options: unknown }) => {
+    tone.state.contextOptions = context.options
+  },
+  Context: class {
+    options: unknown
+    constructor(options: unknown) {
+      this.options = options
+    }
+  },
+  immediate: () => 0,
   getDestination: () => new tone.FakeNode(),
   getTransport: () => tone.transport,
   getDraw: () => ({ schedule: (callback: () => void) => callback() }),
@@ -270,5 +282,19 @@ describe('strumming', () => {
   it('arpeggiates one note per eighth', async () => {
     const notes = await runFirstStep('arpeggio')
     expect(notes).toHaveLength(8)
+  })
+})
+
+describe('latency', () => {
+  it('runs in a low-latency context and plays a tapped chord right away, not after Tone’s lookahead', async () => {
+    const engine = await freshEngine()
+    await engine.start()
+    expect(tone.state.contextOptions).toEqual({ latencyHint: 'interactive', lookAhead: 0.05 })
+    tone.state.notes = []
+    engine.playFrets([null, 3, 2, 0, 1, 0], [40, 45, 50, 55, 59, 64])
+    const times = (tone.state.notes as Array<[string, number, number, number]>).map(([, , time]) => time)
+    // The first string within ~10 ms of the tap (jitter included), the strum spread after it.
+    expect(Math.min(...times)).toBeLessThan(0.012)
+    expect(Math.max(...times)).toBeLessThan(0.15)
   })
 })
